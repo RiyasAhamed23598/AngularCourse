@@ -45,6 +45,156 @@
 //     Selectors can be combined to create more complex selectors.
 
 // ######################################################################################################
+// Model
+// ######################################################################################################
+
+// The Model file is used to define the structure of data (interfaces or classes) that will be managed by the NgRx store.
+// These models represent the current module's entities, ensuring strong typing. Example:
+
+export interface ICustomer {
+  customerId: number;
+  firstName: string;
+  lastName: string;
+  orders: IOrder[];
+}
+
+export interface IOrder {
+  orderId: number;
+  orderDate: Date;
+  products: IProduct[];
+}
+
+export interface IProduct {
+  productId: number;
+  productName: string;
+  price: number;
+  quantity: number; // quantity of the product in the order
+}
+
+// ######################################################################################################
+// State
+// ######################################################################################################
+
+// State refers to an object that holds all the data of a module (normally, a screen with many related data objects) at a specific point in time.
+
+// As an example, let's consider a screen (module) with the following structure
+// (it doesn't seems realistic but demonstrates easy management of complex screens using understandable entities):
+// * There is a list of customers.
+// * When the user selects a customer, the screen displays the details form for that customer and a list of the customer's orders.
+// * When the user selects an order, the screen displays the details form for that order and a list of the order's products.
+// * When the user double-clicks a product, a details form dialog pops up.
+// The Add/Edit/Delete functionality is omitted for simplicity.
+
+// Here is the State datatype which holds the entire screen's data:
+
+import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
+
+export interface ICustomerState {
+  customersList: ICustomer[]; // list of customers
+  contextCustomer: ICustomer | null; // details form of the currently selected customer
+  ordersList: IOrder[]; // list of orders of the currently selected customer
+  contextOrder: IOrder | null; // details form of the currently selected order
+  productsList: IProduct[]; // list of products of the currently selected order
+  contextProduct: IProduct | null; // details form dialog for the double-clicked product
+}
+
+// State:
+// * Centralizes data management providing a single source of truth for the module's data.
+// * Ensures that all parts of the module are synchronized with the same version of the data.
+// * Simplifies communication between components by avoiding direct data sharing and, worse, multiple copies of the same data.
+// * Ensures that growing amounts of data are handled efficiently and predictably.
+
+// In NgRx, State is immutable, meaning it cannot be directly modified.
+// Instead, a new State is created whenever changes occur, ensuring predictability and enabling time-travel debugging.
+// Eeach change creates a new snapshot, preventing accidental modifications and ensuring reliable debugging.
+
+// The same State file must also define the Initial State object where all the properties are populated with default values:
+
+export const initialCustomerState: ICustomerState = {
+  customersList: [],
+  contextCustomer: null,
+  ordersList: [],
+  contextOrder: null,
+  productsList: [],
+  contextProduct: null
+};
+
+// The Initial State is crucial since it:
+// * Provides a clear and consistent starting point for the module's State.
+// * Ensures that the state is always defined, even before any data is retrieved.
+
+// ######################################################################################################
+// Store
+// ######################################################################################################
+
+// While State is a module-level data container, Store is an application-level data container.
+// The Store instance is a singleton data object that holds the state of the whole application.
+// In fact, Store is a container for States of multiple modules which are currently active.
+
+// It should be regarded as one single source of data that is delivered to the application.
+// By following this rule, the Store represents the application’s true and only state at any time.
+// This makes it easier to predict and track changes of any data.
+
+// The Store is a state-management solution inspired by the famous library Redux.
+// Redux popularized the idea of organizing the application state into simple objects (use primitive and non-primitive types
+// 		 in JavaScript) and updating this state by replacing it with a new state.
+// This means that the object shouldn’t be mutated directly, but rather should be replaced with a new object.
+// You can think of it as a database that you can get access to in order to retrieve or update the data that the application operates on.
+
+// The module (screen) usually consists of a few components for different areas.
+// Here is a sample component for the Customer List.
+// It's incomplete and created only to demonstrate working with the Store:
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { ICustomer } from 'src/models/customer.model';
+
+@Component({
+  selector: 'app-customers-list',
+  template: '<the HTML template URL>'
+})
+export class CustomersListComponent implements OnInit, OnDestroy {
+  customersList$: Observable<ICustomer[]>;
+  contextCustomer$: Observable<ICustomer>;
+  private _customersList: ICustomer[] = [];
+  private _contextCustomer!: ICustomer;
+  private _subscription: Subscription = new Subscription();
+
+  // Pay attention that a pointer to the application's Store is injected into the constructor:
+  constructor(private _store: Store<{ customersList: ICustomer[]; contextCustomer: ICustomer }>) {
+    // Populate observables from the Store:
+    this.customersList$ = this._store.select('customersList');
+    this.contextCustomer$ = this._store.select('contextCustomer');
+    // IMPORTANT!
+    // Note that the parameters passed to the select() functions are the State's properties' names.
+    // This way data is retrieved from the module's State which is a part of the application's Store.
+  }
+
+  ngOnInit(): void {
+    this._subscription.add(
+      this.customersList$.subscribe((customers: ICustomer[]) => { this._customersList = customers; })
+    );
+
+    this._subscription.add(
+      this.contextCustomer$.subscribe((customer: ICustomer) => { this._contextCustomer = customer; })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this._subscription.unsubscribe();
+  }
+}
+
+// The _customersList and _contextCustomer vars are created for the sake of working with the data in the imperative way, if needed.
+
+// If another component will need to get, for example, the selected customer, it will do the same:
+this.contextCustomer$ = this._store.select('contextCustomer');
+// That eliminates the need to pass that customer as an input field from the parent component's template.
+// If any component changes contextCustomer property of the module's State, all the subscribing components are immediately aware of that
+//    so, for example, their templates are automatically re-rendered to reflect the change. Reactive programming is magic!
+
+// ######################################################################################################
 // Action
 // ######################################################################################################
 
@@ -132,6 +282,199 @@ export const loadUserProfileSuccessAction = createAction(d.loadUserProfileSucces
 // * Divide - categorize actions based on the event source.
 // * Many - actions are inexpensive to write, so the more actions you write, the better you express flows in your application.
 // * Event-Driven - capture events not commands as you are separating the description of an event and the handling of that event.
+
+
+// ######################################################################################################
+// Service
+// ######################################################################################################
+
+// UNDER CONSTRUCTION
+
+// ######################################################################################################
+// Effect
+// ######################################################################################################
+
+// If your application needs to perform side effects like API calls, you would define Effects.
+// Side effects are operations that occur outside the context of a pure function, such as making HTTP requests, accessing local storage,
+// 		interacting with browser APIs, or performing other asynchronous tasks.
+
+// They are implemented using RxJS observables and are set up to listen for specific actions dispatched from your store.
+// When an effect "hears" the subscribed action, it performs some side effect and then dispatches a new action to update the state in the store.
+
+// Effects allow you to describe asynchronous behavior in a declarative way.
+// As an example of an asynchronous operation, you could use an effect that listens for specific actions and performs an HTTP request.
+
+// NgRx Effects allow you to isolate side effects from components and reducers, keeping your state management pure, predictable and easy to test.
+
+// You can easily compose effects with other observables, enabling complex asynchronous operations to be expressed in a readable manner.
+
+// Let's use the previous example with increment, decrement, and reset actions to demonstrate how Effects can be used to handle side effects.
+// We will create an Effect only for increment (the others would be similar).
+// Let's assume that the increment action should trigger an asynchronous operation, such as logging the increment action to a server.
+// We want to perform a side effect every time the counter is incremented, such as logging this action to an external service.
+
+// The action for incrementing was described earlier:
+export const increment = createAction('[Counter Component] Increment');
+// Now, let's create in counter.actions.ts two more action to handle successful and unsuccessful logging of the increment action:
+export const logIncrementSuccess = createAction('[Counter API] Log Increment Success');
+export const logIncrementFailure = createAction('[Counter API] Log Increment Failure', props<{ error: any }>());
+
+// We’ll use the same state and reducer as before, without any modifications needed for the counter operations themselves.
+
+// Now we create an effect to handle the side effect of logging the increment action to an external service.
+
+// Suppose, we have CounterLogger - an Angular service that is responsible for logging the increment action to an external service or API.
+// Here’s how the CounterLogger might be implemented (the implementation is unimportant for the explanation of Effects,
+//    just notice the logIncrement() method which returns an observable of type void, meaning it does not expect any response body):
+
+// counter.logger.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CounterLogger {
+  private apiUrl = 'https://example.com/api';  // Hypothetical API endpoint
+
+  constructor(private http: HttpClient) {}
+
+  // Method to log the increment action to an external service:
+  logIncrement(): Observable<void> {
+    // Send a POST request to log the increment action
+    return this.http.post<void>(`${this.apiUrl}/log-increment`, {}).pipe(
+      catchError((error) => {
+        console.error('Error logging increment:', error);
+        throw error;
+      })
+    );
+  }
+}
+
+// And now let's write the effects class:
+
+// counter.effects.ts
+import { Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import { CounterLogger } from './counter.logger';
+import * as CounterActions from './counter.actions';
+
+@Injectable()
+export class CounterEffects {
+
+  constructor(
+    private actions$: Actions,
+    private counterLogger: CounterLogger
+  ) {}
+
+  // Effect to log increment action:
+  logIncrement$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CounterActions.increment), // listen for the 'increment' action
+      mergeMap(() =>
+        this.counterLogger.logIncrement().pipe( // call the service to log increment
+          // On successful HTTP request, map to a logIncrementSuccess action:
+          map(() => CounterActions.logIncrementSuccess()), // dispatch success action
+          // Catch any errors during the HTTP request and map them to a logIncrementFailure action:
+          catchError(error => of(CounterActions.logIncrementFailure({ error }))) // dispatch failure action
+        )
+      )
+    )
+  );
+}
+
+// Notice that the logIncrement$ observer is declared public since it must be accessed from outside by:
+// Automatic Subscription:
+//    NgRx Effects uses Angular's dependency injection system to manage and subscribe to effects automatically.
+//    For this to work, NgRx needs to have access to all the effect properties defined within the class.
+// Detection:
+//    NgRx detects effects by looking for properties that are initialized using the createEffect function.
+//    These properties must be publicly accessible to be detected and managed by NgRx.
+
+// createEffect() is a function in NgRx used to define and register effects.
+// Parameters:
+//    Factory function: A function that returns an observable, defining the logic for handling side effects based on actions.
+//    Options object (optional): { dispatch: boolean } to indicate whether the effect should dispatch an action (true by default).
+// Return Type:
+//    EffectConfig: An observable managed by NgRx that triggers side effects and optionally dispatches actions.
+
+// Let's break down each part of the previous code fragment.
+
+// ofType()
+
+// ofType is an operator from NgRx that filters an observable of actions, allowing only actions with specific types to pass through.
+// It filters the actions$ observable stream to listen specifically for CounterActions.increment.
+// This means the subsequent operators in the pipe will only run when an increment action is dispatched.
+
+// of()
+
+// of() is an RxJS function that creates an observable that emits the arguments you pass and then completes.
+// It is used to create an observable that emits the logIncrementFailure action with an error payload.
+// This is necessary for the catchError operator to return an observable in case of an error during the HTTP request.
+
+// mergeMap()
+
+// mergeMap is an RxJS operator that maps each value from the source observable into an observable and
+//    flattens all of these inner observables into a single observable output.
+// It takes the increment action and, instead of returning a simple value, it returns an observable from the logIncrement HTTP request.
+// mergeMap allows multiple HTTP requests to be active simultaneously without waiting for one to complete before starting the next.
+
+// pipe()
+
+// pipe() is a method that combines (chains) multiple operators together.
+// It takes operators as arguments and applies them sequentially to the observable.
+// In this example pipe() is used twice:
+// * On actions$ to compose the ofType and mergeMap operators.
+// * On the observable returned by this.counterService.logIncrement() to handle the response with map (on success) and catchError (on failure).
+
+// >>> The last step: Register the Effect in EffectsModule, and CounterLogger in the app's providers array
+
+// The created Effect must be registered it in EffectsModule.
+// EffectsModule is provided by NgRx and used to set up and manage effects in an Angular application.
+
+// Key Functions of EffectsModule:
+// * Registers Effects:
+//    It registers one or more effects classes that define side effects.
+// * Manages Effects Lifecycle:
+//    It handles the lifecycle of effects, including initializing, listening for dispatched actions, and cleaning up when they are no longer needed.
+// * Configures Global and Feature Effects:
+//    It supports configuring both global (root) effects and feature-specific effects, making it flexible for different parts of an application.
+
+// The next fragment shows how you would typically write those registerations.
+// We will just add new stuff (marked with <<<) to the app.module.ts file we already used to demonstrate reducers:
+
+// app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { StoreModule } from '@ngrx/store';
+import { counterReducer } from './counter.reducer';
+import { EffectsModule } from '@ngrx/effects'; // <<<
+import { CounterEffects } from './counter.effects'; // <<<
+import { CounterLogger } from './counter.logger'; // <<<
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    StoreModule.forRoot({ counter: counterReducer }),
+    EffectsModule.forRoot([CounterEffects]) // <<< register the CounterEffects
+  ],
+  providers: [CounterLogger], // <<< register the logging used in effects as an application's provider
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+
+// Registering CounterLogger the providers array of the root module ensures that Angular's dependency injection system
+//    creates a singleton instance of the service, making it available throughout the entire application.
+// This means the service can be injected into any component, service, or effect throughout the app without creating multiple instances.
+// Having a singleton ensures that all parts of the application using CounterLogger have a consistent view of any state or behavior it manages, 
+//    preventing issues with state duplication or synchronization.
+
 
 // ######################################################################################################
 // Reducer
@@ -318,221 +661,10 @@ export class CounterComponent {
 // 5. Component Update: The component, which is subscribed to the store, automatically receives the updated state and re-renders the view.
 
 // ######################################################################################################
-// Store
-// ######################################################################################################
-
-// One of the most important aspects of software development is state management.
-// With each development project, there’s some sort of tracking being done of data over time as well as of any updates made to that data.
-// When approaching the user interface in front-end development, it’s important to have a single source of truth when it comes to data.
-// The UI should display the exact state of data.
-
-// One Place for State:
-// A store solution dictates keeping the state of the application in one directory.
-// It should be regarded as one single source of data that is delivered to the application.
-// By following this rule, the store represents the application’s true and only state at any time.
-// This makes it easier to predict updates or changes to the state’s structure and how it is manipulated and stored before it is saved by the reducer.
-
-// The store is a state-management solution inspired by the famous library Redux.
-// Redux popularized the idea of organizing the application state into simple objects (use primitive and non-primitive types
-// 		 in JavaScript) and updating this state by replacing it with a new state.
-// This means that the object shouldn’t be mutated directly, but rather should be replaced with a new state object.
-// The store instance is a singleton data object that holds the state of the application.
-// You can think of it as a database that you can get access to in order to retrieve or update the data that the application operates on.
-// In order to update data in the store (a state), we can use the dispatch method.
-// This method takes an action argument (a string) and a second optional data argument of any type.
-// This method actually triggers an event that will handle those functions that are registered.
-
-// When an action is dispatched, all registered reducers receive the action.
-// Whether they handle the action is determined by the on() functions that associate one or more actions with a given state change.
-
-// ######################################################################################################
-// Effects
-// ######################################################################################################
-
-// If your application needs to perform side effects like API calls, you would define Effects.
-// Side effects are operations that occur outside the context of a pure function, such as making HTTP requests, accessing local storage,
-// 		interacting with browser APIs, or performing other asynchronous tasks.
-
-// They are implemented using RxJS observables and are set up to listen for specific actions dispatched from your store.
-// When an effect "hears" the subscribed action, it performs some side effect and then dispatches a new action to update the state in the store.
-
-// Effects allow you to describe asynchronous behavior in a declarative way.
-// As an example of an asynchronous operation, you could use an effect that listens for specific actions and performs an HTTP request.
-
-// NgRx Effects allow you to isolate side effects from components and reducers, keeping your state management pure, predictable and easy to test.
-
-// You can easily compose effects with other observables, enabling complex asynchronous operations to be expressed in a readable manner.
-
-// Let's use the previous example with increment, decrement, and reset actions to demonstrate how Effects can be used to handle side effects.
-// We will create an Effect only for increment (the others would be similar).
-// Let's assume that the increment action should trigger an asynchronous operation, such as logging the increment action to a server.
-// We want to perform a side effect every time the counter is incremented, such as logging this action to an external service.
-
-// The action for incrementing was described earlier:
-export const increment = createAction('[Counter Component] Increment');
-// Now, let's create in counter.actions.ts two more action to handle successful and unsuccessful logging of the increment action:
-export const logIncrementSuccess = createAction('[Counter API] Log Increment Success');
-export const logIncrementFailure = createAction('[Counter API] Log Increment Failure', props<{ error: any }>());
-
-// We’ll use the same state and reducer as before, without any modifications needed for the counter operations themselves.
-
-// Now we create an effect to handle the side effect of logging the increment action to an external service.
-
-// Suppose, we have CounterLogger - an Angular service that is responsible for logging the increment action to an external service or API.
-// Here’s how the CounterLogger might be implemented (the implementation is unimportant for the explanation of Effects,
-//    just notice the logIncrement() method which returns an observable of type void, meaning it does not expect any response body):
-
-// counter.logger.ts
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class CounterLogger {
-  private apiUrl = 'https://example.com/api';  // Hypothetical API endpoint
-
-  constructor(private http: HttpClient) {}
-
-  // Method to log the increment action to an external service:
-  logIncrement(): Observable<void> {
-    // Send a POST request to log the increment action
-    return this.http.post<void>(`${this.apiUrl}/log-increment`, {}).pipe(
-      catchError((error) => {
-        console.error('Error logging increment:', error);
-        throw error;
-      })
-    );
-  }
-}
-
-// And now let's write the effects class:
-
-// counter.effects.ts
-import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
-import { CounterLogger } from './counter.logger';
-import * as CounterActions from './counter.actions';
-
-@Injectable()
-export class CounterEffects {
-
-  constructor(
-    private actions$: Actions,
-    private counterLogger: CounterLogger
-  ) {}
-
-  // Effect to log increment action:
-  logIncrement$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(CounterActions.increment), // listen for the 'increment' action
-      mergeMap(() =>
-        this.counterLogger.logIncrement().pipe( // call the service to log increment
-          // On successful HTTP request, map to a logIncrementSuccess action:
-          map(() => CounterActions.logIncrementSuccess()), // dispatch success action
-          // Catch any errors during the HTTP request and map them to a logIncrementFailure action:
-          catchError(error => of(CounterActions.logIncrementFailure({ error }))) // dispatch failure action
-        )
-      )
-    )
-  );
-}
-
-// Notice that the logIncrement$ observer is declared public since it must be accessed from outside by:
-// Automatic Subscription:
-//    NgRx Effects uses Angular's dependency injection system to manage and subscribe to effects automatically.
-//    For this to work, NgRx needs to have access to all the effect properties defined within the class.
-// Detection:
-//    NgRx detects effects by looking for properties that are initialized using the createEffect function.
-//    These properties must be publicly accessible to be detected and managed by NgRx.
-
-// createEffect() is a function in NgRx used to define and register effects.
-// Parameters:
-//    Factory function: A function that returns an observable, defining the logic for handling side effects based on actions.
-//    Options object (optional): { dispatch: boolean } to indicate whether the effect should dispatch an action (true by default).
-// Return Type:
-//    EffectConfig: An observable managed by NgRx that triggers side effects and optionally dispatches actions.
-
-// Let's break down each part of the previous code fragment.
-
-// ofType()
-
-// ofType is an operator from NgRx that filters an observable of actions, allowing only actions with specific types to pass through.
-// It filters the actions$ observable stream to listen specifically for CounterActions.increment.
-// This means the subsequent operators in the pipe will only run when an increment action is dispatched.
-
-// of()
-
-// of() is an RxJS function that creates an observable that emits the arguments you pass and then completes.
-// It is used to create an observable that emits the logIncrementFailure action with an error payload.
-// This is necessary for the catchError operator to return an observable in case of an error during the HTTP request.
-
-// mergeMap()
-
-// mergeMap is an RxJS operator that maps each value from the source observable into an observable and
-//    flattens all of these inner observables into a single observable output.
-// It takes the increment action and, instead of returning a simple value, it returns an observable from the logIncrement HTTP request.
-// mergeMap allows multiple HTTP requests to be active simultaneously without waiting for one to complete before starting the next.
-
-// pipe()
-
-// pipe() is a method that combines (chains) multiple operators together.
-// It takes operators as arguments and applies them sequentially to the observable.
-// In this example pipe() is used twice:
-// * On actions$ to compose the ofType and mergeMap operators.
-// * On the observable returned by this.counterService.logIncrement() to handle the response with map (on success) and catchError (on failure).
-
-// >>> The last step: Register the Effect in EffectsModule, and CounterLogger in the app's providers array
-
-// The created Effect must be registered it in EffectsModule.
-// EffectsModule is provided by NgRx and used to set up and manage effects in an Angular application.
-
-// Key Functions of EffectsModule:
-// * Registers Effects:
-//    It registers one or more effects classes that define side effects.
-// * Manages Effects Lifecycle:
-//    It handles the lifecycle of effects, including initializing, listening for dispatched actions, and cleaning up when they are no longer needed.
-// * Configures Global and Feature Effects:
-//    It supports configuring both global (root) effects and feature-specific effects, making it flexible for different parts of an application.
-
-// The next fragment shows how you would typically write those registerations.
-// We will just add new stuff (marked with <<<) to the app.module.ts file we already used to demonstrate reducers:
-
-// app.module.ts
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { StoreModule } from '@ngrx/store';
-import { counterReducer } from './counter.reducer';
-import { EffectsModule } from '@ngrx/effects'; // <<<
-import { CounterEffects } from './counter.effects'; // <<<
-import { CounterLogger } from './counter.logger'; // <<<
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    StoreModule.forRoot({ counter: counterReducer }),
-    EffectsModule.forRoot([CounterEffects]) // <<< register the CounterEffects
-  ],
-  providers: [CounterLogger], // <<< register the logging used in effects as an application's provider
-  bootstrap: [AppComponent]
-})
-export class AppModule {}
-
-// Registering CounterLogger the providers array of the root module ensures that Angular's dependency injection system
-//    creates a singleton instance of the service, making it available throughout the entire application.
-// This means the service can be injected into any component, service, or effect throughout the app without creating multiple instances.
-// Having a singleton ensures that all parts of the application using CounterLogger have a consistent view of any state or behavior it manages, 
-//    preventing issues with state duplication or synchronization.
-
-// ######################################################################################################
 // Another comprehensive example of all the features described so far
 // ######################################################################################################
+
+// UNDER CONSTRUCTION
 
 #### Example Scenario
 
