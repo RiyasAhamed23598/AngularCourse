@@ -90,11 +90,11 @@ export interface IProduct {
 import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
 
 export interface ICustomerState {
-  customersList: ICustomer[]; // list of customers
+  customerList: ICustomer[]; // list of customers
   contextCustomer: ICustomer | null; // details form of the currently selected customer
-  ordersList: IOrder[]; // list of orders of the currently selected customer
+  orderList: IOrder[]; // list of orders of the currently selected customer
   contextOrder: IOrder | null; // details form of the currently selected order
-  productsList: IProduct[]; // list of products of the currently selected order
+  productList: IProduct[]; // list of products of the currently selected order
   contextProduct: IProduct | null; // details form dialog for the double-clicked product
 }
 
@@ -111,11 +111,11 @@ export interface ICustomerState {
 // The same State file must also define the Initial State object where all the properties are populated with default values:
 
 export const initialCustomerState: ICustomerState = {
-  customersList: [],
+  customerList: [],
   contextCustomer: null,
-  ordersList: [],
+  orderList: [],
   contextOrder: null,
-  productsList: [],
+  productList: [],
   contextProduct: null
 };
 
@@ -154,26 +154,26 @@ import { ICustomer } from 'src/models/customer.model';
   selector: 'app-customers-list',
   template: '<the HTML template URL>'
 })
-export class CustomersListComponent implements OnInit, OnDestroy {
-  customersList$: Observable<ICustomer[]>;
+export class CustomerListComponent implements OnInit, OnDestroy {
+  customerList$: Observable<ICustomer[]>;
   contextCustomer$: Observable<ICustomer>;
-  private _customersList: ICustomer[] = [];
+  private _customerList: ICustomer[] = [];
   private _contextCustomer!: ICustomer;
   private _subscription: Subscription = new Subscription();
 
   // Pay attention that a pointer to the application's Store is injected into the constructor:
-  constructor(private _store: Store<{ customersList: ICustomer[]; contextCustomer: ICustomer }>) {
+  constructor(private _store: Store<{ customerList: ICustomer[]; contextCustomer: ICustomer }>) {
     // Populate observables from the Store:
-    this.customersList$ = this._store.select('customersList');
+    this.customerList$ = this._store.select('customerList');
     this.contextCustomer$ = this._store.select('contextCustomer');
     // IMPORTANT!
-    // Note that the parameters passed to the select() functions are the State's properties' names.
+    // Note that the parameters passed to the select() functions are the State's properties' names as strings.
     // This way data is retrieved from the module's State which is a part of the application's Store.
   }
 
   ngOnInit(): void {
     this._subscription.add(
-      this.customersList$.subscribe((customers: ICustomer[]) => { this._customersList = customers; })
+      this.customerList$.subscribe((customers: ICustomer[]) => { this._customerList = customers; })
     );
 
     this._subscription.add(
@@ -186,7 +186,7 @@ export class CustomersListComponent implements OnInit, OnDestroy {
   }
 }
 
-// The _customersList and _contextCustomer vars are created for the sake of working with the data in the imperative way, if needed.
+// The _customerList and _contextCustomer vars are created for the sake of working with the data in the imperative way, if needed.
 
 // If another component will need to get, for example, the selected customer, it will do the same:
 this.contextCustomer$ = this._store.select('contextCustomer');
@@ -198,91 +198,162 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 // Action
 // ######################################################################################################
 
-// Actions are defined as plain TypeScript classes. Each action class implements the `Action` interface from NgRx.
-// Define the various actions that can be dispatched, such as `increment`, `decrement`, and `reset` in the next example:
-
-import { createAction } from '@ngrx/store';
-
-// Define actions
-export const increment = createAction('[Counter] Increment');
-export const decrement = createAction('[Counter] Decrement');
-export const reset = createAction('[Counter] Reset');
-
+// An Action is a plain TypeScript class that describes a unique event (usually, a data manipulation or a change in the application’s state).
+// An Action is dispatched (launched) in one part of the application and captured in others, providing an easy global communication channel.
+// NgRx automatically manages the chain of fired events when an Action is dispatched, ensuring the appropriate consumers respond to it seamlessly.
 // Actions are one of the main building blocks in NgRx.
-// They express unique events that happen throughout your application.
-// From user interaction with the page, external interaction through network requests, and direct interaction with device APIs,
-//		these and more events are described with actions.
 
-// @@@ More Details about createAction() Function
+// An Action is created and returned by the createAction() factory function.
+// The next example defines a few simple Actions.
+// The good practice is to add the word "Action" to the names of Action objects:
+import { createAction } from '@ngrx/store';
+export const incrementAction = createAction('[Counter] Increment');
+export const decrementAction = createAction('[Counter] Decrement');
+export const resetAction = createAction('[Counter] Reset');
 
-// The createAction() function is a utility provided by NgRx for defining actions in a type-safe and consistent manner.
-// Allows you to define the action type and any associated metadata (payload) directly in the function call. 
-
-// Structure of the 1st parameter (mandatory) to createAction():
+// @@@ The 1st parameter to createAction():
 
 // It's a string that describes the action and this way represents its type. The naming convention:
-"[Source or Category] Action Description"
-// [Source or Category] (within square brackets) usually indicates the feature module where the action is used.
-//    For application-wide actions, use [App].
-// Action Description describes the specific event or action that is happening.
+"[Module] Description"
+// "[Module]" (within square brackets) indicates the feature module where the action is used. For application-wide Actions, use [App].
+// "Description" reflects the specific event that is fired.
 
-// The first parameter to createAction() should be unique across the entire application.
+// IMPORTANT! The first parameter to createAction() should be unique across the entire application.
 // This string serves as a unique identifier for each action, and having duplicate action types can lead to unintended consequences:
-// * In reducers: Multiple reducers might respond to the same action type, causing unexpected state changes.
-// * In effects: Effects listening for specific action types could trigger multiple times or handle the wrong action.
-// Example:
+// * In Reducers (described later): Multiple reducers might respond to the same action type, causing unexpected state changes.
+// * In Effects (described later): Effects listening for specific action types could trigger multiple times or handle the wrong action.
+// For example, you have two modules - let's name them A and B. Each module has its own Cleanup Before Destroy Action.
+// Declare in the Actions file of one module:
+export const cleanupBeforeDestroyAction = createAction('[Module A] Cleanup Before Destroy');
+// Declare in the Actions file of the other module:
+export const cleanupBeforeDestroyAction = createAction('[Module B] Cleanup Before Destroy');
+// The contants names are the same since they are in different files, but the descriptions, seen on the app level, are different, so you are good.
 
-export const loadUserProfile = createAction('[User Profile Page] Load User Profile');
-export const fetchUserProfileSuccess = createAction('[User Profile API] Fetch User Profile Success');
+// Hypothetically, different modules could have a same description, which would break the uniqueness.
+// To be 100% safe, use the Action file name (without the .ts) as the module identifier in the square brackets.
 
-// The 2nd parameter (optional) to inforce strong typing - payload (additional data)
+// @@@ The 2nd parameter (optional) to createAction():
 
-// An action in NgRx is a plain JavaScript object that has a type property and, optionally, a payload (additional data).
-// The payload is a way to pass additional data that may be needed to perform a particular operation or state change in the application.
-// For example, if you are adding a new item to a list, the payload would include the data for that item.
-// However, if the action resets the list, there is no payload.
+// Describes the payload (additional data) expected by the Action. That data must be provided when the Action is dispatched.
+// The argument prevents sending wrong data, i.e. inforces strong typing.
 
-// The payload is sent to createAction() as the 2nd parameter via the props<T>() funstion:
-
+// The payload is sent to createAction() as the 2nd parameter via the props<T>() function, for example:
 import { createAction, props } from '@ngrx/store';
+export const insTodoAction = createAction('[Todo List] Insert Todo', props<{ todoText: string }>());
 
-export const addTodo = createAction('[Todo List] Add Todo', props<{ text: string }>());
+// props<T>() takes a generic type parameter, which is the shape of the payload for compile-time type checking to ensure correct payload structure.
+// In the example above, the props defines that the action should carry a payload with a property `todoText` of type `string`:
+this._store.dispatch(insTodoAction({ todoText: 'Learn NgRx' })); // correct!
+// The next call will cause a compilation-time error:
+this._store.dispatch(insTodoAction({ text: 'Learn NgRx' })); // doesn't match the required shape - 'text' is not defined in the props
 
-// The props<T>() function takes a generic type parameter, which is the shape of the payload.
-// That provids compile-time type checking to ensure correct payload structure when actions are dispatched.
-// In other words, when the action creator is called, it must receive an object that matches the pre-defined shape.
-// In the example above, `props<{ text: string }>()` defines that the action should carry a payload with a property `text` of type `string`.
+// Note that the dispatch() method is in the State singleton - that illustrates the application-wide scope of Actions.
+// Usually, Action files are grouped in a folder under the app's Store folder, like src/app/Store/actions/.
 
-// Correct usage:
-const newTodoAction = addTodo({ text: 'Learn NgRx' });
+// The next example describes the Action file which could exist for the Customer screen we used earlier.
+// A dedicated Action is defined for each relevant CRUD operation of each component of the module.
 
-// Incorrect usage (will cause a TypeScript error):
-const newTodoAction = addTodo({ name: 'Learn NgRx' }); // 'name' is not defined in the props
+// If the Action was executed sucsessfully, then its Success counterpart Action is dispatched by the Effect (Effects will be described later).
+// For example, if delCustomerAction has deleted the requested customer, the Effect dispatches delCustomerSuccessAction.
 
-// Examples:
-const screen = '[User Profile Page]';
-enum d { //"d"escription
-  login = `${screen} Login`,
-  loginSuccess = `${login} Success`,
-  loadUserProfile = `${screen} Load User Profile`,
-  loadUserProfileSuccess = `${loadUserProfile} Success`
+// Note that the props of the Success Actions represent data, returned by the Service (i.e., usually retrieved from the DB).
+// For example:
+// * selCustomerListSuccessAction has the retrieved customers list (the Reducer will populate the State's customers array with it).
+// * insCustomerSuccessAction has the inserted customer with the customerId just generated by the DB
+//      (the Reducer will update the contextCustomer with it).
+// * updCustomerSuccessAction has the updated customer (in the real app, it could have some fields, generated by the DB, such as updateTime and
+//      updatedBy, or some calculated statistics, so the Reducer would update the contextCustomer with the new values).
+// * delCustomerSuccessAction has the customerId of the deleted customer (the Reducer will remove it from the State's customers array).
+// If any CRUD Action failes, its xxxSuccessAction is not dispatched, so the State remains untouched.
+
+import { createAction } from '@ngrx/store';
+import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
+
+const m = '[customer.action]'; // m = Module; supposing the file name is customer.action.ts
+const c = 'Customer';
+const o = 'Order';
+const p = 'Product';
+
+enum d { // the Actions "d"escriptions
+  // Customer:
+  SetContextCustomer = `${m} Set Context ${c}`, // displatched when a customer is highlighted in the customers list
+  SelCustomerList = `${m} Select ${c} List`,
+  SelCustomerListSuccess = `${SelCustomerList} Success`,
+  SelCustomer = `${m} Select ${c}`,
+  SelCustomerSuccess = `${SelCustomer} Success`,
+  InsCustomer = `${m} Insert $c}`,
+  InsCustomerSuccess = `${InsCustomer} Success`,
+  UpdCustomer = `${m} Update ${c}`,
+  UpdCustomerSuccess = `${UpdCustomer} Success`,
+  DelCustomer = `${m} Delete ${c}`,
+  DelCustomerSuccess = `${DelCustomer} Success`,
+  // Order:
+  SelOrderList = `${m} Select ${o} List`,
+  SelOrderListSuccess = `${SelOrderList} Success`,
+  SelOrder = `${m} Select ${o}`,
+  SelOrderSuccess = `${SelOrder} Success`,
+  InsOrder = `${m} Insert $o}`,
+  InsOrderSuccess = `${InsOrder} Success`,
+  UpdOrder = `${m} Update ${o}`,
+  UpdOrderSuccess = `${UpdOrder} Success`,
+  DelOrder = `${m} Delete ${o}`,
+  DelOrderSuccess = `${DelOrder} Success`,
+  // Product:
+  SelProductList = `${m} Select ${p} List`,
+  SelProductListSuccess = `${SelProductList} Success`,
+  SelProduct = `${m} Select ${p}`,
+  SelProductSuccess = `${SelProduct} Success`,
+  InsProduct = `${m} Insert $p}`,
+  InsProductSuccess = `${InsProduct} Success`,
+  UpdProduct = `${m} Update ${p}`,
+  UpdProductSuccess = `${UpdProduct} Success`,
+  DelProduct = `${m} Delete ${p}`,
+  DelProductSuccess = `${DelProduct} Success`,
 }
-export const loginAction = createAction(d.login, props<{ userName: string, password : string }>());
-export const loginSuccessAction = createAction(d.loginSuccess);
-export const loadUserProfileAction = createAction(d.loadUserProfile, props<{ text: string }>());
-export const loadUserProfileSuccessAction = createAction(d.loadUserProfileSuccess, props<{ user: User }>());
 
-// REMARK: If the action was executed sucsessfully, then its Success counterpart action is dispatched by the Effect.
-// For example, if deleteProductsAction has deleted the requested products, the Effect dispatches deleteProductsSuccessAction.
-// The Reducer captures it and removes the deleted products from the products array in the State (so they disappear from the diplayed list).
-// If deleteProductsAction has failed, deleteProductsSuccessAction is not dispatched, so the diplayed list stys untouched.
+// Customer:
+export const setContextCustomerAction = createAction(d.SetContextCustomer, props<{ actionCustomer: ICustomer | null }>());
+export const selCustomerListAction = createAction(d.SelCustomerList);
+export const selCustomerListSuccessAction = createAction(d.SelCustomerListSuccess, props<{ actionCustomerList: ICustomer[] }>());
+export const selCustomerAction = createAction(d.SelCustomer, props<{ actionCustomerId: number }>());
+export const selCustomerSuccessAction = createAction(d.SelCustomerSuccess, props<{ actionCustomer: ICustomer }>());
+export const insCustomerAction = createAction(d.InsCustomer, props<{ actionCustomer: ICustomer }>());
+export const insCustomerSuccessAction = createAction(d.InsCustomerSuccess, props<{ actionCustomer: ICustomer }>());
+export const updCustomerAction = createAction(d.UpdCustomer, props<{ actionCustomer: ICustomer }>());
+export const updCustomerSuccessAction = createAction(d.UpdCustomerSuccess, props<{ actionCustomer: ICustomer }>());
+export const delCustomerAction = createAction(d.DelCustomer, props<{ actionCustomerId: number }>());
+export const delCustomerSuccessAction = createAction(d.DelCustomerSuccess, props<{ actionCustomerId: number }>());
+// Order:
+export const selOrderListAction = createAction(d.SelOrderList, props<{ actionCustomerId: number }>());
+export const selOrderListSuccessAction = createAction(d.SelOrderListSuccess, props<{ actionOrderList: IOrder[] }>());
+export const selOrderAction = createAction(d.SelOrder, props<{ actionOrderId: number }>());
+export const selOrderSuccessAction = createAction(d.SelOrderSuccess, props<{ actionOrder: IOrder }>());
+export const insOrderAction = createAction(d.InsOrder, props<{ actionOrder: IOrder }>());
+export const insOrderSuccessAction = createAction(d.InsOrderSuccess, props<{ actionOrder: IOrder }>());
+export const updOrderAction = createAction(d.UpdOrder, props<{ actionOrder: IOrder }>());
+export const updOrderSuccessAction = createAction(d.UpdOrderSuccess, props<{ actionOrder: IOrder }>());
+export const delOrderAction = createAction(d.DelOrder, props<{ actionOrderId: number }>());
+export const delOrderSuccessAction = createAction(d.DelOrderSuccess, props<{ actionOrderId: number }>());
+// Product:
+export const selProductListAction = createAction(d.SelProductList, props<{ actionOrderId: number }>());
+export const selProductListSuccessAction = createAction(d.SelProductListSuccess, props<{ actionProductList: IProduct[] }>());
+export const selProductAction = createAction(d.SelProduct, props<{ actionProductId: number }>());
+export const selProductSuccessAction = createAction(d.SelProductSuccess, props<{ actionProduct: IProduct }>());
+export const insProductAction = createAction(d.InsProduct, props<{ actionProduct: IProduct }>());
+export const insProductSuccessAction = createAction(d.InsProductSuccess, props<{ actionProduct: IProduct }>());
+export const updProductAction = createAction(d.UpdProduct, props<{ actionProduct: IProduct }>());
+export const updProductSuccessAction = createAction(d.UpdProductSuccess, props<{ actionProduct: IProduct }>());
+export const delProductAction = createAction(d.DelProduct, props<{ actionProductId: number }>());
+export const delProductSuccessAction = createAction(d.DelProductSuccess, props<{ actionProductId: number }>());
+
+// Note that the names of the properties passed to the props() methods follow the "actionXxx" naming convention.
+// That will be helpful when the data is provided on dispatch ("actionCustomerId = customerId" is more clear than "customerId = customerId").
 
 // There are a few rules to writing good actions within your application:
 // * Upfront - write actions before developing features to understand and gain a shared knowledge of the feature being implemented.
 // * Divide - categorize actions based on the event source.
 // * Many - actions are inexpensive to write, so the more actions you write, the better you express flows in your application.
 // * Event-Driven - capture events not commands as you are separating the description of an event and the handling of that event.
-
 
 // ######################################################################################################
 // Service
