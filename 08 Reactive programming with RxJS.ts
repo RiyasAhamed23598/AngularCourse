@@ -1,7 +1,7 @@
-// https://ngrx.io/
+// https://rxjs.dev/
 
 // ######################################################################################################
-// Reactive vs. Imperative programming
+// Introduction: Reactive vs. Imperative programming
 // ######################################################################################################
 
 // Imperative Programming:

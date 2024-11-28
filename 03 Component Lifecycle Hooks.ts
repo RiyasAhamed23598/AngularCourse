@@ -1,15 +1,26 @@
-// Lifecycle hooks are specific functions that allow you to tap into specific moments in the life of a component or directive.
-// To implement a lifecycle hook, import the corresponding interface from `@angular/core` and have the component or directive class implement it.
+// CONTENTS:
 
-//### `ngOnInit`
+// * ngOnInit
+// * ngDoCheck
+// * ngAfterContentInit
+// * ngAfterContentChecked
+// * ngAfterViewInit
+// * ngAfterViewChecked
+// * ngOnChanges
+// * ngOnDestroy
 
-// Called ONLY ONCE after the component's constructor is executed and input properties are set (the properties passed from the parent component).
+// Lifecycle hooks are specific functions that allow you to tap into specific moments in the life of a component object.
+// To implement a lifecycle hook, import the corresponding interface from `@angular/core` and have the component class implement it.
+
+// ######################################################################################################
+// * ngOnInit
+// ######################################################################################################
+
+// The most frequently used hook. Called ONLY ONCE after the component's constructor is executed and input properties are set (the properties passed from the parent component).
 // Runs once the component is properly constructed but before it's displayed to the user.
 // Provides a reliable spot for initialization tasks that depend on the component's input properties being available.
-// It's a good place to put initialization logic, such as fetching data for the component.
-
-// The hook is fundamental for initializing component properties and executing logic that needs to occur once when the component is instantiated.
-// It's particularly useful for setting up data fetching operations, initializing component state, or configuring default settings.
+// It's a good place to put initialization logic, such as fetching data, populating the component's vars from the Store, configuring default settings.
+// The hook is fundamental for executing logic that needs to occur once when the component is instantiated.
 
 // Let's create a component that fetches user data from a service and displays it (it's a common use of ngOnInit).
 // We'll simulate the fetching operation with a service that returns a list of users.
@@ -88,7 +99,9 @@ export class UserListComponent implements OnInit {
 // It runs after the constructor and the first ngOnChanges, making it a safe and logical place to initialize data
 // that might depend on input properties or other initialization logic.
 
-//### `ngDoCheck`
+// ######################################################################################################
+// * ngDoCheck
+// ######################################################################################################
 
 // Called during every change detection cycle.
 // Useful when you need to detect changes that Angular's built-in change detection mechanism might miss,
@@ -212,7 +225,9 @@ export class AppComponent {
 // Remember, while `ngDoCheck` provides powerful capabilities to intercept and act on changes, it runs very frequently.
 // Therefore, any heavy computations or complex logic inside `ngDoCheck` should be handled carefully to avoid degrading performance.
 
-//### `ngAfterContentInit`
+// ######################################################################################################
+// * ngAfterContentInit
+// ######################################################################################################
 
 // Called ONLY ONCE after the first `ngDoCheck`.
 // Called after Angular initializes the content children - the content projected into the component from an external template using <ng-content>.
@@ -296,7 +311,9 @@ export class TabContainerComponent implements AfterContentInit {
 })
 export class AppComponent {}
 
-//### `ngAfterContentChecked`
+// ######################################################################################################
+// * ngAfterContentChecked
+// ######################################################################################################
 
 // Called after each `ngDoCheck` (first time - after `ngAfterContentInit`).
 // Eensures that any changes in the content part of the component (like projected content via <ng-content>) are processed and updated if necessary.
@@ -391,7 +408,9 @@ export class AppComponent {}
 // This pattern is useful when you need to react to changes in projected content, especially when those changes
 // might affect layout or when you need to synchronize some state based on the content's properties.
 
-//### `ngAfterViewInit`
+// ######################################################################################################
+// * ngAfterViewInit
+// ######################################################################################################
 
 // Called ONLY ONCE after the first `ngAfterContentChecked`.
 // Usage: Respond after Angular initializes the component's views and child views, or the view that contains the directive.
@@ -511,7 +530,9 @@ ngAfterViewInit() {
 // Performing manipulations outside Angular's zone means executing code in a way that doesn't trigger Angular's change detection mechanism.
 // Angular provides the NgZone service with methods like runOutsideAngular() to execute code outside its zone.
 
-//### `ngAfterViewChecked`
+// ######################################################################################################
+// * ngAfterViewChecked
+// ######################################################################################################
 
 // Called after each `ngAfterContentChecked` (first time - after `ngAfterViewInit`).
 // Usage: Respond after Angular checks the component's views and child views, or the view that contains the directive.
@@ -628,8 +649,9 @@ export class ExampleComponent implements AfterViewChecked {
 //		Use ngAfterViewChecked when you need to ensure that the whole component and its children are rendered and checked,
 //		which is useful for final DOM manipulations or after rendering operations.
 
-
-//### `ngOnChanges`
+// ######################################################################################################
+// * ngOnChanges
+// ######################################################################################################
 
 // Called each time a data-bound input property changes.
 // Usage: Respond when Angular sets or resets data-bound input properties.
@@ -642,22 +664,23 @@ Tell me more about ngOnChanges hook. Give an example of ngOnChanges hook which d
 
 2. Check that the value of the birthdate field, if it's not NULL, is not less than the current date minus 120 years. If less, display an error message and abort the change making the field blank (i.e. make the new value NULL).
 
-
-//### `ngOnDestroy`
+// ######################################################################################################
+// * ngOnDestroy
+// ######################################################################################################
 
 // Called ONLY ONCE just before Angular destroys the directive or component.
 // Usage: Cleanup just before Angular destroys the directive or component.
+// Second most frequently used after ngOnInit
 // Useful for unsubscribing from observables, detaching event handlers, and stopping interval timers to avoid memory leaks.
 
-Give an example of ngOnDestroy hook which demonstrates its typical uses
-
-//### Implementing interfaces
+// ######################################################################################################
+// Implementing interfaces
+// ######################################################################################################
 
 // As you noticed, each hook is defined by an interface having the same name as the hook but with no initial 'ng'.
 // Technically, it's not a must to include "implements ..." in your component definition to use the lifecycle hook.
 // However, it's considered a good practice to do so since declaring "implements ..." helps in two ways:
 // * Type Checking:
-//		If there's a typo in the interface name, TypeScript will throw an error since no such type exists.
 //		If there's a typo in the hook name, TypeScript will throw an error since the hook, defined by the interface, is not implemented.
 // * Code Readability:
 //		It makes it clear to other developers (and to yourself) that this component is expected to implement the lifecycle hook.
