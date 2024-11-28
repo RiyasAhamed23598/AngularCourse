@@ -1,7 +1,16 @@
-// https://rxjs.dev/
+// CONTENTS:
+
+// * Introduction: Reactive vs. Imperative programming
+// * What is RxJS?
+// * Observable
+// * The async Pipe to subscribe in an HTML template
+// * Manipulating an Observable's value in the imperative way (as a regular variable)
+// * More about Subscription
+// * RxJS operators
+// * pipe()
 
 // ######################################################################################################
-// Introduction: Reactive vs. Imperative programming
+// * Introduction: Reactive vs. Imperative programming
 // ######################################################################################################
 
 // Imperative Programming:
@@ -55,8 +64,10 @@
 //    - Reactive: Steeper learning curve, requires a shift in thinking.
 
 // ######################################################################################################
-// What is RxJS?
+// * What is RxJS?
 // ######################################################################################################
+
+// https://rxjs.dev/
 
 // RxJS (Reactive Extensions for JavaScript) is a powerful library for reactive programming using Observables.
 
@@ -98,7 +109,7 @@
 // It's a cornerstone of reactive programming in the JavaScript ecosystem.
 
 // ######################################################################################################
-// Observable
+// * Observable
 // ######################################################################################################
 
 // An Observable is an object that can emit one or more values over time.
@@ -142,33 +153,98 @@ value => console.log(value)
 // * Value 3 is emitted: The subscriber function is called with 3, so console.log(3) runs.
 // * The Observable completes, and no further emissions occur.
 
-// When subscribe() is used:
+// ######################################################################################################
+// * The async Pipe to subscribe in an HTML template
+// ######################################################################################################
 
-// It's usually used either for debugging (as in the example above) or for populating regular, non-observable variables.
-// In the latter case, the assignment occurs inside the function passed to the subscribe() method, for example:
+// subscribe() is a TypeScript method. In HTML, you use the async Pipe instead - it's even simpler.
+// Let's say, your component has the screenTitle$ Observable. In the template, it could be subscribed this way:
+<h2>{{ screenTitle$ | async }}</h2>
+// The Observable must be public in the component class to be accessible from the template.
+
+// Another classical example - building an HTML list (<ul>) with items (<li>) rendered dynamically from an Observable which emits an array.
+// In the next example, the component class has the customerList$ Observable.
+// In the real life, it would be populated from the DB (e.g., via an HTTP call), but let's hardcode the values to keep the example simple:
+
+import { Component } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { ICustomer } from 'src/models/customer.model';
+
+@Component({
+  selector: 'app-customer-list',
+  templateUrl: './customer-list.component.html',
+})
+export class CustomerListComponent {
+  customerList$: Observable<ICustomer[]> = of([
+    { customerId: 1, firstName: 'John', lastName: 'Doe' },
+    { customerId: 2, firstName: 'Jane', lastName: 'Smith' },
+    { customerId: 3, firstName: 'Alice', lastName: 'Brown' },
+  ]);
+}
+
+// The HTML template (customer-list.component.html):
+<ul>
+  <li *ngFor="let c of customerList$ | async">
+    {{ c.firstName }} {{ c.lastName }} - {{ c.customerId }}
+  </li>
+</ul>
+
+// The async Pipe in the template automatically subscribes to the customerList$ observable and retrieves its emitted values (the customer array).
+
+// The *ngFor iterates over the emitted customer array and renders a <li> for each customer:
+<ul>
+  <li>John Doe - 1</li>
+  <li>Jane Smith - 2</li>
+  <li>Alice Brown - 3</li>
+</ul>
+
+// The Pipe manages automatic unsubscribing when the component is destroyed, so you don't need to handle subscriptions manually.
+
+// The entire code (TypeScript and HTML) is extremely compact.
+// If the real-life customerList$ is later re-populated from the DB (for example, after items adding, editing or removing),
+//    the HTML will be automatically re-rendered as the new values are emitted, without additional manual handling.
+// With imperatrive programming, you would write a lot of boilerplate code to acheive the same.
+
+// ######################################################################################################
+// * Manipulating an Observable's value in the imperative way (as a regular variable)
+// ######################################################################################################
+
+// An Observable can only be subscribed and emit the value to the subscriber. You cannot write: "if (amount$ > 0)..." in the reactive programming world.
+// If you need to work with an Observable in the imperative way, its value must be emitted into a regular, "old fashion" variable.
+// The assignment of the Observable's value to the non-Observable variable occurs inside the function you pass to the subscribe() method, for example:
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { Product } from './product.model';
+import { IProduct } from 'src/models/customer.model';
 
 @Component({
   selector: 'app-product',
-  template: '<p>Product Component</p>',
+  templateUrl: './product.component.html',
 })
 export class ProductComponent implements OnInit, OnDestroy {
-  retrievedProduct$: Observable<Product>;
-  contextProduct: Product; // a regular variable
-  private _subscription: Subscription; // that type will be described soon; now, just consider it a pointer to the subscription
+  // An Observable:
+  contextProduct$: Observable<IProduct>;
+  // A regular variable:
+  private _contextProduct: IProduct;
+  // Subscription will be described soon, don't concentrate on it now:
+  private _subscription: Subscription;
 
-  constructor(private _store: Store<{ product: Product }>) {
-    this.retrievedProduct$ = this._store.select('product');
-  }
+  constructor(private _store: Store<any>) { }
 
   ngOnInit(): void {
-    this._subscription = this.retrievedProduct$.subscribe((prod: Product) => {
-      this.contextProduct = prod; // the assignment occurs inside the function passed to the subscribe() method
+    // STEP 1: Populate the Observable from the Store:
+    this.contextProduct$ = this._store.select('contextProduct');
+    // STEP 2: Populate the regular var from the Observable:
+    this._subscription = this.contextProduct$.subscribe((p: IProduct) => {
+      // The assignment of the Observable's value to the non-Observable variable occurs inside the function you pass to the subscribe() method:
+      this._contextProduct = p;
     });
+  }
+
+  isTooExpensive(): boolean {
+    // return (this.contextProduct$.price > 100); // compilation error :-(
+    return (this._contextProduct.price > 100); // woohooo!
   }
 
   ngOnDestroy(): void {
@@ -178,60 +254,12 @@ export class ProductComponent implements OnInit, OnDestroy {
   }
 }
 
-// It's the developer's responsibility not to read from the regular var before the subscribed Observer emits a value.
+// In the above example, which is a very popular pattern, the Store usually contains the requested property's value prior to creating the component instance.
+// The Observable is populated at the moment of the this._store.select(), so the regular var gets ready to be consumed in the component class or the HTML template right away.
+// But if the value in the Store can be blank at that moment, it's your responsibility not to read from the regular var before the subscribed Observer emits a value.
 
 // ######################################################################################################
-// The async Pipe to subscribe in an HTML template
-// ######################################################################################################
-
-// subscribe() is a TypeScript method. In HTML, you use the async Pipe instead - it's even simpler.
-// Let's say, your component has the screenTitle$ Observable. In the template, it could be subscribed this way:
-<h2>{{ screenTitle$ | async }}</h2>
-// The Observable must be public in the component class to be accessible from the template.
-
-// Another classical example - building an HTML list (<ul>) with items (<li>) rendered dynamically from an Observable which emits an array.
-// In the next example, the component class has the customers$ Observable.
-// In the real life, it would be populated from the DB (e.g., via an HTTP call), but let's hardcode the values to keep the example simple:
-
-import { Component } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-@Component({
-  selector: 'app-customer-list',
-  templateUrl: './customer-list.component.html',
-})
-export class CustomerListComponent {
-  customers$: Observable<Customer[]> = of([
-    { customerId: 1, firstName: 'John', lastName: 'Doe' },
-    { customerId: 2, firstName: 'Jane', lastName: 'Smith' },
-    { customerId: 3, firstName: 'Alice', lastName: 'Brown' },
-  ]);
-}
-
-// The HTML template (customer-list.component.html):
-<ul>
-  <li *ngFor="let customer of customers$ | async">
-    {{ customer.firstName }} {{ customer.lastName }} - {{ customer.customerId }}
-  </li>
-</ul>
-
-// The async Pipe in the template automatically subscribes to the customers$ observable and retrieves its emitted values (the customer array).
-// The Pipe also manages unsubscribing when the component is destroyed, so you don't need to handle subscriptions manually.
-
-// The *ngFor iterates over the emitted customer array and renders a <li> for each customer:
-<ul>
-  <li>John Doe - 1</li>
-  <li>Jane Smith - 2</li>
-  <li>Alice Brown - 3</li>
-</ul>
-
-// The entire code (TypeScript and HTML) is extremely compact.
-// If the real-life customers$ is later re-populated from the DB (for example, after items adding, editing or removing),
-//    the HTML will be automatically re-rendered as the new values are emitted, without additional manual handling.
-// With imperatrive programming, you would write a lot of boilerplate code to acheive the same.
-
-// ######################################################################################################
-// More about Subscription
+// * More about Subscription
 // ######################################################################################################
 
 // While JavaScript's garbage collector (GC) does handle the automatic deallocation of memory for objects that are no longer referenced, 
@@ -343,7 +371,7 @@ export class ExampleComponent implements OnInit, OnDestroy {
 //     or a specified number of emissions has occurred.
 
 // ######################################################################################################
-// RxJS operators
+// * RxJS operators
 // ######################################################################################################
 
 // RxJS operators are functions that allow you to transform, filter, and manipulate the data emitted by Observables.
@@ -398,7 +426,7 @@ of(1, 2, 3, 4, 5).pipe(last()); // emits 5 and completes
 of(1, 2, 3, 4, 5).pipe(last(x => x < 4)) // emits 3 and completes
 
 // ######################################################################################################
-// pipe()
+// * pipe()
 // ######################################################################################################
 
 // REMARK: Not to be confused with the Angular Pipes used for data transformations in templates!

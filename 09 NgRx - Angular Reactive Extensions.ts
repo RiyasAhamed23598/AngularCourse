@@ -19,14 +19,15 @@
 // * Service
 // * Effect
 // * Reducer
+// * The Action's life cycle
 // * Selector
 
 // ######################################################################################################
 // * Model
 // ######################################################################################################
 
-// The Model file is used to define the structure of data (interfaces or classes) that will be managed by the NgRx store.
-// These models represent the current module's entities, ensuring strong typing. Example:
+// The Model file is used to define the structure of data (interfaces or classes) that will be managed by the NgRx State.
+// These models represent the module's entities, ensuring strong typing. Example:
 
 export interface ICustomer {
   customerId: number;
@@ -323,8 +324,14 @@ export const updProductSuccessAction = createAction(d.UpdProductSuccess, props<{
 export const delProductAction = createAction(d.DelProduct, props<{ actionOrderId: number, actionProductId: number }>()); // delete the product from the order
 export const delProductSuccessAction = createAction(d.DelProductSuccess, props<{ actionProductId: number }>());
 
-// Note that the names of the properties passed to the props() methods follow the "actionXxx" naming convention.
-// That will be helpful when the data is provided on dispatch ("actionCustomerId = customerId" is more clear than "customerId = customerId").
+// === END OF THE Action FILE ===
+
+// Here are sample lines in the CustomerComponent which dispatch some Actions (of course, they would be in different parts of the component class):
+this._store.dispatch(selCustomerListAction({ actionLastName: this._lastName }));
+this._store.dispatch(selCustomerAction({ actionCustomerId: highlightedCustomerId })); // highlightedCustomerId is a param of delCustomer() function called from the template
+this._store.dispatch(insCustomerAction({ actionCustomer: this._contextCustomer }));
+this._store.dispatch(updCustomerAction({ actionCustomer: this._contextCustomer }));
+this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer.customerId }));
 
 // There are a few rules to writing good actions within your application:
 // * Upfront - write actions before developing features to understand and gain a shared knowledge of the feature being implemented.
@@ -389,12 +396,12 @@ export class CustomerService {
 // * Effect
 // ######################################################################################################
 
-// If your application needs to perform side effects, you would define Effects.
-// Side effects are operations that occur outside the context of Angular, such as external/browser APIs calls, HTTP requests or accessing local storage.
+// Side effects are operations that occur outside the context of Angular, such as external APIs calls, HTTP requests or accessing local storage.
+// If your application needs to perform a side effect, you would define an Effect.
+// Each time you see "Effect" as an NgRx class or a file, keep in mind that "Side Effect" is meant.
 
 // Effects are implemented using RxJS Observables and are set up to listen for specific Actions and perform side effects without affecting the Store directly.
-// Once the side effect is successfully completed, Effects usually dispatch new Actions ("Success" Actions) to update the Store with the side effect results.
-// That allows you to isolate side effects from components and reducers, keeping your state management pure, predictable and easy to test.
+// Once a side effect is successfully completed, the Effect usually dispatches a new Action ("Success" Action) to update the Store with the results returned from outside.
 
 // Let's use the Customer screen to demonstrate how Effects can be used to handle side effects:
 
@@ -438,9 +445,9 @@ export class CustomerEffect {
       // This means the subsequent operators in the pipe will only run when the apropriate Action is dispatched.
       ofType(selCustomerListAction),
       switchMap((action) => {
-        // The passed function calls the respective WEB Service function passing to it the input data, according to the Action's props:
+        // The passed function calls the respective WEB Service function passing to it the input data:
         return this._svc.selCustomerList(action.actionLastName).pipe(
-          // If no errors, dispatch the counterpart Success Action passing to it the WEB Service function's output, according to the Success Action's props:
+          // If no errors, dispatch the counterpart Success Action passing to it the WEB Service function's output:
           map((customerList: ICustomer[]) => selCustomerListSuccessAction({ actionCustomerList: customerList })),
           catchError(() => EMPTY),
         );
@@ -605,6 +612,20 @@ const reducerFunc = createReducer(
 // The spread operator (...state) only does shallow copying and does not handle deeply nested objects.
 // You need to copy each level in the object to ensure immutability.
 // There are libraries that handle deep copying including lodash and immer.
+
+
+// ######################################################################################################
+// * The Action's life cycle
+// ######################################################################################################
+
+// Let's briefly summarize the life cycle stages that an Action goes through:
+
+// 1. The component dispatches an Action.
+// 2. The Effect captures it and calls the corresponding function of the Service.
+// 3. The Service sends an HTTP request to the WEB Service and is waiting for its result.
+// 4. When an HTTP responce is received, Angular passes its output to the waiting Effect.
+// 5. If the call was successful, the Effect dispatches the respective Success Action.
+// 6. The Reducer captures it and updates the module State in the app Store with the changes made.
 
 // ######################################################################################################
 // * Selector
