@@ -2,19 +2,22 @@
 // It's the mechanism that connects the application's data to the user interface (the HTML template) and vice versa.
 // Changes in the data model are immediately reflected in the UI, and user interactions with the UI are immediately reflected in the data model.
 
-// Angular provides several types of data binding:
-// One-way: component ---> GUI:
+// Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* Event Binding using @Output decorator", and Ctrl+F by it):
+
+// One-way: component class ---> HTML template:
 // * Interpolation using double curly braces - {{ }}
 // * Property Binding using square brackets - []
 // * Property Binding using @Input() decorator
-// One-way: GUI ---> component:
+
+// One-way: HTML template ---> component class
 // * Event Binding using parentheses - ()
 // * Event Binding using @Output decorator
-// Two-Way:
+
+// Two-Way: component class ---> HTML template and HTML template ---> component class
 // * Data Binding with [(ngModel)]
 
 // ######################################################################################################
-// Interpolation (one-way: component ---> GUI)
+// * Interpolation using double curly braces - {{ }} (one-way: component class ---> HTML template)
 // ######################################################################################################
 
 // Binds a component property value to the template (a displayed text) using double curly braces - {{ }}.
@@ -122,7 +125,7 @@ export class ExampleComponent {
 // to run change detection on these components only when their inputs change or when events originate from the component or its children.
 
 // ######################################################################################################
-// Property Binding using square brackets - [] (one-way: component ---> GUI)
+// * Property Binding using square brackets - [] (one-way: component class ---> HTML template)
 // ######################################################################################################
 
 // Sets an HTML element's property value based on a component variable or a method. The syntax:
@@ -225,7 +228,7 @@ export class ExampleComponent {
 // Property Binding can bind any data type to an element property, making it more versatile for setting properties that require non-string values.
 
 // ######################################################################################################
-// Property Binding using @Input() decorator (one-way: component ---> GUI)
+// Property Binding using @Input() decorator (one-way: component class ---> HTML template)
 // ######################################################################################################
 
 // @Input() decorator denotes a component's property as an input property.
@@ -360,7 +363,7 @@ export class CustomerProfileComponent {
 // * It provides flexibility in refactoring: you can change the internal property name without affecting how other components use your component.
 
 // ######################################################################################################
-// Event Binding using parentheses - () (one-way: GUI ---> component)
+// * Event Binding using parentheses - () (one-way: HTML template ---> component class)
 // ######################################################################################################
 
 // Components handle user interactions and respond to events such as button clicks, form submissions, and more.
@@ -447,7 +450,7 @@ export class cstNmComponent {
 // 		which can be useful in certain scenarios or when you need more control over the binding process.
 
 // ######################################################################################################
-// Event Binding using @Output decorator  (one-way: GUI ---> component)
+// * Event Binding using @Output decorator (one-way: HTML template ---> component class)
 // ######################################################################################################
 
 // The @Output decorator is used to create custom events that a child component can emit to its parent component.
@@ -569,7 +572,7 @@ export class ParentComponent {
 // 		- integrates better with Angular's form handling mechanisms.
 
 // ######################################################################################################
-// Data Binding with [(ngModel)] (two-way)
+// * Data Binding with [(ngModel)] (two-way: component class ---> HTML template and HTML template ---> component class)
 // ######################################################################################################
 
 // Allows changes in the GUI to update the component's data, and vice versa, automatically and simultaneously.

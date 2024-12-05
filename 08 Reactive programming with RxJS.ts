@@ -1,4 +1,4 @@
-// CONTENTS:
+// CONTENTS (to jump to a section, copy it with the asterisk, like "* Observable", and Ctrl+F by it):
 
 // * Introduction: Reactive vs. Imperative programming
 // * What is RxJS?
@@ -63,6 +63,10 @@
 //    - Imperative: More intuitive for beginners and widely understood.
 //    - Reactive: Steeper learning curve, requires a shift in thinking.
 
+// At first glance, Reactive Programming seems complicated because you must work with more abstract flows of program logic and
+//    get acquainted with new kinds of programming objects which support that flow.
+// But with experience, you understand that this is a well-organized and well-thought-out system that makes development easier.
+
 // ######################################################################################################
 // * What is RxJS?
 // ######################################################################################################
@@ -108,6 +112,9 @@
 //    or when dealing with multiple interdependent asynchronous operations.
 // It's a cornerstone of reactive programming in the JavaScript ecosystem.
 
+// You can manually implement Reactive Programming in a traditional environment (such as .Net) but that requires boilerplate code to manage events, delegates, publishers and subscriptions.
+// NgRx is doing most of the work automatically behind the scenes, so you can concentrate on the business logic.
+
 // ######################################################################################################
 // * Observable
 // ######################################################################################################
@@ -116,35 +123,29 @@
 // It represents a stream of data that can be observed by subscribers.
 // Instead of getting a single value, you can subscribe to an Observable to receive multiple values over time.
 // Observables are a way to handle asynchronous data streams like HTTP requests, user input, and more.
+// This is the foundation and core tool of RxJS, so it is important to understand and "feel" it.
 // Observable variables' names must end with $. That is not enforced by compiler but it's an accepted naming convention.
 
 // The next example uses of() - a utility function that creates an Observable which emits the values provided as arguments, one after the other.
+// Calling subscribe() for the first subscriber "activates" the Observable and it starts emitting values.
 // After emitting the last value, the Observable completes (i.e., it doesn't emit any more values).
-// It is a quick and simple way to create an Observable from a static set of values.
+// By the naming convention, Observable variables' names must end with $:
 
 import { of } from 'rxjs';
-
 // Create an object of type Observable<number> that emits the values 1, 2, and 3:
 const threeNumbers$ = of(1, 2, 3);
-
 // Subscribe to the observable and log each emitted value:
-threeNumbers$.subscribe(value => console.log(value)); // outputs: 1, 2, 3
+threeNumbers$.subscribe((val: String) => console.log(val)); // outputs: 1, 2, 3
 
-// You probably have a question: what exactly does subscribe to the subscriber?
-// The answer is simple, but you should memorize it because it's the cornerstone of reactive programming:
-// The function passed to .subscribe() acts as the subscriber.
+// You could ask: What exactly does subscribe to the Observable?
+// !!! ==>> The function passed to .subscribe() is the subscriber (observer).
 // In this case, the subscriber is:
-value => console.log(value)
-// As you can see, the name of the subscribe() method is misleading.
-// The code looks like the Observable is subscribing to something, when in fact it is being subscribed to.
+(val: String) => console.log(val)
+// !!! ==>> Each time the Observable emits a value, that function is called, getting the emitted value as the parameter.
+// !!! ==>> This pattern is the cornerstone of reactive programming!
+
+// The name of the subscribe() method is misleading - calling it looks like the Observable is subscribing to something, when in fact it is being subscribed to.
 // It would be more correct to name this method getSubscribedBy().
-
-// What Happens Internally:
-
-// Observables are lazy by default. This means that an Observable does not start emitting values until it is subscribed to.
-// The subscribe() method is a regular, "imperative" method.
-// When it's called, that is what "activates" the Observable and it starts emitting values.
-// The subscriber function is called for each emitted value, accepting that value as the parameter.
 
 // The flow steps:
 
@@ -154,7 +155,7 @@ value => console.log(value)
 // * The Observable completes, and no further emissions occur.
 
 // ######################################################################################################
-// * The async Pipe to subscribe in an HTML template
+// * The async Pipe to read from an Observable in an HTML template
 // ######################################################################################################
 
 // subscribe() is a TypeScript method. In HTML, you use the async Pipe instead - it's even simpler.
@@ -184,14 +185,14 @@ export class CustomerListComponent {
 
 // The HTML template (customer-list.component.html):
 <ul>
-  <li *ngFor="let c of customerList$ | async">
-    {{ c.firstName }} {{ c.lastName }} - {{ c.customerId }}
-  </li>
+  @for (let c of customerList$ | async) {
+    <li>{{ c.firstName }} {{ c.lastName }} - {{ c.customerId }}</li>
+  }
 </ul>
 
 // The async Pipe in the template automatically subscribes to the customerList$ observable and retrieves its emitted values (the customer array).
 
-// The *ngFor iterates over the emitted customer array and renders a <li> for each customer:
+// The @for iterates over the emitted customer array and renders a <li> for each customer:
 <ul>
   <li>John Doe - 1</li>
   <li>Jane Smith - 2</li>
@@ -228,7 +229,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   // A regular variable:
   private _contextProduct: IProduct;
   // Subscription will be described soon, don't concentrate on it now:
-  private _subscription: Subscription;
+  private _s: Subscription;
 
   constructor(private _store: Store<any>) { }
 
@@ -236,10 +237,10 @@ export class ProductComponent implements OnInit, OnDestroy {
     // STEP 1: Populate the Observable from the Store:
     this.contextProduct$ = this._store.select('contextProduct');
     // STEP 2: Populate the regular var from the Observable:
-    this._subscription = this.contextProduct$.subscribe((p: IProduct) => {
+    this._s = this.contextProduct$.subscribe(
       // The assignment of the Observable's value to the non-Observable variable occurs inside the function you pass to the subscribe() method:
-      this._contextProduct = p;
-    });
+      (p: IProduct) => this._contextProduct = p
+    );
   }
 
   isTooExpensive(): boolean {
@@ -247,16 +248,12 @@ export class ProductComponent implements OnInit, OnDestroy {
     return (this._contextProduct.price > 100); // woohooo!
   }
 
-  ngOnDestroy(): void {
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
-  }
+  ngOnDestroy = () => this._s.unsubscribe;
 }
 
 // In the above example, which is a very popular pattern, the Store usually contains the requested property's value prior to creating the component instance.
-// The Observable is populated at the moment of the this._store.select(), so the regular var gets ready to be consumed in the component class or the HTML template right away.
-// But if the value in the Store can be blank at that moment, it's your responsibility not to read from the regular var before the subscribed Observer emits a value.
+// The Observable is populated at the moment of the this._store.select(), so the regular var is ready to be consumed in the component class or the HTML template right away.
+// But if the value in the Store can be blank at that moment, it's your responsibility not to read from the regular var before the subscribed Observable emits a value.
 
 // ######################################################################################################
 // * More about Subscription
@@ -281,12 +278,12 @@ interval(1000).subscribe(value => {
 // It allows you to manage and control the lifecycle of the Observable stream.
 
 // When you subscribe to an Observable, the subscribe() function returns a Subscription object:
-private _subscription: Subscription = interval(1000).subscribe(value => {
+private _s: Subscription = interval(1000).subscribe(value => {
   console.log(value);
 });
  
 // When a component is destroyed (typically in the ngOnDestroy() hook), you should unsubscribe from any active subscriptions to avoid memory leaks:
-this._subscription.unsubscribe();
+this._s.unsubscribe();
 
 // It's especially important to unsubscribe from long-lived Observables (like those tied to user input).
 // Here's an example of how you use a Subscription in a component to subscribe to an Observable (e.g., valueChanges from a form control):
@@ -301,21 +298,17 @@ import { Subscription } from 'rxjs';
 })
 export class ExampleComponent implements OnDestroy {
   searchControl = new FormControl('');
-  private _subscription: Subscription;
+  private _s: Subscription;
 
   constructor() {
     // Subscribing to form control value changes:
-    this._subscription = this.searchControl.valueChanges.subscribe(value => {
-      console.log('Search input:', value);
-    });
+    this._s = this.searchControl.valueChanges.subscribe(
+      (val: String) => console.log('Search input:', val)
+    );
   }
 
   // Unsubscribing when the component is destroyed:
-  ngOnDestroy(): void {
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
-  }
+  ngOnDestroy = () => this._s.unsubscribe;
 }
 
 // @@@ One Subscription object per component
@@ -331,21 +324,19 @@ import { Subscription, interval } from 'rxjs';
   template: '<p>Example Component</p>',
 })
 export class ExampleComponent implements OnInit, OnDestroy {
-  private _subscription = new Subscription();
+  private _s = new Subscription();
 
   ngOnInit(): void {
-    this._subscription.add(
+    this._s.add(
       interval(1000).subscribe(() => console.log('Subscription 1 tick'))
     );
 
-    this._subscription.add(
+    this._s.add(
       interval(2000).subscribe(() => console.log('Subscription 2 tick'))
     );
   }
 
-  ngOnDestroy(): void {
-    this._subscription.unsubscribe(); // that cancels both the subscriptions
-  }
+  ngOnDestroy = () => this._s.unsubscribe; // that cancels both the subscriptions
 }
 
 // Scenarios When Unsubscribing Is Necessary:

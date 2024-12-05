@@ -1,4 +1,4 @@
-// CONTENTS:
+// CONTENTS (to jump to a section, copy it with the asterisk, like "* ngOnDestroy", and Ctrl+F by it):
 
 // * ngOnInit
 // * ngDoCheck
