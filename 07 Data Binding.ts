@@ -20,10 +20,10 @@
 // * Interpolation using double curly braces - {{ }} (one-way: component class ---> HTML template)
 // ######################################################################################################
 
-// Binds a component property value to the template (a displayed text) using double curly braces - {{ }}.
-// Allows you to embed expressions into HTML.
-// Interpolation automatically converts the expression to a string. It's best suited for inline text content within HTML elements.
-// The expression within the curly braces is evaluated, and the result is converted to a string and inserted into the HTML content.
+// You can embed expressions (dynamic text) into HTML templates with double curly braces, which tells Angular that it is responsible for the expression inside and ensuring it is updated correctly.
+// This is called text interpolation.
+// Interpolation automatically converts the expression to a string. Objects and arrays are converted using their toString method.
+// In addition to evaluating the expression at first render, Angular also updates the rendered content when the expression's value changes.
 
 @Component({
   selector: 'app-example',
@@ -108,7 +108,7 @@ export class ExampleComponent {
 
 // Optimization:
 // It's generally better to store dynamic values as component properties and update these properties only when necessary.
-// This way, Angular only has to check the property value during change detection, rather than executing a method.
+// This way, during change detection, Angular only has to check the property value rather than execute a method.
 
 // Best Practices
 
