@@ -1,5 +1,5 @@
 // Angular applications are made up of components.
-// A component is the combination of an HTML template and a component class that controls a portion of the screen.
+// A component is the combination of an HTML template and a TypeScript class that controls a portion of the screen.
 
 // Components are responsible for rendering the UI by combining the template and data.
 // They bind data from the component's class to the template, allowing dynamic rendering of content.
@@ -7,7 +7,7 @@
 // Components handle user interactions and respond to events such as button clicks, form submissions, and more.
 // They can define event handlers in the component's class to execute specific actions or trigger changes in the application.
 
-// Components have lifecycle hooks, which are methods that are called at specific stages of a component's lifecycle.
+// Components have lifecycle hooks, which are pre-defined methods that are called at specific stages of a component's lifecycle.
 // Lifecycle hooks allow performing actions at various points, such as initialization, changes detection, and destruction.
 
 // Components can communicate with other components using input and output properties.
@@ -17,28 +17,28 @@
 // Components can be organized in a hierarchical structure, where parent components contain child components.
 // This allows creating complex UI layouts and establishing relationships between components for communication and data sharing.
 
-// Component Structure:
-// 		1. Template: Components have an associated template that defines the layout of the user interface.
-//			Templates are written in HTML with additional Angular-specific syntax and directives.
-// 		2. TypeScript Class: Contains the component's logic, properties, and methods.
+// Usually, a component consists of 3 files:
+// 		1. TypeScript Class: Contains the component's logic, properties, and methods.
 //			The class is responsible for handling data, responding to events, and interacting with other components or services.
-// 		3. Metadata: Components are decorated with metadata using the @Component decorator, which provides additional configuration information
-//			such as the component's selector, template file, style files, and more.
-// 		4. CSS styles (optional).
+// 		2. Template (optional): Components have an associated template that defines the layout of the user interface.
+//			Templates are written in HTML with additional Angular-specific syntax and directives.
+// 		3. CSS styles (optional).
 
 // Components encapsulate the rendering logic, data, and styles in a single unit, making it easier to manage and reuse UI elements across the app.
 
-//### Component Class
+// ######################################################################################################
+// Component Class
+// ######################################################################################################
 
 // The component class is where you define the logic and data for the component. It is a TypeScript class decorated with the @Component decorator.
 
-// The @Component decorator is used to define metadata for the component. Here are the primary properties used within this decorator:
-
+// The @Component decorator is used to define metadata (additional configuration information) for the component.
+// Here are the primary properties used within this decorator:
 // * selector: A custom HTML tag which identifies this component in the template. It is used to instantiate the component.
-// * templateUrl: The path to the external HTML file for the component's template.
-// * template: The inline HTML template for the component.
-// * styleUrls: An array of paths to external CSS files for the component's styles.
-// * styles: An array of inline CSS styles for the component.
+// * template: The inline HTML template for the component (if it's so short that no dedicated file is needed).
+// * templateUrl: The path to the external HTML file (if exists).
+// * styles: An array of inline CSS styles for the component (if they are so short that no dedicated file is needed).
+// * styleUrls: An array of paths to external CSS files for the component's styles (if exists).
 
 import { Component } from '@angular/core';
 
@@ -52,14 +52,20 @@ export class ExampleComponent {
   title = 'Hello, Angular!';
 }
 
-// REMARK: Notice the import statement. It must appear in each file which declares a component.
+// REMARK: Notice the import statement. It must be in each file which declares a component.
 // Components are very common, so they will be used a lot in these notes.
-// To make the notes shorter, the "import { Component }" statement will be usually omitted.
+// To make this course shorter, the "import { Component }" statement will be usually omitted.
 
-//### Template
+// ######################################################################################################
+// Template
+// ######################################################################################################
 
 // Defines the HTML structure of the component.
 // It can be inline (directly within the @Component decorator) or in a separate HTML file (referenced by the templateUrl property).
+
+// External Template (for the previous example component class):
+<!-- example.component.html -->
+<h1>{{ title }}</h1>
 
 // Inline Template:
 @Component({
@@ -71,13 +77,9 @@ export class ExampleComponent {
   title = 'Hello, Angular!';
 }
 
-// External Template:
-<!-- example.component.html -->
-<h1>{{ title }}</h1>
-
 //### More about "selector"
 
-// @@@ Type Selector (Component Directive)
+// @@@ Type Selector (Component Directive), most commonly used:
 
 // Matches elements based on their HTML tag name, or node name.
 // Used to create custom reusable components. They have their own templates and logic encapsulated within the component.
@@ -95,13 +97,13 @@ export class HelloWorldComponent { }
 // When Angular parses the other template, it will replace the app-hello-world tag with the whole content of HelloWorldComponent template.
 // In our example, in the rendered HTML, "<app-hello-world></app-hello-world>" will be replaced with "<h1>Hello World!</h1>".
 
-// @@@ Attribute Selector (Attribute Directive)
+// @@@ Attribute Selector (Attribute Directive):
 
 // Matches elements based on the presence of an HTML attribute and, optionally, an exact value for that attribute.
 // Modify the behavior or appearance of an existing element or component by applying custom logic.
 // To use this directive in a template, you would apply it as an attribute, allowing you to apply the component to existing elements:
 @Component({
-  selector: '[app-example]', // notice the square brackets indicating an Attribute Selector
+  selector: '[app-example]', // notice the square brackets - they indicate an Attribute Selector
   template: `<p>Example component works!</p>`,
   ...
 })
@@ -115,11 +117,11 @@ export class HelloWorldComponent { }
   <p>Example component works!</p>
 </div>
 
-// @@@ Class Selector:
+// @@@ Class Selector, rarely used:
 
 // This can be used to apply the component as a class, though it is less common:
 @Component({
-  selector: '.app-example', // notice the dot indicating a Class Selector
+  selector: '.app-example', // notice the dot - it indicates a Class Selector
   template: `<p>Example component works!</p>`,
   ...
 })
@@ -131,50 +133,49 @@ export class HelloWorldComponent { }
   <p>Example component works!</p>
 </div>
 
-// If multiple Angular components within the same module or template context use the same selector,
-// Angular will encounter a conflict because it won't know which component to apply.
-// To resolve this, each component must have a unique selector.
+// ATTENTION! Each component within the same module or template context must have a unique selector.
+// If multiple components use the same selector, Angular will encounter a conflict because it won't know which component to apply.
 
-//### Styles
+// ######################################################################################################
+// Styles
+// ######################################################################################################
 
-// Components can have associated styles, either inline styles or external CSS files, to define the visual presentation of the component's UI.
+// A component can have associated styles, either inline or external CSS files, to override the default visual presentation settings of the component's UI.
 
-// Inline Styles:
+// External Styles (the "styleUrls" array contains the external file), most commonly used:
+@Component({
+  selector: 'app-example',
+  template: `<h1>{{ title }}</h1>`,
+  styleUrls: ['./example.component.css']
+})
+export class ExampleComponent {
+  title = 'Hello, Angular!';
+}
+
+// The code of example.component.css:
+h1 {
+  color: blue;
+}
+
+// Inline Styles (the "styleUrls" array contains the CSS directly), not usually used:
 @Component({
   selector: 'app-example',
   template: `<h1>{{ title }}</h1>`,
   styles: [`h1 { color: blue; }`]
 })
 export class ExampleComponent {
-  title: string = 'Hello, Angular!';
-  name: string = 'John';
-  imageUrl: string = 'https://example.com/image.png';
-  isButtonDisabled: boolean = false;
-  
-  getImage2Url(): string {
-    return 'https://example.com/image2.png';
-  }
-  
-  onClick() {
-    console.log('Button clicked!');
-  }
+  title = 'Hello, Angular!';
 }
 
-// External Styles:
-/* example.component.css */
-h1 {
-  color: blue;
-}
-
-//### Standalone components
+// ######################################################################################################
+// Standalone components
+// ######################################################################################################
 
 // In Angular, components are traditionally part of an NgModule.
-// This means they must be declared in the declarations array of an Angular module,
+// This means they are declared in the declarations array of an Angular module,
 // 		and the module is responsible for managing the component's lifecycle and dependencies.
-// However, recent versions of Angular introduced the concept of "standalone components,"
-// 		which allow components to be self-contained and used without being declared in an NgModule.
-
-// Standalone components, introduced in Angular 14, can be used without being part of an NgModule.
+// However, Angular 14 introduced the concept of "standalone components,"
+// 		which allow components to be used without being declared in an NgModule.
 // They are self-contained and declare their dependencies directly in the component itself
 // 		providing more flexibility and simplicity in managing components. 
 
@@ -183,42 +184,15 @@ standalone: true
 // in its @Component metadata:
 @Component({
   standalone: true,
+  imports: [CommonModule] // declare dependencies directly in the component, which otherwise would be done in the module
   selector: 'profile-photo',
-})
-export class ProfilePhoto { }
-
-// Standalone components are directly importable into other standalone components:
-@Component({
-  standalone: true,
-  imports: [ProfilePhoto],
   template: `...the HTML fragment...`
 })
-export class UserProfile { }
+export class ProfilePhoto {
+  ...
+}
 
-// Another example of a Standalone Component:
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-
-@Component({
-  standalone: true,  // Indicates this is a standalone component
-  selector: 'app-standalone',
-  templateUrl: './standalone.component.html',
-  styleUrls: ['./standalone.component.css'],
-  imports: [CommonModule]  // Declare dependencies directly in the component
-})
-export class MyStandaloneComponent {}
-
-// You can use a standalone component directly in other components or modules by importing it:
-import { MyStandaloneComponent } from './standalone.component';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, MyStandaloneComponent],  // Importing the standalone component
-  bootstrap: [AppComponent]
-})
-export class AppModule {}
-
-// If you see components that do not have standalone: true and are not explicitly mentioned in an NgModule, it's likely that:
+// If you see components that do not have "standalone: true" and are not explicitly mentioned in an NgModule, it's likely that:
 // * They are declared in an NgModule, but you may not see it directly if you are looking at isolated files or snippets.
 // * They might be declared in a shared or feature module, which is then imported into the root module or other modules.
 
@@ -226,25 +200,25 @@ export class AppModule {}
 
 // Here’s a look at what standalone components can do that non-standalone components cannot:
 
-// 1. **No Need for NgModule**:
+// 1. No Need for NgModule:
 //   - Standalone Components can be used independently without being declared in an Angular module (`@NgModule`).
 //		This simplifies the component setup, especially for smaller applications or individual components.
 //   - Non-Standalone Components must be declared in an Angular module to be used.
 
-// 2. **Simplified Imports**:
+// 2. Simplified Imports:
 //	- Standalone Components import necessary Angular features (such as directives and pipes) directly within the component using the `imports` array.
 //		This makes the component self-contained.
 //   - Non-Standalone Components rely on the module to import and provide necessary features, which can lead to more complex dependency management.
 
-// 3. **Faster Development and Prototyping**:
+// 3. Faster Development and Prototyping:
 //  - Standalone Components allow for rapid development and prototyping by reducing the boilerplate code and simplifying the component setup.
 //		This can be particularly useful in small projects or during the initial stages of development.
 
-// 4. **Decoupled and Reusable**:
+// 4. Decoupled and Reusable:
 //   - Standalone Components are highly decoupled from the rest of the application, making them more reusable and easier to integrate
 //		into different projects or parts of an application without additional setup.
 
-// 5. **Improved Code Organization**:
+// 5. Improved Code Organization:
 //   - Standalone Components promote better code organization by allowing developers to keep the component logic and dependencies together.
 //		This leads to more maintainable and understandable codebases.
 
@@ -253,7 +227,50 @@ export class AppModule {}
 
 // For more information, you can refer to the Angular documentation: https://angular.io/guide/standalone-components
 
-//### The CLI command to create a new component
+// ######################################################################################################
+// Dependency Injection (DI)
+// ######################################################################################################
+
+// DI is a design pattern where a class receives its dependencies from external sources rather than creating them itself.
+// Classes such as components and services request their dependencies through their constructor parameters.
+// The DI framework then provides these dependencies when the class is instantiated.
+
+// When the injectable service is requested for the first time, Angular creates its singleton and passees it to the requestor's constructor.
+// Then this singleton is re-used in subsequent injections.
+
+// The @Injectable decorator tells Angular that this class can be injected as a dependency.
+// The { providedIn: 'root' } means that Angular will provide this service at the root level, making it a singleton across the entire application:
+
+// logger.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class LoggerService {
+  log(message: string) {
+    console.log('LoggerService:', message);
+  }
+}
+
+// app.component.ts
+import { Component } from '@angular/core';
+import { LoggerService } from './logger.service';
+
+@Component({
+  selector: 'app-root',
+  template: `<h1>Welcome to Dependency Injection in Angular</h1>`,
+})
+export class AppComponent {
+  constructor(private logger: LoggerService) { // <<<<<<< inject the service
+    this.logger.log('AppComponent initialized');
+  }
+}
+
+// REMARK: since { providedIn: 'root' } the @Injectable() decorator makes the service available application-wide,
+// 		adding the service to the providers array of the root module is unnecessary and redundant.
+
+// ######################################################################################################
+// The CLI command to create a new component
+// ######################################################################################################
 
 ng generate component my-component
 ng g c my-component
