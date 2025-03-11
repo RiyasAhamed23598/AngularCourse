@@ -30,134 +30,74 @@
 // Component Class
 // ######################################################################################################
 
-// The component class is where you define the logic and data for the component. It is a TypeScript class decorated with the @Component decorator.
-
-// The @Component decorator is used to define metadata (additional configuration information) for the component.
-// Here are the primary properties used within this decorator:
-// * selector: A custom HTML tag which identifies this component in the template. It is used to instantiate the component.
-// * template: The inline HTML template for the component (if it's so short that no dedicated file is needed).
-// * templateUrl: The path to the external HTML file (if exists).
-// * styles: An array of inline CSS styles for the component (if they are so short that no dedicated file is needed).
-// * styleUrls: An array of paths to external CSS files for the component's styles (if exists).
+// The component class is where you define the logic and data for the component.
+// It is a TypeScript class decorated with the @Component decorator.
+// The @Component decorator is used to define metadata (additional configuration information) for the component:
 
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-example',
-  templateUrl: './example.component.html',
-  styleUrls: ['./example.component.css']
+  selector: 'app-example', // a custom HTML tag which identifies this component; used to instantiate and render the component
+  templateUrl: './example.component.html', // the path to the external HTML file (if exists)
+  styleUrls: ['./example.component.css'] // an array of paths to external CSS files for the component's styles (if exist)
 })
 export class ExampleComponent {
-  // Component logic and data go here
+  // Component logic and data go here:
   title = 'Hello, Angular!';
 }
 
 // REMARK: Notice the import statement. It must be in each file which declares a component.
-// Components are very common, so they will be used a lot in these notes.
-// To make this course shorter, the "import { Component }" statement will be usually omitted.
+// Components are very common, so they will be used a lot in this course.
+// To make examples shorter, the "import { Component }" statement will be usually omitted.
+
+// The component's properties are explained below.
 
 // ######################################################################################################
-// Template
+// selector
 // ######################################################################################################
 
-// Defines the HTML structure of the component.
-// It can be inline (directly within the @Component decorator) or in a separate HTML file (referenced by the templateUrl property).
-
-// External Template (for the previous example component class):
-<!-- example.component.html -->
-<h1>{{ title }}</h1>
-
-// Inline Template:
-@Component({
-  selector: 'app-example',
-  template: `<h1>{{ title }}</h1>`,
-  styleUrls: ['./example.component.css']
-})
-export class ExampleComponent {
-  title = 'Hello, Angular!';
-}
-
-//### More about "selector"
-
-// @@@ Type Selector (Component Directive), most commonly used:
-
-// Matches elements based on their HTML tag name, or node name.
-// Used to create custom reusable components. They have their own templates and logic encapsulated within the component.
-
-@Component({
-  selector: 'app-hello-world',
-  template: `<h1>Hello World!</h1>`
-})
-export class HelloWorldComponent { }
-
-// The selector specifies the custom HTML tag that is used to represent the component in the template.
+// The selector specifies the custom HTML tag that is used to represent the component in the templates of other components.
 // Essentially, it tells Angular where to instantiate the component in the DOM.
+
 <!-- app.component.html -->
 <app-hello-world></app-hello-world>
-// When Angular parses the other template, it will replace the app-hello-world tag with the whole content of HelloWorldComponent template.
-// In our example, in the rendered HTML, "<app-hello-world></app-hello-world>" will be replaced with "<h1>Hello World!</h1>".
 
-// @@@ Attribute Selector (Attribute Directive):
-
-// Matches elements based on the presence of an HTML attribute and, optionally, an exact value for that attribute.
-// Modify the behavior or appearance of an existing element or component by applying custom logic.
-// To use this directive in a template, you would apply it as an attribute, allowing you to apply the component to existing elements:
-@Component({
-  selector: '[app-example]', // notice the square brackets - they indicate an Attribute Selector
-  template: `<p>Example component works!</p>`,
-  ...
-})
-
-<!-- app.component.html -->
-<div app-example></div>
-
-// When Angular processes the template, it will inject the component's template content into the existing element.
-// The final HTML output of the other template would look like this:
-<div app-example>
-  <p>Example component works!</p>
-</div>
-
-// @@@ Class Selector, rarely used:
-
-// This can be used to apply the component as a class, though it is less common:
-@Component({
-  selector: '.app-example', // notice the dot - it indicates a Class Selector
-  template: `<p>Example component works!</p>`,
-  ...
-})
-<!-- app.component.html -->
-<div class="app-example"></div>
-
-// The final HTML output of the other template would look like this:
-<div class="app-example">
-  <p>Example component works!</p>
-</div>
+// When Angular renders the other template, it will replace the app-hello-world tag with the whole content of HTML template of HelloWorldComponent.
 
 // ATTENTION! Each component within the same module or template context must have a unique selector.
 // If multiple components use the same selector, Angular will encounter a conflict because it won't know which component to apply.
 
 // ######################################################################################################
-// Styles
+// templateUrl
 // ######################################################################################################
 
-// A component can have associated styles, either inline or external CSS files, to override the default visual presentation settings of the component's UI.
+// Template is the .html file which defines the HTML structure of the component.
 
-// External Styles (the "styleUrls" array contains the external file), most commonly used:
-@Component({
-  selector: 'app-example',
-  template: `<h1>{{ title }}</h1>`,
-  styleUrls: ['./example.component.css']
-})
-export class ExampleComponent {
-  title = 'Hello, Angular!';
-}
+// Example for ExampleComponent:
+<!-- example.component.html -->
+<h1>{{ title }}</h1>
 
-// The code of example.component.css:
+// ######################################################################################################
+// styleUrls
+// ######################################################################################################
+
+// By "styles" we mean CSS classes which override the existing default CSS classes for this specific component only.
+// If a CSS class is not in the .css file, its default definition is used.
+
+// Example for ExampleComponent:
+<!-- example.component.css -->
 h1 {
   color: blue;
 }
 
-// Inline Styles (the "styleUrls" array contains the CSS directly), not usually used:
+// ######################################################################################################
+// Inline Template & Styles
+// ######################################################################################################
+
+// Usually, the template and styles are stored in separate .html and .css files, as described above.
+// But, instead of the "templateUrl" and "styleUrls" properties, you can use the "template" and "styles" properties
+//      and write HTML and CSS code directly within them:
+
 @Component({
   selector: 'app-example',
   template: `<h1>{{ title }}</h1>`,
@@ -166,6 +106,8 @@ h1 {
 export class ExampleComponent {
   title = 'Hello, Angular!';
 }
+
+// This practice is not commonly used.
 
 // ######################################################################################################
 // Standalone components
