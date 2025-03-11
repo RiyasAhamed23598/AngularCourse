@@ -13,30 +13,34 @@
 // Many Angular libraries are modules (such as FormsModule, HttpModule, and RouterModule).
 // Many third-party libraries are available as NgModules (such as Material Design, Ionic, AngularFire2).
 	
-//### Key Features of Angular Modules:
+// ######################################################################################################
+// Key Features of Angular Modules:
+// ######################################################################################################
 
-// 1. **Organization**:
+// 1. Organization:
 // Angular modules allow you to manage and encapsulate components, services, directives, and pipes into a cohesive unit.
 // This helps in organizing the code and makes the application easier to manage as it grows.
 
-// 2. **Decomposition**:
+// 2. Decomposition:
 // Large applications can be broken down into smaller, manageable, and more focused modules.
 // For instance, you might have a `UserModule` for user-related components and services, and a `ProductModule` for product management features.
 
-// 3. **Reusability**:
+// 3. Reusability:
 // By encapsulating functionality within modules, you can easily reuse them across different parts of your app or even across different apps.
 // This modular architecture promotes reusability and DRY (Don't Repeat Yourself) principles.
 
-// 4. **Lazy Loading**:
+// 4. Lazy Loading:
 // Modules can be loaded on demand rather than loading all at once when the application starts.
 // This technique, known as lazy loading, helps in speeding up the initial load time of the application, as modules are only loaded when needed.
 
-// 5. **Providers Scope**:
+// 5. Providers Scope:
 // Services can be provided in Angular modules, which can scope their availability to the module instead.
 // For example, if a service is provided in a module that is lazily loaded,
 //		a new instance of the service will be created and used by all components within that module.
 
-//### Anatomy of an Angular Module:
+// ######################################################################################################
+// Anatomy of an Angular Module:
+// ######################################################################################################
 
 // Here’s a basic example of an Angular module:
 
@@ -47,55 +51,36 @@ import { MyComponent } from './my.component';
 
 @NgModule({
   declarations: [
-    MyComponent  // declare all components, directives, and pipes that belong to this module
+    // An array of all components, directives, and pipes that belong to this module:
+    MyComponent 
   ],
   imports: [
+    // An array of other Angular modules which are available in the HTML templates of the current module.
+    // All exportable declarations from the imported modules (components, directives, pipes) become available in HTML.
+    // ATTENTION! The "imports" array has no effect on what you can use in your component classes' code.
+    // Your components' code still needs explicit TypeScript import statements.
     CommonModule, // includes common directives like *ngIf, *ngFor
     FormsModule  // is required if you're using template-driven forms
   ],
   providers: [
-    // List of injectable services that components in this module might need.
-	// While providers can be declared in any module, app-wide services are typically provided in the app root module.
+    // Defines the injectable service providers that components in this module might need.
+    // The Angular Injector creates a singleton instance of these services, available to all components in the module.
+	  // While providers can be declared in any module, app-wide services are typically provided in the app root module.
   ],
   exports: [
-    MyComponent // components, directives, or pipes that modules that import this module can use
+    // An array of the components, directives, and pipes that belong to this module which are available to other modules:
+    MyComponent
   ]
 })
 export class MyModule {}
 
-//### Usage:
-
-// declarations:
-//		This property is used to define which components, directives, and pipes belong to the module.
-// imports:
-//		It lists the modules with the components, directives, and pipes needed by the components in the current module.
-//		Is used to import other Angular modules into the current module.
-//		All the declarations (components, directives, pipes) and providers (services) that are exported by the imported module
-//		become available to the components and services that are declared within the importing module.
-// providers:
-//		Defines the service providers. The Angular Injector creates a singleton instance of these services, available to all components in the module.
-// exports:
-//		This property is used to make some of the components, directives, and pipes available to other modules.
-
-// @@@ Angular's @NgModule() imports and TypeScript import are entirely different concepts
-
-// The imports array in an NgModule makes the exported declarations of other modules available to the current module.
-// However, it does not automatically make these imported features available in the classes listed in the declarations array of the same module.
-// Instead, the imports array allows the current module to use the features (such as components, directives, and pipes)
-// 		exported by the imported modules within its own components, directives, and pipes.
-	
-// Components, directives, or pipes declared in the declarations array of a module can use the features from the modules listed in the imports array.
-// However, this does not mean that these imported features are automatically available in each function of the declared classes.
-// Instead, they are available to be used within the templates of the components declared in that module.
-
-// Therefore, while the imports array provides access to the necessary features for the components declared in the module,
-// 		it does not eliminate the need to import specific dependencies in each component or service file as needed for their implementation
-
-//### THE ROOT MODULE: AppModule
+// ######################################################################################################
+// THE ROOT MODULE: AppModule
+// ######################################################################################################
 
 // Every Angular application has at least one module class, the root module which tells Angular how to construct the application.
 // You bootstrap that module to launch the application.
-// You can call it anything you want. The conventional name is AppModule.
+// The conventional name is AppModule.
 // In contrast to feature modules, the root module has the bootstrap property - it identifies the bootstrap component.
 
 // The root module is all you need in a simple application with a few components.
@@ -116,23 +101,28 @@ import { AppComponent }  from './app.component';
 })
 export class AppModule { }
 
+// @@@ The "imports" array
+
+// The root module doesn't usually have HTML templates directly, but it still needs to import feature modules in its "imports" array for several important reasons:
+// 1. Component Registration: When you import a feature module into AppModule, you're registering all the exported components from that feature module
+//            with Angular's component registry. This makes those components available for use anywhere in your app, including:
+//    * In the AppComponent's template (the root component)
+//    * In router outlet targets when using routing
+//    * As entry components for dynamic component creation
+// 2. Bootstrapping Process: Angular's bootstrapping process starts with the AppModule. It needs to know about all parts of your application that should be available at startup.
+// 3. Dependency Injection Tree: Services provided in feature modules become part of the application's dependency injection tree when those modules are imported into AppModule.
+
 // Every browser app must import BrowserModule which registers critical application service providers.
 // It's essential for running your app in a browser and should be imported only once in your entire application, specifically in the `AppModule`.
 // Other (non-root) modules typically use `CommonModule` instead of `BrowserModule`.
 
-// The declarations list identifies the application's only component, the root component, the top of the app's rather bare component tree.
+// @@@ The "declarations" array
 
-// The bootstrap property contains the root component that Angular creates and inserts into the index.html host web page.
+// Identifies the application's only component, the root component, the top of the app's rather bare component tree.
 
-// The example AppComponent simply displays a data-bound title:
-@Component({
-  selector: 'my-app',
-  template: '<h1>{{title}}</h1>',
-})
-export class AppComponent {
-  title = 'Minimal NgModule';
-}
-// When Angular launches the app, it places the HTML of the template in the DOM, inside the <my-app> element tags of the index.html.
+// @@@ The "bootstrap" array
+
+// Contains the root component that Angular creates and inserts into the index.html host web page.
 
 // @@@ How Does Angular Know Which Module is the Root Module?
 
@@ -149,6 +139,7 @@ platformBrowserDynamic().bootstrapModule(AppModule)
 // Obviously, the class, passed to platformBrowserDynamic().bootstrapModule(), MUST be in the bootstrap property of the root module.
 
 // @@@ Root-level routing:
+
 // If you're using routing, the root `RouterModule.forRoot()` is declared in the `AppModule`.
 
 import { RouterModule } from '@angular/router';
@@ -161,7 +152,9 @@ export class AppModule { }
 
 // Other (non-root) modules use `RouterModule.forChild()` if they have routes.
 
-//### The CLI command to create a new module
+// ######################################################################################################
+// The CLI command to create a new module
+// ######################################################################################################
 
 ng generate module my-module
 ng g m my-module
@@ -171,13 +164,13 @@ ng g m my-module
 // However, the Angular CLI is designed to work from any subdirectory within your project.
 
 // @@@ Created File and Location:
-// By default, this command will create a new folder named `my-module` inside the `src/app` directory of your project.
+// By default, the "ng generate module my-module" command will create a new folder named `my-module` inside the `src/app` directory of your project.
 // Inside this folder, it will generate one file containing the module class:
 src/
 └── app/
     └── my-module.module.ts
 
-// The generated module will look something like this:
+// The generated module will look like this:
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -193,9 +186,9 @@ export class MyModuleModule { }
 // @@@ Customizing the Location:
 // You can specify a location different from `src/app` by providing a path:
 ng generate module path/to/my-module
+ng g m my-module
 
 // If the path is relative (doesn't start with the drive letter), the module folder will be created under `src/app`:
-ng g m my-module
 
 src/
 └── app/
