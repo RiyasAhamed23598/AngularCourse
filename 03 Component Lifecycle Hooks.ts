@@ -1,4 +1,4 @@
-// CONTENTS (to jump to a section, copy it with the asterisk, like "* ngOnDestroy", and Ctrl+F by it):
+// CONTENTS (to jump to a section, copy it with the asterisk, like "* ngOnDestroy") and Ctrl+F by it:
 
 // * ngOnInit
 // * ngDoCheck
@@ -12,12 +12,15 @@
 // Lifecycle hooks are specific functions that allow you to tap into specific moments in the life of a component object.
 // To implement a lifecycle hook, import the corresponding interface from `@angular/core` and have the component class implement it.
 
+// If you just started learning Angular, you don't need to learn this whole file, only read about ngOnInit, ngAfterViewInit and ngOnDestroy.
+// Then, you can use this file for reference.
+
 // ######################################################################################################
 // * ngOnInit
 // ######################################################################################################
 
 // The most frequently used hook. Called ONLY ONCE after the component's constructor is executed and input properties are set (the properties passed from the parent component).
-// Runs once the component is properly constructed but before it's displayed to the user.
+// Runs when the component has been constructed but before it's displayed to the user.
 // Provides a reliable spot for initialization tasks that depend on the component's input properties being available.
 // It's a good place to put initialization logic, such as fetching data, populating the component's vars from the Store, configuring default settings.
 // The hook is fundamental for executing logic that needs to occur once when the component is instantiated.
@@ -25,7 +28,7 @@
 // Let's create a component that fetches user data from a service and displays it (it's a common use of ngOnInit).
 // We'll simulate the fetching operation with a service that returns a list of users.
 
-// First, let's define a User interface to specify the structure of a user object:
+// First, define a User interface to specify the structure of a user object:
 
 export interface User {
   id: number;
@@ -36,13 +39,10 @@ export interface User {
 
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { User } from './user.model'; // Import the User model
+import { User } from './user.model'; // import the User interface
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-
   constructor() { }
 
   getUsers(): Observable<User[]> {
@@ -71,7 +71,7 @@ import { User } from './user.model'; // Import the User model
   `
 })
 export class UserListComponent implements OnInit {
-  users: User[] = []; // Use the User type for the users array
+  users: User[] = [];
 
   // The UserService is injected into the UserListComponent through its constructor:
   constructor(private userService: UserService) { }
@@ -95,9 +95,9 @@ export class UserListComponent implements OnInit {
 
 // Using ngOnInit for fetching data separates construction from initialization logic.
 // ngOnInit ensures the component's constructor remains light and focused only on setting up dependency injection,
-// without side effects like data fetching.
+//    without side effects like data fetching.
 // It runs after the constructor and the first ngOnChanges, making it a safe and logical place to initialize data
-// that might depend on input properties or other initialization logic.
+//    that might depend on input properties or other initialization logic.
 
 // ######################################################################################################
 // * ngDoCheck
@@ -105,12 +105,12 @@ export class UserListComponent implements OnInit {
 
 // Called during every change detection cycle.
 // Useful when you need to detect changes that Angular's built-in change detection mechanism might miss,
-// especially in properties which are mutable objects or array that are not caught by the default change detection
-// which does not detect changes WITHIN objects and arrays (unless the reference to the entire object or array has changed).
+//    especially in properties which are mutable objects or array that are not caught by the default change detection
+//    which does not detect changes WITHIN objects and arrays (unless the reference to the entire object or array has changed).
 // Used to implement manual/custom change detection logic or to perform checks immediately after the default change detection has run.
 
-// In the next example, we'll create a simple Angular component that monitors an array of objects for changes.
-// `ngDoCheck` allows you to manually check for such changes.
+// In the next example, we'll create a component that monitors an array of objects for changes.
+// ngDoCheck allows you to manually check for such changes.
 
 // Let's set up a simple component with an array of objects. We'll also add a method to modify one of the objects in the array:
 
@@ -152,17 +152,17 @@ export class WatchListComponent implements DoCheck {
 
 // Explanation:
 
-// 1. **Component Definition**:
+// 1. Component Definition:
 //		The `WatchListComponent` manages an array of items, each with a `name` and a `quantity`.
 //		The template lists these items and includes a button to change the quantity of the first item.
 
-// 2. **Detecting Changes with `ngDoCheck`**:
+// 2. Detecting Changes with `ngDoCheck`:
 //   - We use `IterableDiffers` to create a differ for the array. This service helps in tracking changes in collections.
 //   - In `ngDoCheck`, we check for differences using this differ.
 //		If any differences are found (like when `changeItem()` is called), we log these changes to the console.
 //		This demonstrates how `ngDoCheck` can be used to catch updates inside complex structures like arrays of objects.
 
-// 3. **Modifying an Item**:
+// 3. Modifying an Item:
 //		The `changeItem` method modifies the `quantity` of the first item in the array.
 //		Normally, Angular wouldn't check deep changes within objects in an array, but thanks to `ngDoCheck` and `IterableDiffers`,
 //		we can manually detect these changes.
@@ -657,12 +657,6 @@ export class ExampleComponent implements AfterViewChecked {
 // Usage: Respond when Angular sets or resets data-bound input properties.
 // Receives a `SimpleChanges` object containing the current and previous property values,
 //		allowing developers to implement custom change detection logic or respond to changes in specific properties.
-
-Tell me more about ngOnChanges hook. Give an example of ngOnChanges hook which demonstrates its typical uses. Include 2 validations:
-
-1. Compare the current and previous values of a "salary" property (taking into account that both can be NULL). If the new value is more than 10% more than the previous, display an error message and abort the change, restoring the old value.
-
-2. Check that the value of the birthdate field, if it's not NULL, is not less than the current date minus 120 years. If less, display an error message and abort the change making the field blank (i.e. make the new value NULL).
 
 // ######################################################################################################
 // * ngOnDestroy

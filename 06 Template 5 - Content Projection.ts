@@ -11,7 +11,7 @@
 // 1. Create the Parent Component
 
 // Uses the Child component and provides it with the content to be projected.
-// The content inside `<app-child>` tags (the selector of the Child component) is inserted into the Child component at the `<ng-content>` location.
+// The content inside <app-child> tags (the selector of the Child component) is inserted into the Child component at the <ng-content> location.
 
 @Component({
   selector: 'app-parent',
@@ -27,9 +27,8 @@
 export class ParentComponent {}
 
 // 2. Create the Child Component
-
-// The Child component will use the `<ng-content>` tag to specify where the projected content should be inserted.
-// `<ng-content>` acts as a placeholder and, on rendering, will be replaced with the content passed from the Parent component.
+// The Child component will use the <ng-content> tag to specify where the projected content should be inserted.
+// <ng-content> acts as a placeholder and, on rendering, will be replaced with the content passed from the Parent component.
 
 @Component({
   selector: 'app-child',
@@ -44,8 +43,8 @@ export class ChildComponent {}
 
 // 3. Rendered HTML by the Child Component
 
-// When the Parent component is rendered, the content inside the `<app-child>` tags is projected into the Child component
-// 	where the `<ng-content>` tag is placed. The rendered HTML will look like this:
+// When the Parent component is rendered, the content inside the <app-child> tags is projected into the Child component
+//    where the <ng-content> tag is placed. The rendered HTML will look like this:
 
 <div>
   <h1>Parent Component</h1>
@@ -61,7 +60,7 @@ export class ChildComponent {}
 // This is useful when you want to project different parts of the parent content into different locations in the child component's template.
 
 // Let's create an example with a Child component that has multiple `<ng-content>` tags, each with a `select` attribute,
-//  and a Parent component that provides content to be projected.
+//    and a Parent component that provides content to be projected.
 
 // 1. Create the Parent Component
 
