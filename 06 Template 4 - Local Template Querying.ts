@@ -1,5 +1,5 @@
 // ######################################################################################################
-// Local Template Querying, @ViewChild & @ViewChildren decorators
+// Local Template Querying - @ViewChild & @ViewChildren decorators
 // ######################################################################################################
 
 // Local Template Querying allows the component class to access and manipulate elements, components and drectives of its template.
@@ -7,7 +7,8 @@
 
 //### @ViewChild
 
-// The @ViewChild decorator is used to query a single element, directive, or component from the component's template.
+// The @ViewChild decorator is used to query a single element from the component's template.
+// The name of the template reference variable (#var) is passed to the @ViewChild decorator as a parameter (with no pound sign):
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
@@ -19,8 +20,8 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
   `
 })
 export class AppComponent {
-  @ViewChild('header') // <<<<<<< the template variable's name is sent with no pound sign (#)!!!
-  header: ElementRef;
+  @ViewChild('header') // the name of the #header var is sent with no pound sign
+  header: ElementRef; // a reference to the <h1> element
 
   changeTitle() {
     this.header.nativeElement.textContent = 'New Title';
@@ -33,7 +34,7 @@ export class AppComponent {
 
 //### @ViewChildren
 
-// The @ViewChildren decorator is used to query multiple elements, directives, or components from the component's template.
+// The @ViewChildren decorator is used to query multiple elements from the component's template.
 // It returns a QueryList of items, which can be iterated over or manipulated as needed.
 
 import { Component, ViewChildren, QueryList, ElementRef } from '@angular/core';
@@ -58,7 +59,7 @@ export class AppComponent {
   }
 }
 
-// @ViewChildren returns ALL the elements with the given template reference variable, not only the first as @ViewChild does.
+// @ViewChildren returns ALL the elements with the given template reference variable, not only the first .
 // In this example, @ViewChildren is used to get references to all <div> elements with the template reference variable #item.
 // The changeItems() method then changes the text color of all these elements to red.
 
@@ -69,20 +70,8 @@ export class AppComponent {
 // The argument passed to @ViewChild and @ViewChildren
 // ######################################################################################################
 
-// It's crucial for identifying which elements or components to query. That argument can be:
-
-// 1. Template Reference Variable name (as a string):
-// This is the most common use case, as shown in the previous examples.
-
-@ViewChild('myElement')
-element!: ElementRef;
-
-@ViewChildren('item')
-items!: QueryList<ElementRef>;
-// Here, 'myElement' and 'item' correspond to #myElement and #item template vars.
-
-// 2. Type of Component or Directive:
-// You can pass a component or directive type to obtain the first (for @ViewChild) or all (for @ViewChildren) instances of that type.
+// Usually, we send the name of the template reference variable to @ViewChild and @ViewChildren, as shown in the previous examples.
+// But we can pass a component or directive data type to obtain the first (for @ViewChild) or all (for @ViewChildren) instances of that data type:
 
 @ViewChild(ChildComponent)
 childComp!: ChildComponent;
@@ -300,6 +289,5 @@ export class ParentComponent {
     console.log(this.childComponent.someProperty);
   }
 }
-// You cannot change data-bound properties from ngAfterViewInit, see "03 Component Lifecycle Hooks.ts" > "ExpressionChangedAfterItHasBeenCheckedError".
 
 // Don't try to access queried elements in the constructor, ngOnInit, ngAfterContentInit and ngAfterContentChecked that run before ngAfterViewInit!
