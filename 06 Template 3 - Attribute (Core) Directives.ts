@@ -1,20 +1,23 @@
 // Attribute Directives (also known as Core directives):
 // * Don't change the DOM structure, only modify the behavior or appearance of existing elements
-// * Typically used with square brackets [], for examples: [ngModel] (described in "04 Data Binding.ts"), [ngClass], [ngStyle]
+// * Typically used with square brackets [], for examples: [ngModel], [ngClass], [ngStyle]
 // * Can have multiple core directives on a single element
 
 // ######################################################################################################
-//### [ngClass]
+// ### [ngClass]
 // ######################################################################################################
 
-// The standard 'class' property of an HTML element (like <div class="...">) contains the CSS class(es) to be applied on the HTML element.
+// The standard 'class' property of an HTML element (like <div class="...">) contains the CSS class(es) to be applied hardcoded.
 // [ngClass] allows to build the value of the 'class' property dynamically - it can add or remove CSS classes based on component logic.
 
 // In the rendered HTML:
 //		"[ngClass]" is replaced with "class".
 //		Each class name passed to [ngClass]) appears (or doesn't appear) depending on its boolean expression.
 
+// @@@ The string passed to [ngClass]:
+
 // The [ngClass] directive can accept a string which contains a several types of values:
+
 // #1. Object with key-value pairs. In each pair:
 // 		* the key is the CSS class name;
 // 		* the value is a boolean expression (normally, the component's property or method) which governs wether or not the CSS class must be applied:
@@ -39,10 +42,13 @@ export class MyComponent {
 <div class="active disabled">
   Content
 </div>
+
 // #2. List of classes separated by space (in fact, a string which would be the value of the static 'class' property as is):
 <div [ngClass]="'class1 class2'">
+
 // #3. Array of classes:
 <div [ngClass]="['class1', 'class2']">
+
 // #4. Component method returning any of the above:
 <div [ngClass]="getClasses()">
 // The method can return not only a string (#2) but also an object (#1) or an array (#3).
@@ -59,14 +65,13 @@ export class MyComponent {
 <div [ngClass]="['class1', { 'class2': isClass2, 'class3': isClass3 }, 'class4', isClass5() ? 'class5' : '']">
 // This div will always have class1 and class4, and it will conditionally have class2, class3 and class5 based on the respective boolean values.
 
-// @@@ Combination of static and dynamic classes
+// @@@ Combination of static and dynamic classes:
 
 // When an HTML element has both [ngClass] and a static 'class' attribute, the classes from both sources are combined. Here's how it works:
 // 1. The static 'class' attribute classes are applied.
 // 2. The classes from [ngClass] are then added.
 // 3. If the same class appears in both, it's not duplicated.
-<div class="static-class1 static-class2" 
-     [ngClass]="{'dynamic-class': isDynamic, 'static-class2': true}">
+<div class="static-class1 static-class2" [ngClass]="{'dynamic-class': isDynamic, 'static-class2': true}">
   Content
 </div>
 // Assuming `isDynamic` is true, this will render as:
