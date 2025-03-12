@@ -108,67 +108,6 @@ export class MyComponent {
 // 		enhancing the overall flexibility and functionality of your Angular applications.
 
 // ######################################################################################################
-// ng-template
-// ######################################################################################################
-
-// It's a directive that defines a template that is not rendered by default.
-// It serves as a container for an HTML block that Angular can conditionally add or remove from the DOM.
-// The ng-template itself is never displayed directly, but its contents can be included in the DOM at runtime using structural directives
-// 		such as *ngIf, *ngFor, *ngSwitch, or via manual rendering with ViewContainerRef and TemplateRef.
-
-// The <ng-template> with an else condition in *ngIf is used to define content that should be displayed when the condition in *ngIf is false.
-// It provides a way to specify alternative content without needing an additional *ngIf statement.
-
-// Basic Structure:
-
-<div *ngIf="condition; else elseBlock">
-  Content to show when condition is true
-</div>
-
-<ng-template #elseBlock>
-  Content to show when condition is false
-</ng-template>
-
-// If the condition is true, the div content is rendered.
-// Otherwise, the content inside the <ng-template> with the matching reference variable (in this case, `#elseBlock`) is rendered instead.
-
-// Example:
-
-<div *ngIf="isLoggedIn; else loginButton">
-  Welcome, {{username}}!
-</div>
-
-<ng-template #loginButton>
-  <button (click)="login()">Login</button>
-</ng-template>
-
-// Advantages:
-//    - It keeps related content (true and false cases) close together in the template.
-//    - It's more efficient than using two separate *ngIf directives.
-//    - It makes the intent of the code clearer.
-
-// You can also use ng-template with `then` and `else`:
-<div *ngIf="condition; then thenBlock else elseBlock"></div>
-<ng-template #thenBlock>Content to render when condition is true.</ng-template>
-<ng-template #elseBlock>Content to render when condition is false.</ng-template>
-
-// @@@ *ngIf as an object existence guard
-
-// The next <div> will be rendered only if the object named 'user' is defined and instantiated, even if it's an empty object = {}:
-<div *ngIf="user; else noUser">
-  <h2>User Details</h2>
-  <p>Name: {{user.name}}</p>
-  <p>Email: {{user.email}}</p>
-  <p>Age: {{user.age}}</p>
-</div>
-
-<ng-template #noUser>
-  <h2>No user found</h2>
-</ng-template>
-// The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
-// That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted.
-
-// ######################################################################################################
 // Pipes (for Templates)
 // ######################################################################################################
 

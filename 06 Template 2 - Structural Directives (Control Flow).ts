@@ -1,14 +1,13 @@
 // Structural Directives:
+// * Bring to HTML the programming language-like functionality (such as "if", "else", "for", "switch").
 // * Change the DOM layout (the structure of the view) by adding, removing, or manipulating DOM elements based on conditions.
-// * Prefixed with an asterisk (*) (the OLD syntax) or with a pound (@) (the NEW syntax, starting from Angular 17)
-// * Examples: *ngIf, *ngFor, *ngSwitch
-// * An element can have only one structural directive
+// * Prefixed with an asterisk (*) (the OLD syntax) or with a pound (@) (the NEW syntax, starting from Angular 17).
+// * Examples: *ngIf, *ngFor, *ngSwitch (the NEW syntax: @if, @for, @switch).
+// * An element can have only one structural directive.
 
 ////////////////////////////////////////////////////////////////////////
 // The OLD syntax: /////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
-
-// The most common structural directives are *ngIf, `*ngFor`, and `*ngSwitch`.
 
 // ######################################################################################################
 // *ngIf
@@ -45,19 +44,31 @@ export class AppComponent {
   This element is conditionally displayed.
 </div>
 
-// @@@ <ng-template> custom HTML tag
+// @@@ *ngIf as an object existence guard
 
-// It's not a structural directive, but it's widely used with structural directives, so it's described in this file.
+// The next <div> will be rendered only if the object named 'user' is defined and instantiated, even if it's an empty object = {}:
+<div *ngIf="user; else noUser">
+  <h2>User Details</h2>
+  <p>Name: {{user.name}}</p>
+  <p>Email: {{user.email}}</p>
+  <p>Age: {{user.age}}</p>
+</div>
+// The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
+// That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted.
 
-// The <ng-template> directive defines a template that is not rendered by default.
-// It serves as a container for an HTML block that Angular can conditionally add or remove from the DOM.
-// The <ng-template> itself is never displayed directly, but its contents can be included in the DOM at runtime using structural directives
-// 		such as *ngIf, *ngFor, *ngSwitch, or via manual rendering with ViewContainerRef and TemplateRef.
+// ######################################################################################################
+// <ng-template> custom HTML tag to implement the "else" functionality
+// ######################################################################################################
+
+// It's not a structural directive, but it's widely used with structural directives, so it's described here.
+
+// The <ng-template> tag defines a piece of HTML (like <div>) but is not rendered by default.
+// It's' a container for an HTML block that Angular can conditionally add or remove from the DOM at runtime using structural directives.
 
 // The <ng-template> with an else condition in *ngIf is used to define content that should be displayed when the condition in *ngIf is false.
 // It provides a way to specify alternative content without needing an additional *ngIf statement with the same but negative condition.
 
-// Basic Structure:
+// The pattern:
 
 <div *ngIf="condition; else elseBlock">
   Content to show when condition is true
@@ -66,9 +77,6 @@ export class AppComponent {
 <ng-template #elseBlock>
   Content to show when condition is false
 </ng-template>
-
-// If the condition is true, the div content is rendered.
-// Otherwise, the content inside the <ng-template> with the matching reference variable (in this case, `#elseBlock`) is rendered instead.
 
 // Example:
 
@@ -80,151 +88,10 @@ export class AppComponent {
   <button (click)="login()">Login</button>
 </ng-template>
 
-// Advantages:
-//    - It keeps related content (true and false cases) close together in the template.
-//    - It's more efficient than using two separate *ngIf directives.
-//    - It makes the intent of the code clearer.
-
-// You can also use ng-template with `then` and `else`:
+// You can also use <ng-templat>e with `then` and `else`:
 <div *ngIf="condition; then thenBlock else elseBlock"></div>
 <ng-template #thenBlock>Content to render when condition is true.</ng-template>
 <ng-template #elseBlock>Content to render when condition is false.</ng-template>
-
-// @@@ *ngTemplateOutlet
-
-// *ngTemplateOutlet is a directive that allows you to render the content of an ng-template dynamically in a view.
-// It lets you insert a template reference into the DOM at runtime, giving you the flexibility to control what gets displayed based on your app logic.
-
-// Use Cases for *ngTemplateOutlet
-// Reusing Templates:
-// 		If you have a template reused in multiple places, you can define it once and then use ngTemplateOutlet to insert it wherever needed.
-// Dynamic Content Rendering:
-//		When you need to render different templates based on conditions or inputs.
-// Component Customization:
-// 		Allowing consumers of a component to pass in a template for customized rendering.
-
-// Example:
-
-// 1. Define the Templates
-
-// In your component's template, define a couple of templates using the <ng-template> directive:
-
-<ng-template #templateA>
-  <div>This is Template A</div>
-</ng-template>
-
-<ng-template #templateB>
-  <div>This is Template B</div>
-</ng-template>
-
-// 2. Use *ngTemplateOutlet to Render the Template
-
-// Now, we can use ngTemplateOutlet to render one of these templates based on a condition in the component.
-// The example will contain the <ng-container> custom HTML which will be described later in detail.
-// For now, just know that it's like <div> but not rendered (just delimits HTML pieces which are processed as one block by the logic).
-// Let's suppose that showTemplateA is aboolean property in the component class:
-
-<div *ngIf="showTemplateA; else otherTemplate">
-  <ng-container *ngTemplateOutlet="templateA"></ng-container>
-</div>
-
-<ng-template #otherTemplate>
-  <ng-container *ngTemplateOutlet="templateB"></ng-container>
-</ng-template>
-
-// *ngTemplateOutlet is used inside an <ng-container> to insert the content of an <ng-template> at runtime.
-// The template to be inserted is referenced using a template reference variable, like templateA or templateB in this example.
-
-// You can also pass a context object to the template using *ngTemplateOutlet. This allows you to pass data into the template dynamically.
-// Here, the templateWithContext template is rendered with a dynamic message passed via the context object:
-
-<ng-template #templateWithContext let-msg="greetingMessage">
-  <div>{{ msg }}</div>
-</ng-template>
-
-<ng-container *ngTemplateOutlet="templateWithContext; context: { greetingMessage: 'Hello from context!' }"></ng-container>
-
-// When using the *ngTemplateOutlet directive to pass data to a template, the object used to pass that data is referred to as context.
-// This is a required and specific property name in the syntax for *ngTemplateOutlet. You cannot rename this to something else; it must be context.
-
-// Notice the let-msg declaration.
-// The let- part is same as "let" in JS, it's not a part of the var name (which is msg in our example).
-// The let- variables declared within a <ng-template> are template input variables.
-// They're used to capture values from the context object passed to the template.
-// The data type of a let- variable corresponds to the data type of the context object's property from which it's populated.
-
-// IMPORTANT!!!
-// The string, passed to a let- var, is not the initial value per se (as it would be in the JS "let") but the name of a property of the context object.
-// The initial value is the value of that property.
-
-// Another example of let- variables (pay attention that the naming convention for them is camelCase):
-
-<ng-container *ngTemplateOutlet="greetTemplate; context: { name: 'Alice', age: 30 }"></ng-container>
-
-<ng-template #greetTemplate let-personName="name" let-personAge="age">
-  <p>Hello, {{ personName }}! You are {{ personAge }} years old.</p>
-</ng-template>
-
-// Let's compare `let-` variables and template reference variables (declared with #):
-
-// Similarities:
-// 1. Both are used within templates.
-// 2. Both provide a way to reference values or elements in the template.
-// 3. Both can be used in template expressions.
-
-// Differences:
-
-// 1. Declaration:
-//    - `let-` variables: Declared in `<ng-template>` or structural directives.
-//    - `#` variables: Declared on any element in the template.
-
-// 2. Scope:
-//    - `let-` variables: Scoped to the <ng-template> tag they're declared in.
-//    - `#` variables: Available throughout the entire HTML template after the declaration point.
-
-// 3. Purpose:
-//    - `let-` variables: Used to capture values from a context object.
-//    - `#` variables: Used to reference DOM elements or directive instances.
-
-// 4. Usage context:
-//    - `let-` variables: Typically used with `*ngTemplateOutlet` or structural directives.
-//    - `#` variables: Can be used anywhere in the template.
-
-// 5. Value assignment:
-//    - `let-` variables: Values are assigned from a context object.
-//    - `#` variables: Reference the element or component/directive they're declared on.
-
-// @@@ *ngIf as an object existence guard
-
-// The next <div> will be rendered only if the object named 'user' is defined and instantiated, even if it's an empty object = {}:
-<div *ngIf="user">
-  <h2>User Details</h2>
-  <p>Name: {{user.name}}</p>
-  <p>Email: {{user.email}}</p>
-  <p>Age: {{user.age}}</p>
-</div>
-// The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
-// That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted:
-
-// This approach allows you to safely access properties of user without using the Elvis operator on each property this way:
-<h2>User Details</h2>
-<p>Name: {{user?.name}}</p>
-<p>Email: {{user?.email}}</p>
-<p>Age: {{user?.age}}</p>
-// In contrast to Elvis, *ngIf prevents rendering of the entire block if the object doesn't exist, which can be more efficient.
-// It also more user-friendly - the labels with no values look as an obvious bug.
-
-// <ng-template> can be used with an *ngIf in this situation in the normal way:
-<div *ngIf="user; else noUser">
-  <h2>User Details</h2>
-  <p>Name: {{user.name}}</p>
-  <p>Email: {{user.email}}</p>
-  <p>Age: {{user.age}}</p>
-</div>
-
-<ng-template #noUser>
-  <h2>No user found</h2>
-</ng-template>
 
 // ######################################################################################################
 // *ngFor
