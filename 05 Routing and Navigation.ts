@@ -200,7 +200,7 @@ http://www.example.com/user/123
 
 // this.route.params.subscribe is a method used in Angular components to subscribe to route parameter changes.
 // this.route refers to an instance of ActivatedRoute, which is typically injected into the component's constructor.
-// params is an Observable on the ActivatedRoute that emits new values when the route parameters change.
+// params is an Observable (you will learn oabout them soon) on the ActivatedRoute that emits new values when the route parameters change.
 // subscribe is a method on this Observable that allows you to react to these changes.
 
 // In the above example, whenever the route parameter 'id' changes, the subscribe callback will be called with the new parameters.
@@ -403,13 +403,13 @@ this.router.navigate['products', 'electronics'] // result: '/products/electronic
 this.router.navigate['/user', id] // result: '/user/123' if `id` is 123
 this.router.navigate['/user', username, 'posts', postId] // result: '/user/john/posts/456'
 this.router.navigate['/', 'home'] // result: '/home'
-this.router.navigate[''] // result: '', i.e. it's the final URL is the base URL only (like "myexample.com")
+this.router.navigate[''] // result: '', i.e. it's the final URL is the base URL only
 
 // @@@ The 'extras' argument (optional)
 
 // An object of type NavigationExtras containing additional navigation options.
 // The NavigationExtras interface is described here: https://v17.angular.io/api/router/NavigationExtras
-// It has many properties but we will review only two which are especially important - relativeTo, queryParams and replaceUrl.
+// It has many properties but we will review only three which are especially important - relativeTo, queryParams and replaceUrl.
 
 // relativeTo (of type ActivatedRoute: https://v17.angular.io/api/router/ActivatedRoute):
 // Specifies the base ActivatedRoute from which the navigation should occur. 
@@ -606,13 +606,13 @@ export class UserDetailComponent implements OnInit {
 
 // How Route Resolvers Work:
 
-// 1. **Define a Resolver Service**:
+// 1. Define a Resolver Service:
 //       Create a service that implements the `Resolve` interface.
 //       This service fetches data asynchronously and returns it, usually from a backend API.
-// 2. **Register the Resolver with a Route**:
+// 2. Register the Resolver with a Route:
 //       Associate the resolver with a specific route in your routing configuration.
 //       When the route is activated, Angular will first execute the resolver, wait for it to complete, and then proceed to activate the route.
-// 3. **Access Resolved Data**:
+// 3. Access Resolved Data:
 //       The resolved data is then available as part of the route's `ActivatedRoute` data,
 //       making it accessible to the component that is loaded by the route.
 

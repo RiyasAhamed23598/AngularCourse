@@ -10,7 +10,9 @@
 // The `main.ts` file is where you configure and launch your Angular application.
 // It contains the setup needed to execute the application in a web browser environment.
 
-// #### Typical Content of `main.ts`
+// ######################################################################################################
+// Typical Content of main.ts
+// ######################################################################################################
 
 // Here’s what you usually find in a standard Angular project's `main.ts` file:
 
@@ -28,7 +30,7 @@ platformBrowserDynamic().bootstrapModule(AppModule)
 
 /* ### Explanation of `main.ts`
 
-1. **Importing Necessary Functions and Modules**:
+1. Importing Necessary Functions and Modules:
    - `enableProdMode()`:
 		Function that disables Angular's development mode.
 		It turns off development-specific features like assertions and change detection checks to improve performance.
@@ -39,10 +41,10 @@ platformBrowserDynamic().bootstrapModule(AppModule)
 		The root module of your application, defined in `app.module.ts`.
 		This module sets up the initial view and provides the configured runtime compiler.
 
-2. **Check Environment**:
+2. Check Environment:
    - The `if` block checks if the application is in production mode (`environment.production`).
 
-3. **Bootstrapping the Application**:
+3. Bootstrapping the Application:
    - `platformBrowserDynamic().bootstrapModule(AppModule)`:
 		This line bootstraps the root `AppModule`.
 		Bootstrapping in this context means loading the Angular module to start the application, i,e,
@@ -52,7 +54,7 @@ platformBrowserDynamic().bootstrapModule(AppModule)
    - `.catch(err => console.error(err))`:
 		This is a catch block to handle and log errors that occur during the application bootstrap process.
 
-### Platform Initialization
+@@@ Platform Initialization
 
 The platform setup by `platformBrowserDynamic()` is specific for browser-based applications.
 Angular also supports other platforms, like server-side rendering (Angular Universal uses `platformServer`),
@@ -158,7 +160,9 @@ As the application runs, Angular continues to update the DOM based on component 
 This process allows Angular to take control of a specific part of the HTML document (defined by the root component's tag)
 	and manage it as a dynamic, interactive application, while leaving the rest of the index.html file intact. */
 	
-//### package.json
+// ######################################################################################################
+// package.json
+// ######################################################################################################
 
 // package.json is a crucial file in Angular projects, as it is in most Node.js-based applications. It serves several important purposes:
 // 1. Project metadata: It contains basic information about the project such as name, version, description, and author.
@@ -248,6 +252,7 @@ This process allows Angular to take control of a specific part of the HTML docum
 
 // These scripts can be run using npm. For example:
 // - `npm start` to start the development server
+// - `npm run dev` to build the project for fevelopment
 // - `npm run build` to build the project for production
 // - `npm test` to run the tests
 

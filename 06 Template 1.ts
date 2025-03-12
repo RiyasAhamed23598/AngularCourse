@@ -24,7 +24,7 @@
 
 // 3.2 Referencing in the Component Class
 
-// To access the variable in the component class, use the @ViewChild decorator:
+// To access the variable in TypeScript, use the @ViewChild decorator:
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
@@ -155,24 +155,6 @@ export class MyComponent {
 // @@@ *ngIf as an object existence guard
 
 // The next <div> will be rendered only if the object named 'user' is defined and instantiated, even if it's an empty object = {}:
-<div *ngIf="user">
-  <h2>User Details</h2>
-  <p>Name: {{user.name}}</p>
-  <p>Email: {{user.email}}</p>
-  <p>Age: {{user.age}}</p>
-</div>
-// The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
-// That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted:
-
-// This approach allows you to safely access properties of user without using the Elvis operator on each property this way:
-<h2>User Details</h2>
-<p>Name: {{user?.name}}</p>
-<p>Email: {{user?.email}}</p>
-<p>Age: {{user?.age}}</p>
-// In contrast to Elvis, *ngIf prevents rendering of the entire block if the object doesn't exist, which can be more efficient.
-// It also more user-friendly - the labels with no values look as an obvious bug.
-
-// <ng-template> can be used with an *ngIf in this situation in the normal way:
 <div *ngIf="user; else noUser">
   <h2>User Details</h2>
   <p>Name: {{user.name}}</p>
@@ -183,6 +165,8 @@ export class MyComponent {
 <ng-template #noUser>
   <h2>No user found</h2>
 </ng-template>
+// The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
+// That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted.
 
 // ######################################################################################################
 // Pipes (for Templates)
@@ -194,7 +178,7 @@ export class MyComponent {
 // Pipes take in data as input and transform it to a desired output format.
 // They are used to display formatted data in the view without having to write complex logic in the component itself.
 
-// You apply pipes directly in the template using the | operator. Here's the syntax:
+// You apply pipes directly in the template using the | operator:
 {{ expression | pipeName }}
 
 // You can also pass arguments to a pipe by separating them with colons:
@@ -238,9 +222,11 @@ export class PipeExampleComponent {
 {{ price | currency:'USD':true }}
 // formats 199.99 as $199.99, with the currency symbol (USD for US dollars).
 
-// @@@ Custom Pipe
+// @@@ Custom Pipes:
 
-// You can also create your own custom pipes to handle specific transformations that are not covered by the built-in pipes.
+// You can also create your own pipes to handle specific transformations that are not covered by the built-in pipes.
+// Pipe is a class which has the @Pipe decorator and implements the PipeTransform interface.
+// The naming convention is <Description>Pipe. Ours will be ReversePipe.
 // Suppose you want to create a custom pipe that reverses a string.
 
 // 1. Generate a new pipe using Angular CLI:
@@ -251,7 +237,7 @@ ng generate pipe reverse
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-	name: 'reverse'
+	name: 'reversePipe'
 })
 export class ReversePipe implements PipeTransform {
 	transform(value: string): string {
@@ -259,8 +245,9 @@ export class ReversePipe implements PipeTransform {
 	}
 }
 
-// The `@Pipe` decorator defines the pipe with the name `reverse`.
-// The `transform` method takes an input value and returns the reversed string.
+// The @Pipe decorator defines the pipe with the name `reversePipe`.
+//    The naming convention for custom pipe name is <description>Pipe. Ours will be reversePipe.
+// The transform() method takes an input value and returns the transformed value (reversed string in our case).
 //		It's a required method that every custom pipe must implement as part of the PipeTransform interface.
 
 // 3. Use the custom pipe in a component template:
@@ -271,7 +258,7 @@ import { Component } from '@angular/core';
 	selector: 'app-custom-pipe-example',
 	template: `
    <p>Original string: {{ title }}</p>
-   <p>Reversed string: {{ title | reverse }}</p>
+   <p>Reversed string: {{ title | reversePipe }}</p>
  `
 })
 export class ReversePipeExampleComponent {
@@ -280,7 +267,7 @@ export class ReversePipeExampleComponent {
 
 // @@@ Custom Pipe with a Pearameter
 
-// Here is how the transform method is defined in the PipeTransform interface:
+// Here is how the transform() method is defined in the PipeTransform interface:
 
 export interface PipeTransform {
     transform(value: any, ...args: any[]): any;
@@ -295,7 +282,7 @@ export interface PipeTransform {
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'repeat'
+  name: 'repeatPipe'
 })
 export class RepeatPipe implements PipeTransform {
   transform(value: string, times: number): string {
@@ -303,9 +290,9 @@ export class RepeatPipe implements PipeTransform {
   }
 }
 
-// To use the repeat pipe in a template, you simply need to use the pipe operator | followed by the pipe name and pass the parameter:
+// Pass the parameter from the template:
 <p>Original string: {{ title }}</p>
-<p>Repeated string: {{ title | repeat:3 }}</p>
+<p>Repeated string: {{ title | repeatPipe:3 }}</p>
 
 // @@@ Registering Custom Pipe in the Module
 
@@ -320,10 +307,10 @@ import { RepeatPipeExampleComponent } from './repeat-pipe-example.component';
 
 @NgModule({
   declarations: [
-    RepeatPipe,
+    RepeatPipe, // <<<<<<<<<<<<<<<<<<<<<<<
     RepeatPipeExampleComponent,
-	ReversePipeExampleComponent,
-	ReversePipe
+    ReversePipe, // <<<<<<<<<<<<<<<<<<<<<<<
+    ReversePipeExampleComponent
   ],
   imports: [BrowserModule],
   bootstrap: [RepeatPipeExampleComponent]
