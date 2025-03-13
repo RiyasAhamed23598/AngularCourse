@@ -64,7 +64,7 @@ export class ExampleComponent {
 
 // When Angular renders the other template, it will replace the app-hello-world tag with the whole content of HTML template of HelloWorldComponent.
 
-// ATTENTION! Each component within the same module or template context must have a unique selector.
+// IMPORTANT! The selector for each component should be unique across your Angular application to avoid conflicts and unexpected behavior.
 // If multiple components use the same selector, Angular will encounter a conflict because it won't know which component to apply.
 
 // ######################################################################################################
