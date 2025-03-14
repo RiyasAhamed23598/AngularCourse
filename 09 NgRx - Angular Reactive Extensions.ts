@@ -392,7 +392,7 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 // The class which calls the Web Service directly.
 // It's "the last station" of data flow within Angular before it's sent to the Middle tier on the Web.
 // The class name says just "Service" for shortness, but keep in mind that "Web Service" is meant.
-// Strictly speacking, this class is not a part of the NgRx library, but it usually exists in apps which call a Web Service, which is the standard architecture.
+// Strictly speaking, this class is not a part of the NgRx library, but it usually exists in apps which call a Web Service, which is the standard architecture.
 // It will be injected into the Side Effect class (described next), that's why it has the @Injectable decorator:
 
 import { Injectable } from '@angular/core';
@@ -481,6 +481,7 @@ import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class CustomerEffect {
+  // Note the Service injected into the Effect through its constructor:
   constructor(private _actions$: Actions, private _svc: CustomerService) {}
 
   // Customer:
@@ -610,7 +611,7 @@ const getNewState = createReducer(
 
   on(setContextCustomerAction, (state: ICustomerState, { actionCustomer: newContextCustomer }) => ({
     ...state, // copy all the properties of the old State to the new State unchanged...
-    contextCustomer: newContextCustomer // ...except of contextCustomer which gets a new value
+    contextCustomer: newContextCustomer // ...and override contextCustomer whith the new value
   })),
 
   on(selCustomerListAction, (state: ICustomerState) => ({
@@ -639,7 +640,7 @@ const getNewState = createReducer(
     ...state,
     // Refresh the context Customer to populate the DB-generated fields - customerId, updatedBy & updatedAt:
     contextCustomer: insertedCustomer,
-    // Also, add the INSERTed Table to the Customers List:
+    // Add the INSERTed Table to the Customers List:
     customerList: [...state.customerList, insertedCustomer]
   })),
 
@@ -647,7 +648,7 @@ const getNewState = createReducer(
     ...state,
     // Refresh the context Customer to populate the DB-generated fields - updatedBy & updatedAt:
     contextCustomer: updatedCustomer,
-    // Also, refresh the UPDATEd Customer in the Customers List:
+    // Refresh the UPDATEd Customer in the Customers List:
     customerList: state.customerList.map(
       (customerInList: ICustomer) => customerInList.customerId === updatedCustomer.customerId ? updatedCustomer : customerInList
     )
@@ -657,7 +658,7 @@ const getNewState = createReducer(
     ...state,
     // Dispose of the DELETEd Customer:
     contextCustomer: null,
-    // Also, remove the DELETEd Customer from the Customers List:
+    // Remove the DELETEd Customer from the Customers List:
     customerList: state.customerList.filter(
       (customerInList: ICustomer) => customerInList.customerId !== deletedCustomerId
     )
@@ -676,7 +677,6 @@ const getNewState = createReducer(
 // You need to copy each level in the object to ensure immutability.
 // There are libraries that handle deep copying including lodash and immer.
 
-
 // ######################################################################################################
 // * The Action's life cycle
 // ######################################################################################################
@@ -684,19 +684,9 @@ const getNewState = createReducer(
 // Let's briefly summarize the life cycle stages that an Action goes through:
 
 // 1. The component dispatches a regular (not Success) Action.
-// 2. The Reducer captures it (if a handler exists) and updates the State with the requested changed.
-// 3. The Effect captures it (if a handler exists) and calls the corresponding function of the Service, passing the payload as an input.
+// 2. The Reducer captures it (if a handler for it exists) and updates the State with the requested changed.
+// 3. The Effect captures it (if a handler for it exists) and calls the corresponding function of the Service, passing the payload as an input.
 // 4. The Service sends an HTTP request to the Web Service and is waiting for its result.
 // 5. When an HTTP response is received, Angular passes its output to the waiting Effect.
 // 6. If the call was successful, the Effect dispatches the respective Success Action, passing the results returned by the Web Service.
 // 7. The Reducer captures it and updates the State with those results.
-
-// ######################################################################################################
-// * Selector
-// ######################################################################################################
-
-// Selectors are pure functions that extract and derive slices of state from the Store.
-// They are used to retrieve specific pieces of state or computed properties from the Store.
-// Selectors can be combined to create more complex selectors.
-
-// UNDER CONSTRUCTION
