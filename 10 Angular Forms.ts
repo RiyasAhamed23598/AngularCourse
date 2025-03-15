@@ -31,7 +31,7 @@
 // 2. Reactive Forms:
 
 // Uses a more programmatic, reactive approach, where the form structure and logic are defined in the component class.
-// Best for complex forms, dynamic form generation, or forms with heavy validation requirements.
+// Best for complex forms, dynamic form generation, or forms with heavy validations.
 // Example:
 
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -132,71 +132,51 @@ interface AsyncValidatorFn {
 // A few examples of Properties and Functions of the Validators Class:
 
 // 1. required:
-// Type:
-ValidatorFn
 // Ensures that the form control has a value (i.e., the field cannot be empty).
-// Usage:
-const control = new FormControl('', Validators.required);
-// The control is marked as invalid if it doesn't have a value. Works for inputs, selects, checkboxes, etc.
+const control = new FormControl('', Validators.required); // the 1st parameter to FormControl constructor is the initial value
 
 // 2. min:
-// Type:
-(min: number) => ValidatorFn
 // Ensures that the form control's value is greater than or equal to a specified minimum number.
-// Usage:
 const control = new FormControl('', Validators.min(10));
-// The control is invalid if its value is less than the specified minimum (min).
 
 // 3. max:
-// Type:
-(max: number) => ValidatorFn
 // Ensures that the form control's value is less than or equal to a specified maximum number.
-// Usage:
 const control = new FormControl('', Validators.max(100));
-// The control is invalid if its value exceeds the specified maximum (max).
 
 // 4. minLength():
-// Type:
-(minLength: number) => ValidatorFn
 // Ensures that the form control's value has at least the specified minimum number of characters.
-// Usage:
 const control = new FormControl('', Validators.minLength(5));
-// The control is invalid if the input value's length is shorter than the specified minLength.
 
 // 5. maxLength():
-// Type:
-(maxLength: number) => ValidatorFn
 // Ensures that the form control's value has no more than the specified maximum number of characters.
-// Usage:
 const control = new FormControl('', Validators.maxLength(10));
-// The control is invalid if the input value's length exceeds the specified maxLength.
 
 // 6. pattern():
-// Type:
-(pattern: string | RegExp) => ValidatorFn
 // Ensures that the form control's value matches a specified regular expression pattern.
-// Usage:
-const control = new FormControl('', Validators.pattern('^[a-zA-Z]+$'));
-// The control is invalid if the value does not match the pattern (e.g., only letters allowed).
+const control = new FormControl('', Validators.pattern('^[a-zA-Z]+$')); // only letters allowed
 
 // 7. email:
-// Type:
-ValidatorFn
 // Validates that the control's value is in a valid email format (following RFC 5322 standard).
-// Usage:
 const control = new FormControl('', Validators.email);
-// The control is invalid if the value is not a valid email address (e.g., test@example.com).
 
-// You can apply validators when creating form controls like this:
+// You can apply validators when creating form input controls like this:
 import { FormControl, Validators } from '@angular/forms';
 
-const formControl = new FormControl('', [
+const username = new FormControl('', [
   Validators.required,
-  Validators.minLength(3),
-  Validators.maxLength(10)
+  Validators.minLength(6),
+  Validators.maxLength(20)
 ]);
 // These validators are applied to the form control, and the form becomes invalid if any of the conditions are not met.
 // Each validator returns an error object if validation fails or null if it succeeds.
+
+// If validations are optional, then firstly create an array of validators according to your needs, and then pass it to the FormControl's constructor:
+const usernameValidators = (this.loginThroughGoogleOrSocialMedia()) ? [] : [
+  Validators.required,
+  Validators.minLength(6),
+  Validators.maxLength(20)
+];
+const username = new FormControl('', usernameValidators);
 
 // Validators example:
 
@@ -208,7 +188,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   templateUrl: './validators-example.component.html'
 })
 export class ValidatorsExampleComponent {
-  formGroup = new FormGroup({
+  formGroup = new FormGroup({ // FormGroup represents a group of form controls, will be described soon
     age: new FormControl('', [Validators.required, Validators.min(18), Validators.max(65)]),
     username: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(10)]),
     name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z]+$')]),
@@ -269,13 +249,13 @@ export class ValidatorsExampleComponent {
 // It provides the basic functionality for form controls, such as tracking their value, validity, and user interactions.
 
 // Types of Form Controls that Extend AbstractControl:
-// * FormControl: Represents a single form input (e.g., a text box).
+// * FormControl: Represents a single form input (such as a text box).
 // * FormGroup: Represents a group of form controls, allowing you to treat multiple controls as a single unit.
 // * FormArray: Represents an array of form controls, useful for dynamic forms.
 
-// Constructor:
+// AbstractControl's constructor:
 constructor(validators: ValidatorFn | ValidatorFn[], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[]) {}
-// Each parameter is a function or array of function used to determine the validity of this control synchronously and asynchronously.
+// Each parameter is a function or array of functions used to determine the validity of this control synchronously and asynchronously.
 
 // Properties and methods of AbstractControl are described here: https://angular.dev/api/forms/AbstractControl
 
@@ -298,7 +278,7 @@ constructor(validators: ValidatorFn | ValidatorFn[], asyncValidators: AsyncValid
 // errors: Any validation errors present in the control.
 
 // Type Parameter in FormControl:
-// In Angular v14+, FormControl can accept a type parameter that specifies the type of data the form control holds, enhancing type safety.
+// In Angular v14+, FormControl can accept a type parameter that specifies the type of data it holds (FormControl<T>), enhancing type safety.
 
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
@@ -314,8 +294,12 @@ export class ExampleFormComponent {
   genderControl = new FormControl<string>('');
   acceptTermsControl = new FormControl<boolean>(false, Validators.requiredTrue);
 
+  allControllsAreValid(): boolean {
+    return this.nameControl.valid && this.ageControl.valid && this.birthDateControl.valid && this.genderControl.valid && this.acceptTermsControl.valid;
+  }
+
   onSubmit() {
-    if (this.nameControl.valid && this.ageControl.valid && this.birthDateControl.valid && this.genderControl.valid && this.acceptTermsControl.valid) {
+    if (this.allControllsAreValid()) {
       console.log({
         name: this.nameControl.value,
         age: this.ageControl.value,
@@ -372,7 +356,7 @@ export class ExampleFormComponent {
   </div>
 
   <!-- Submit Button -->
-  <button type="submit" [disabled]="nameControl.invalid || ageControl.invalid || birthDateControl.invalid || genderControl.invalid || acceptTermsControl.invalid">Submit</button>
+  <button type="submit" [disabled]="!allControlsAreValid()">Submit</button>
 </form>
 
 // ######################################################################################################
@@ -381,7 +365,7 @@ export class ExampleFormComponent {
 
 // https://v17.angular.io/api/forms/FormGroup
 
-// FormGroup is a class in Angular's Reactive Forms module that groups multiple form controls (FormControls) into a single unit.
+// FormGroup is a class in Angular's Reactive Forms module that groups multiple FormControl-s into a single unit.
 // It is used to represent a collection of form controls that logically belong together, such as the fields of a form.
 // By grouping controls, Angular allows you to manage the validation, status, and values of multiple form controls at once.
 
@@ -392,7 +376,7 @@ export class ExampleFormComponent {
 //         It tracks the state (valid, invalid, dirty, touched, etc.) of all its child controls.
 // * Manages the form’s value:
 //         A FormGroup allows you to get or set the entire form’s value as an object,
-//         where the keys are the control names and the values are the form control values.
+//            where the keys are the control names and the values are the form control values.
 // * Validation:
 //         You can add synchronous or asynchronous validators to a FormGroup to manage the validation of the entire group of controls.
 
@@ -420,7 +404,7 @@ export class UserFormComponent {
 
   // Handle form submission
   onSubmit() {
-    if (this.userForm.valid) {
+    if (this.userForm.valid) { // no need to check each control individually
       console.log(this.userForm.value);
     }
   }
@@ -456,7 +440,7 @@ export class UserFormComponent {
   <button type="submit" [disabled]="userForm.invalid">Submit</button>
 </form>
 
-// You can retrieve the values of the entire FormGroup as an object:
+// You can retrieve the values of the entire FormGroup as a plain TypeScript object:
 console.log(this.userForm.value); // output: { name: '', age: null, email: '' }
 
 // You can set the values of the entire group programmatically:
@@ -534,12 +518,6 @@ userForm = new FormGroup({
   age: new FormControl('')
 }, { validators: ageValidator });
 
-// Summary of FormGroup:
-// Collection of Controls: FormGroup manages multiple FormControl instances and other form controls, allowing them to work as a cohesive unit.
-// Tracks the State: Tracks the validity, value, and interaction state of all its child controls.
-// Flexible Structure: Can nest FormGroup instances to organize complex forms with sections.
-// Validation: Can apply validation to individual controls or the group as a whole.
-
 // ######################################################################################################
 // FormArray
 // ######################################################################################################
@@ -552,10 +530,10 @@ userForm = new FormGroup({
 // This means each control in the FormArray has an index and can be accessed via its position in the array.
 
 // Key Features of FormArray:
-// Dynamic Form Control Management: It allows adding, removing, or updating form controls dynamically,
+// * Dynamic Form Control Management: It allows adding, removing, or updating form controls dynamically,
 //         which is useful for use cases like adding multiple email addresses, phone numbers, or dynamically generating form fields.
-// Manages Form Controls: A FormArray can hold instances of FormControl, FormGroup, or even other FormArray.
-// Tracks Form State: Similar to FormGroup, it tracks the state of all the controls it contains (such as valid, invalid, touched, dirty, etc.).
+// * Manages Form Controls: A FormArray can hold instances of FormControl, FormGroup, or even other FormArray.
+// * Tracks Form State: Similar to FormGroup, it tracks the state of all the controls it contains (such as valid, invalid, touched, dirty, etc.).
 
 // Its constructor accepts an array of FormControl, FormGroup, or FormArray instances.
 
@@ -753,34 +731,26 @@ import { FormBuilder, Validators } from '@angular/forms';
   template: '...'
 })
 export class UserFormComponent {
-  userForm = this.fb.group({ // <<<<<<< creating FormGroup
+  constructor(private _fb: FormBuilder) { } // <<<<<<< FormBuilder is typically injected into a component's constructor
+
+  userForm = this._fb.group({ // <<<<<<< creating FormGroup
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    address: this.fb.group({
+    address: this._fb.group({
       street: ['', Validators.required],
       city: ['', Validators.required],
       zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]]
     }),
-    phones: this.fb.array([ // <<<<<<< creating FormArray
-      this.fb.control('', Validators.required)
+    phones: this._fb.array([ // <<<<<<< creating FormArray
+      this._fb.control('', Validators.required)
     ])
   });
 
-  constructor(private fb: FormBuilder) { } // <<<<<<< it's typically injected into a component's constructor
-
   addPhone() {
     const phones = this.userForm.get('phones') as FormArray;
-    phones.push(this.fb.control('', Validators.required)); // <<<<<<< creating FormControl
+    phones.push(this._fb.control('', Validators.required)); // <<<<<<< creating FormControl
   }
 }
-
-// Notice that the fb variable is declared in the constructor of FormSampleComponent because it is dependency-injected.
-// In Angular, services (like FormBuilder) are provided through Dependency Injection (DI), which allows Angular to provide
-//      instances of services automatically when they are needed in components or other services.
-
-// FormBuilder is a service that is part of the ReactiveFormsModule (will be bdescribed below).
-// By declaring fb in the constructor, Angular's Dependency Injection system will automatically provide an instance of FormBuilder
-//      when the component is instantiated.
 
 // ######################################################################################################
 // An example demonstrating FormControl, FormGroup, FormArray & FormBuilder in one component
@@ -796,13 +766,12 @@ import { FormBuilder, FormControl, FormGroup, FormArray, Validators } from '@ang
   templateUrl: './form-sample.component.html'
 })
 export class FormSampleComponent implements OnInit {
-  // Using FormBuilder to build a FormGroup
   myForm: FormGroup;
   
-  constructor(private fb: FormBuilder) {}
+  constructor(private _fb: FormBuilder) {}
 
   ngOnInit(): void {
-    this.myForm = this.fb.group({
+    this.myForm = this._fb.group({
       // FormControl with Validators
       username: new FormControl('', [Validators.required, Validators.minLength(3)]),
 
@@ -908,7 +877,7 @@ untypedControl.setValue(123); // no error
 // They are suitable for simpler forms where most of the form logic and validation is embedded (managed declaratively) in the template itself.
 
 // Key Characteristics of FormsModule:
-// * Two-Way Data Binding: Uses Angular’s two-way binding ([(ngModel)]) to synchronize the form inputs with the component properties.
+// * Two-Way Data Binding: Uses Angular’s two-way binding - [(ngModel)] - to synchronize the form inputs with the component properties.
 // * Minimal Component Logic: Most of the form handling happens in the template.
 // * Built-In Validation: Uses template-driven directives like required, minlength, maxlength, etc., for validation.
 // * Simplicity: It's easy to set up, making it a good choice for basic forms without complex validation logic.
@@ -927,7 +896,7 @@ import { FormsModule } from '@angular/forms';
 export class AppModule {}
 
 
-// 2. Template-Driven Form:
+// Template-Driven Form:
 
 <form #form="ngForm">
   <label>Username</label>
@@ -948,11 +917,10 @@ export class AppModule {}
 
 // Reactive forms (also called model-driven forms) are defined in the component class and are more suitable for complex forms
 //      with advanced validation and dynamic control creation. This approach gives developers full programmatic control over form handling.
-// Best for more complex forms where form logic and validation need to be handled dynamically or in a more programmatic way.
 
 // Key Characteristics of ReactiveFormsModule:
 // * Form Control in Component:
-//      Form controls (e.g., FormControl, FormGroup, FormArray) are defined and managed in the component class rather than the template.
+//      Form-related objectss (e.g., FormControl, FormGroup, FormArray) are defined and managed in the component class rather than the template.
 // * Reactive and Explicit:
 //      Form handling is reactive, meaning changes to form values or state can trigger logic in the component using observables and subscriptions.
 // * Complex Validation:
