@@ -53,6 +53,10 @@ export class AppComponent {
   <p>Email: {{user.email}}</p>
   <p>Age: {{user.age}}</p>
 </div>
+
+<ng-template #noUser>
+  <p>Please login!</p>
+</ng-template>
 // The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
 // That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted.
 
@@ -61,6 +65,7 @@ export class AppComponent {
 // ######################################################################################################
 
 // It's not a structural directive, but it's widely used with structural directives, so it's described here.
+// In fact, you've just seen it in the previous example.
 
 // The <ng-template> tag defines a piece of HTML (like <div>) but is not rendered by default.
 // It's' a container for an HTML block that Angular can conditionally add or remove from the DOM at runtime using structural directives.
@@ -97,7 +102,7 @@ export class AppComponent {
 // <ng-container> to be used instead of <div>
 // ######################################################################################################
 
-// It's not a structural directive, but it's widely used with structural directives, so it's described in this file.
+// It's not a structural directive, but it's widely used with structural directives, so it's described here too.
 
 // <ng-container> groups several elements together like <div> but without adding an extra node to the DOM.
 // Allows to apply structural directives to multiple elements or a fragment of a template without rendering unnecessary <div> wrapper elements.
@@ -130,7 +135,6 @@ export class AppComponent {
 // This is why you must use <ng-template> when you need to define template (a piece of HTML) that can be referenced elsewhere.
 
 // The new syntax (described soon) implicitly groups the content inside the directive block, so there is no need for <ng-container> anymore.
-// The new syntax directives themselves handle the grouping and conditional rendering directly within the template syntax.
 
 // ######################################################################################################
 // *ngFor
@@ -176,8 +180,8 @@ export class BeatlesComponent {
 
 // Often, the looping is on an array of objects which have a unique identifier field.
 // That usually happens when the array is populated from a DB table, and the PK field is included in the data type.
-// In that case, use trackBy to specify the function which returns that unique identifier for each item in the loop.
-// When the change detection mechanism finds that the array has been changed, Angular must re-render the HTML element (<ul> in our example).
+// In that case, use trackBy to specify the function which returns the PK value for each item in the loop.
+// When the change detection mechanism finds that the array has been changed, Angular re-renders the HTML element (<ul> in our example).
 // trackBy improves performance by helping Angular identify which items have changed and re-render only them - instead of re-rendering the entire list.
 
 @Component({
@@ -201,11 +205,11 @@ export class UserListComponent {
   }
 }
 
-// Angular’s ngFor directive expects a trackBy function (like getCurrUserId in our example) to match the following signature:
+// Angular’s *ngFor directive expects a trackBy function (like getCurrUserId in our example) to match the following signature:
 (index: number, item: T) => any
 // The function receives two parameters:
 //   index: The current item's index in the iteration
-//   user: The current item from the array being iterated
+//   item: The current item from the array being iterated
 
 // That signature comes from Angular's TrackByFunction<T> interface, which is defined in Angular's core libraries. The full type definition looks like:
 export interface TrackByFunction<T> {
@@ -234,23 +238,23 @@ export interface TrackByFunction<T> {
 // If there are no matches, a view with the *ngSwitchDefault directive is rendered.
 
 <div [ngSwitch]="favoriteFruit">
-  <div *ngSwitchCase="'apple'">Apple is selected!</div>
-  <div *ngSwitchCase="'banana'">Banana is selected!</div>
-  <div *ngSwitchCase="'cherry'">Cherry is selected!</div>
+  <div *ngSwitchCase="apple">Apple is selected!</div>
+  <div *ngSwitchCase="banana">Banana is selected!</div>
+  <div *ngSwitchCase="cherry">Cherry is selected!</div>
   <div *ngSwitchDefault>No fruit selected.</div>
 </div>
 
-/// The rendered HTML if favoriteFruit is :
+/// The rendered HTML if favoriteFruit is "cherry":
 <div>
-  <div>Map View</div>
+  <div>Cherry is selected!</div>
 </div>
 
 // @@@ Example of using <ng-container> rather than <div>:
 
 <ng-container [ngSwitch]="favoriteFruit">
-  <ng-container *ngSwitchCase="'apple'">Apple is selected!</ng-container>
-  <ng-container *ngSwitchCase="'banana'">Banana is selected!</ng-container>
-  <ng-container *ngSwitchCase="'cherry'">Cherry is selected!</ng-container>
+  <ng-container *ngSwitchCase="apple">Apple is selected!</ng-container>
+  <ng-container *ngSwitchCase="banana">Banana is selected!</ng-container>
+  <ng-container *ngSwitchCase="cherry">Cherry is selected!</ng-container>
   <ng-container *ngSwitchDefault>No fruit selected.</ng-container>
 </ng-container>
 
@@ -318,11 +322,11 @@ export interface TrackByFunction<T> {
 <div @for="let item of items; let i = $index">
   <p>Index: {{ i }} - Item: {{ item.name }}</p>
 </div>
-// Notice that it has the dollar sign - in contrast to the old syntax.
+// Notice that the variable has the dollar sign - in contrast to the old syntax.
 
 // @@@ track
 // A simplified way to specify a unique identifier for each item in the loop.
-// Serving the same purpose as `trackBy` in the old syntax but with no need to create a trackBy...() function - the property is mentioned directly:
+// Serving the same purpose as `trackBy` in the old syntax but with no need to create a trackBy...() function - the property is mentioned directly.
 
 // In the new syntax, track is mandatory - in contrast to trackBy in the old syntax.
 // If you forget it, you will get the "NG5002: @for loop must have a "track" expression" error.

@@ -44,7 +44,7 @@ export class MyComponent {
 
 // When used on a standard HTML element, the variable refers to the DOM element:
 
-<div #myDiv>Hello</div>
+<div #greetingDiv>Hello</div>
 
 // 4.2 Components
 
@@ -111,7 +111,7 @@ export class MyComponent {
 // Pipes (for Templates)
 // ######################################################################################################
 
-// REMARK: Not to be confused with RxJS pipe() function (for Observables) that combines and chains multiple RxJS operators together!
+// REMARK: Not to be confused with the pipe() function of RxJS Observables that combines and chains multiple RxJS operators together!
 
 // Angular Pipes are used in templates to modify how data is displayed (for example, formatting dates, numbers, or applying custom filters).
 // Pipes take in data as input and transform it to a desired output format.
@@ -164,7 +164,9 @@ export class PipeExampleComponent {
 // @@@ Custom Pipes:
 
 // You can also create your own pipes to handle specific transformations that are not covered by the built-in pipes.
-// Pipe is a class which has the @Pipe decorator and implements the PipeTransform interface.
+// Pipe is a class which:
+//    1. Has the @Pipe decorator.
+//    2. Implements the PipeTransform interface which has only one method - transform(). The method takes an original value and returns the transformed value.
 // The naming convention is <Description>Pipe. Ours will be ReversePipe.
 // Suppose you want to create a custom pipe that reverses a string.
 
@@ -183,11 +185,6 @@ export class ReversePipe implements PipeTransform {
 		return value.split('').reverse().join('');
 	}
 }
-
-// The @Pipe decorator defines the pipe with the name `reversePipe`.
-//    The naming convention for custom pipe name is <description>Pipe. Ours will be reversePipe.
-// The transform() method takes an input value and returns the transformed value (reversed string in our case).
-//		It's a required method that every custom pipe must implement as part of the PipeTransform interface.
 
 // 3. Use the custom pipe in a component template:
 
@@ -213,7 +210,7 @@ export interface PipeTransform {
 }
 
 // Its first parameter is the value to transform (which is on the lefthand side of the pipe symbol, like title in the example above).
-// The second parameter is an array of values that the template can provide.
+// The second parameter is an array of values that the template can provide as parameters.
 
 // Here’s a simple example of a custom pipe that accepts a parameter.
 // This pipe will take a string and repeat it a specified number of times.
