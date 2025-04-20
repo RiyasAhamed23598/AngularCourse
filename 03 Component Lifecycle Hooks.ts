@@ -12,20 +12,27 @@
 // Lifecycle hooks are specific functions that allow you to tap into specific moments in the life of a component object.
 // To implement a lifecycle hook, import the corresponding interface from `@angular/core` and have the component class implement it.
 
-// If you just started learning Angular, you don't need to learn this whole file, only read about ngOnInit, ngAfterViewInit and ngOnDestroy.
-// Then, you can use this file for reference.
+// If you just started learning Angular, you don't need to bone up this whole file. For now, get familiar with only three hooks which are most frequently used:
+// - ngOnInit
+// - ngAfterViewInit
+// - ngOnDestroy
+// Later, when you dive deeper into Angular or start working, you can use this file as a reference for all the hooks.
 
 // ######################################################################################################
 // * ngOnInit
 // ######################################################################################################
 
-// The most frequently used hook. Called ONLY ONCE after the component's constructor is executed and input properties are set (the properties passed from the parent component).
+// Called ONLY ONCE after the component's constructor is executed and input properties (the properties passed from the parent component) are set.
 // Runs when the component has been constructed but before it's displayed to the user.
 // Provides a reliable spot for initialization tasks that depend on the component's input properties being available.
 // It's a good place to put initialization logic, such as fetching data, populating the component's vars from the Store, configuring default settings.
 // The hook is fundamental for executing logic that needs to occur once when the component is instantiated.
 
-// Let's create a component that fetches user data from a service and displays it (it's a common use of ngOnInit).
+// In ngOnInit, you can safely interact with the component's data, but not with the HTML template which has not been rendered yet.
+// You cannot manipulate DOM elements, or interact with child components which still have not been created.
+// To perform initalizations in the template or accessing child components, use the ngAfterViewInit hook described later.
+
+// As an example, let's write a component that fetches user data from a service and displays it (it's a common use of ngOnInit).
 // We'll simulate the fetching operation with a service that returns a list of users.
 
 // First, define a User interface to specify the structure of a user object:
@@ -46,7 +53,7 @@ export class UserService {
   constructor() { }
 
   getUsers(): Observable<User[]> {
-    // Simulated HTTP response with specific types
+    // The real method would retrieve users from a web service, but we simulate an HTTP response for simplicity:
     return of([
       { id: 1, name: 'Alice' },
       { id: 2, name: 'Bob' },
@@ -58,8 +65,8 @@ export class UserService {
 // Finally, create the component:
 
 import { Component, OnInit } from '@angular/core';
+import { User } from './user.model';
 import { UserService } from './user.service';
-import { User } from './user.model'; // Import the User model
 
 @Component({
   selector: 'app-user-list',
@@ -70,24 +77,24 @@ import { User } from './user.model'; // Import the User model
     </ul>
   `
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit { // <<<<<<<<<<<<< notice "implements OnInit"
   users: User[] = [];
 
   // The UserService is injected into the UserListComponent through its constructor:
-  constructor(private userService: UserService) { }
+  constructor(private _userSvc: UserService) { }
 
   // The fetchUsers method is responsible for initiating the data-fetching process from the UserService object.
   // It subscribes to the Observable returned by the getUsers method of the service, setting the component's users property with the fetched data.
   // This data binding subsequently updates the view to display the list of users.
   fetchUsers(): void {
-    this.userService.getUsers().subscribe(data => {
+    this._userSvc.getUsers().subscribe(data => {
       this.users = data;
     }, error => {
       console.error('Failed to fetch users', error);
     });
   }
 
-  // By call fetchUsers inside ngOnInit, we ensure that it runs once the component is properly constructed but before it's displayed to the user:
+  // By calling fetchUsers in ngOnInit, we ensure that it runs once the component is properly constructed but before it's displayed to the user:
   ngOnInit(): void {
     this.fetchUsers();
   }
@@ -664,7 +671,6 @@ export class ExampleComponent implements AfterViewChecked {
 
 // Called ONLY ONCE just before Angular destroys the directive or component.
 // Usage: Cleanup just before Angular destroys the directive or component.
-// Second most frequently used after ngOnInit
 // Useful for unsubscribing from observables, detaching event handlers, and stopping interval timers to avoid memory leaks.
 
 // ######################################################################################################

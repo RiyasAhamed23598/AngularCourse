@@ -57,15 +57,15 @@ import { MyComponent } from './my.component';
   imports: [
     // An array of other Angular modules which are available in the HTML templates of the current module.
     // All exportable declarations from the imported modules (components, directives, pipes) become available in HTML.
-    // ATTENTION! The "imports" array has no effect on what you can use in your component classes' code.
-    // Your components' code still needs explicit TypeScript import statements.
+    // ATTENTION! The "imports" array has no effect on what you can use in your component classes' TypeScript code.
+    // You still need explicit TypeScript import statements.
     CommonModule, // includes common directives like *ngIf, *ngFor
     FormsModule  // is required if you're using template-driven forms
   ],
   providers: [
     // Defines the injectable service providers that components in this module might need.
     // The Angular Injector creates a singleton instance of these services, available to all components in the module.
-	  // While providers can be declared in any module, app-wide services are typically provided in the app root module.
+	  // While providers can be declared in any module, app-wide services are typically declared in the app root module.
   ],
   exports: [
     // An array of the components, directives, and pipes that belong to this module which are available to other modules:
@@ -122,9 +122,9 @@ export class AppModule { }
 
 // @@@ The "bootstrap" array
 
-// Contains the root component that Angular creates and inserts into the index.html host web page.
+// Contains the root component that Angular creates and inserts into the index.html host web page as <app-module></app-module>.
 
-// @@@ How Does Angular Know Which Module is the Root Module?
+// @@@ How Does Angular Know Which Module is the App Root Module?
 
 // Through the bootstrapping mechanism defined in main.ts. Here’s how it typically looks:
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -156,21 +156,16 @@ export class AppModule { }
 // The CLI command to create a new module
 // ######################################################################################################
 
-ng generate module my-module
-ng g m my-module
+ng generate module my-example
+ng g m my-example
 
-// @@@ Working Directory:
-// You should ideally run this from the root directory of your Angular project (where the `angular.json` file is located).
-// However, the Angular CLI is designed to work from any subdirectory within your project.
+// The command creates a new module class file `my-example.module.ts` under the root folder of your project (where the `angular.json` file is located), like `src/app`:
 
-// @@@ Created File and Location:
-// By default, the "ng generate module my-module" command will create a new folder named `my-module` inside the `src/app` directory of your project.
-// Inside this folder, it will generate one file containing the module class:
 src/
 └── app/
-    └── my-module.module.ts
+    └── my-example.module.ts
 
-// The generated module will look like this:
+// The generated module class will look like this:
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -181,75 +176,28 @@ import { CommonModule } from '@angular/common';
    CommonModule
  ]
 })
-export class MyModuleModule { }
+export class MyExampleModule { }
 
 // @@@ Customizing the Location:
-// You can specify a location different from `src/app` by providing a path:
-ng generate module path/to/my-module
-ng g m my-module
 
-// If the path is relative (doesn't start with the drive letter), the module folder will be created under `src/app`:
+// You can specify a location different from the root folder by providing a path:
+ng generate module path/to/my-example
+ng g m my-example
+
+// If the path is relative (doesn't start with the drive letter), the module folder will be created in the root folder:
 
 src/
 └── app/
-    └── my-module/
-        └── my-module.module.ts
+    └── my-example/
+        └── my-example.module.ts
 
 // @@@ --routing
-// Adds a routing module. For example:
-ng g m my-module --routing
-// Use the `--routing` flag if you want to create a module with its own routing configuration.
+// Adds a routing module.
+// Use the `--routing` flag if you want to create a module with its own routing configuration For example:
+ng g m my-example --routing
 
-// @@@ --module=<module-name>
-// Unlike components, generating a module does not automatically import it into any other module.
-// You'll need to either manually import it where needed (typically in the `AppModule` or another feature module) or create it using --module.
-// This parameter tells the Angular CLI to add the newly created module to the imports array of the specified module.
-// <module-name> should be the name of the TypeScript file without the .module.ts extension (not the class name!!!).
-
-// Example:
-ng g m my-feature --module=app
-// This command will:
-// 1. Create a new module file my-feature.module.ts with the MyFeatureModule class.
-// 2. Automatically imports MyFeatureModule into app.module.ts and add it to the imports array of its @NgModule decorator:
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { MyFeatureModule } from './my-feature/my-feature.module'; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    MyFeatureModule // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  ],
-  bootstrap: [AppComponent]
-})
-export class AppModule { }
-// The --module parameter saves you the step of manually importing and adding the new module to the imports array of the parent module,
-//		reducing the chance of errors and saving time.
-
-// If the module, to which you want to add the newly created module, is in a subfolder, you need to include the path relative to src/app.
-// The CLI will look for a file named <module-name>.module.ts in your project structure.
-// For example, if you have a structure like this:
-src/
-└── app/
-    ├── features/
-    │   └── user/
-    │       └── user.module.ts
-    ├── shared/
-    │   └── shared.module.ts
-    └── app.module.ts
-// You could use any of these:
-ng g m new-feature --module=app
-ng g m new-feature --module=shared/shared
-ng g m new-feature --module=features/user/user
-
-// If the specified module doesn't exist, the CLI will throw an error.
-// The module name is case-sensitive and should match exactly how it's named in your project.
-
-// After creating a module, you might want to generate components within that module using the `--module` parameter
-//		to automatically declare them in the new module:
-
-ng g c my-module/my-component --module=my-module
+// After creating a module, you might want to generate components within that module using the `--module` parameter:
+ng g c my-example/my-component --module=my-example
+// But this is already the topic of the next file of our course.
 
 // Remember, you can always run `ng generate module --help` to see all available options for this command.

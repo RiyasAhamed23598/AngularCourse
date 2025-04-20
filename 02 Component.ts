@@ -1,5 +1,6 @@
 // Angular applications are made up of components.
-// A component is the combination of an HTML template and a TypeScript class that controls a portion of the screen.
+// A component is a piece of the UI (user interface) that has its own logic and appearance.
+// Technically, it's the combination of an HTML template and a TypeScript class that controls a portion of the screen.
 
 // Components are responsible for rendering the UI by combining the template and data.
 // They bind data from the component's class to the template, allowing dynamic rendering of content.
@@ -7,8 +8,8 @@
 // Components handle user interactions and respond to events such as button clicks, form submissions, and more.
 // They can define event handlers in the component's class to execute specific actions or trigger changes in the application.
 
-// Components have lifecycle hooks, which are pre-defined methods that are called at specific stages of a component's lifecycle.
-// Lifecycle hooks allow performing actions at various points, such as initialization, changes detection, and destruction.
+// Components have lifecycle hooks, which are pre-defined methods that are called at specific stages of a component's lifecycle,
+//    such as initialization, changes detection, and destruction. The next file of our course will explain this topic in detail.
 
 // Components can communicate with other components using input and output properties.
 // Input properties allow passing data into a component.
@@ -18,11 +19,11 @@
 // This allows creating complex UI layouts and establishing relationships between components for communication and data sharing.
 
 // Usually, a component consists of 3 files:
-// 		1. TypeScript Class: Contains the component's logic, properties, and methods.
+// 		1. TypeScript Class: Contains the component's properties and logic.
 //			The class is responsible for handling data, responding to events, and interacting with other components or services.
 // 		2. Template (optional): Components have an associated template that defines the layout of the user interface.
 //			Templates are written in HTML with additional Angular-specific syntax and directives.
-// 		3. CSS styles (optional).
+// 		3. CSS styles (optional): CSS classes which overeride their default definition for the template of this component only.
 
 // Components encapsulate the rendering logic, data, and styles in a single unit, making it easier to manage and reuse UI elements across the app.
 
@@ -30,9 +31,8 @@
 // Component Class
 // ######################################################################################################
 
-// The component class is where you define the logic and data for the component.
-// It is a TypeScript class decorated with the @Component decorator.
-// The @Component decorator is used to define metadata (additional configuration information) for the component:
+// The component class is where you define the data and logic for the component.
+// It is a TypeScript class decorated with the @Component decorator which defines metadata (additional configuration information) for the component:
 
 import { Component } from '@angular/core';
 
@@ -64,8 +64,8 @@ export class ExampleComponent {
 
 // When Angular renders the other template, it will replace the app-hello-world tag with the whole content of HTML template of HelloWorldComponent.
 
-// IMPORTANT! The selector for each component should be unique across your Angular application to avoid conflicts and unexpected behavior.
-// If multiple components use the same selector, Angular will encounter a conflict because it won't know which component to apply.
+// IMPORTANT! The selector specifies the custom HTML tag which becomes available across the whole application.
+// That means that the selector for each component should be unique.
 
 // ######################################################################################################
 // templateUrl
@@ -107,7 +107,7 @@ export class ExampleComponent {
   title = 'Hello, Angular!';
 }
 
-// This practice is not commonly used.
+// This practice is not commonly used. Create separate files even if they contain just one line - that is expected by developers.
 
 // ######################################################################################################
 // Standalone components
@@ -119,7 +119,9 @@ export class ExampleComponent {
 // However, Angular 14 introduced the concept of "standalone components,"
 // 		which allow components to be used without being declared in an NgModule.
 // They are self-contained and declare their dependencies directly in the component itself
-// 		providing more flexibility and simplicity in managing components. 
+// 		providing more flexibility and simplicity in managing components.
+
+// Good candidates for standalone components are purely technical components that are not related to the business and can be easily copied into other projects.
 
 // A standalone component is a component that sets
 standalone: true
@@ -177,11 +179,12 @@ export class ProfilePhoto {
 // Classes such as components and services request their dependencies through their constructor parameters.
 // The DI framework then provides these dependencies when the class is instantiated.
 
-// When the injectable service is requested for the first time, Angular creates its singleton and passees it to the requestor's constructor.
+// When the injectable service is requested for the first time, Angular creates its singleton and passees a pointer to it to the requestor's constructor.
 // Then this singleton is re-used in subsequent injections.
 
 // The @Injectable decorator tells Angular that this class can be injected as a dependency.
-// The { providedIn: 'root' } means that Angular will provide this service at the root level, making it a singleton across the entire application:
+// The { providedIn: 'root' } means that Angular will provide this service at the root level, making it a singleton across the entire application.
+// Since { providedIn: 'root' } makes the service available application-wide, adding the service to the providers array of the root module is unnecessary and redundant.
 
 // logger.service.ts
 import { Injectable } from '@angular/core';
@@ -202,13 +205,10 @@ import { LoggerService } from './logger.service';
   template: `<h1>Welcome to Dependency Injection in Angular</h1>`,
 })
 export class AppComponent {
-  constructor(private logger: LoggerService) { // <<<<<<< inject the service
-    this.logger.log('AppComponent initialized');
+  constructor(private _logger: LoggerService) { // <<<<<<< inject the service
+    this._logger.log('AppComponent initialized');
   }
 }
-
-// REMARK: since { providedIn: 'root' } the @Injectable() decorator makes the service available application-wide,
-// 		adding the service to the providers array of the root module is unnecessary and redundant.
 
 // ######################################################################################################
 // The CLI command to create a new component
@@ -217,11 +217,6 @@ export class AppComponent {
 ng generate component my-component
 ng g c my-component
 
-// @@@ Working Directory:
-// You should run this command from the root directory of your Angular project (where the `angular.json` file is located).
-// However, Angular CLI is smart enough to find the right location even if you're in a subdirectory of your project.
-
-// @@@ Created Files and Location:
 // By default, this command will create a new folder named `my-component` inside the `src/app` directory of your project.
 // Inside this folder, it will generate four files:
 
@@ -234,7 +229,7 @@ src/
         └── my-component.component.spec.ts
 
 // my-component.component.ts
-// 		The TypeScript file containing the component class.
+// 		The TypeScript file containing the component class. The selector will be generated as `app-my-component`.
 // my-component.component.html
 // 		The HTML template file for the component.
 // my-component.component.css (or `.scss`, `.less`, `.sass` depending on your project setup):
@@ -242,9 +237,7 @@ src/
 // my-component.component.spec.ts
 // 		A basic unit test file for the component.
 
-// @@@ Additional Actions:
-// - The CLI will automatically add the new component to the declarations array of the nearest module (usually `app.module.ts`).
-// - It will generate a selector for the component, typically in the format `app-my-component`.
+// Also, the "g c" command will automatically add the new component to the declarations array of the nearest module (usually `app.module.ts`).
 
 // @@@ Customizing the Command:
 
