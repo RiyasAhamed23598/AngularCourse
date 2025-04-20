@@ -20,8 +20,8 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
   `
 })
 export class AppComponent {
-  @ViewChild('header') // the name of the #header var is sent with no pound sign
-  header: ElementRef; // a reference to the <h1> element
+  // A reference to the <h1> element (notice that the name of the #header var is sent with no pound sign):
+  @ViewChild('header') header: ElementRef; 
 
   changeTitle() {
     this.header.nativeElement.textContent = 'New Title';
@@ -49,8 +49,7 @@ import { Component, ViewChildren, QueryList, ElementRef } from '@angular/core';
   `
 })
 export class AppComponent {
-  @ViewChildren('item')
-  items: QueryList<ElementRef>;
+  @ViewChildren('item') items: QueryList<ElementRef>;
 
   changeItems() {
     this.items.forEach(item => {
@@ -59,28 +58,12 @@ export class AppComponent {
   }
 }
 
-// @ViewChildren returns ALL the elements with the given template reference variable, not only the first .
+// @ViewChildren returns ALL the elements with the given template reference variable, not only the first.
 // In this example, @ViewChildren is used to get references to all <div> elements with the template reference variable #item.
 // The changeItems() method then changes the text color of all these elements to red.
 
-// @ViewChild and @ViewChildren can only query elements within the same template. 
+// @ViewChild and @ViewChildren can only query elements within the template of the same component. 
 // They cannot access elements inside child components or parent components.
-
-// ######################################################################################################
-// The argument passed to @ViewChild and @ViewChildren
-// ######################################################################################################
-
-// Usually, we send the name of the template reference variable to @ViewChild and @ViewChildren, as shown in the previous examples.
-// But we can pass a component or directive data type to obtain the first (for @ViewChild) or all (for @ViewChildren) instances of that data type:
-
-@ViewChild(ChildComponent)
-childComp!: ChildComponent;
-
-@ViewChildren(ItemDirective)
-items!: QueryList<ItemDirective>;
-
-// Passing a type is dangerous since, in the future, an element of the same type can be added, which is not supposed to be picked.
-// Passing a template var name is safe since you need to add that var to the new element in order for it to be picked.
 
 // ######################################################################################################
 // The data type returned by @ViewChild and @ViewChildren
@@ -272,7 +255,7 @@ items!: QueryList<ElementRef | ChildComponent | ItemDirective>;
 // ngAfterViewInit
 // ######################################################################################################
 
-// @ViewChild and @ViewChildren are resolved (initialized) after the view is fully initialized
+// @ViewChild and @ViewChildren are resolved after the view is fully initialized.
 // So, the ngAfterViewInit lifecycle hook is the first point to safely work with queried elements:
 
 import { Component, ViewChild } from '@angular/core';
