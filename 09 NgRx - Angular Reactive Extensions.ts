@@ -124,20 +124,24 @@ export interface ICustomerState {
 
 // You must also create the Initial State object of the declared type, with all the properties populated with default values:
 export const initialCustomerState: ICustomerState = {
+  // Customer:
   customerList: [],
   customerListLoaded: false,
   contextCustomer: null,
   contextCustomerLoaded: false,
+  // Order:
   orderList: [],
   orderListLoaded: false,
   contextOrder: null,
   contextOrderLoaded: false,
+  // Product:
   productList: [],
   productListLoaded: false,
   contextProduct: null,
   contextProductLoaded: false
 };
-// This object is usually created in same file which declares the State's data type (ICustomerState in our example).
+// This object is usually created in same Model file which declares the State's data types.
+// If those data types are changed later, it's convenient to synchronize the Initial State since it's right there at hand.
 
 // The Initial State is crucial since it:
 // * Provides a clear and consistent starting point for the module's State.
@@ -152,19 +156,18 @@ export const initialCustomerState: ICustomerState = {
 // While State is a module-level data container, Store is an application-level data container.
 // The Store instance is a singleton object that holds the States of multiple modules combined, which makes up the state of the whole application.
 
-// The Store is the single source of truth for the current state of the application.
+// The Store is the single source of truth for the current state of the whole application.
 // It provides a way to access the state, dispatch actions, and subscribe to state changes.
-// You can think of it as a database that you can get access to in order to retrieve or update the data that the application operates on
+// You can think of it as a database that you can get access in order to retrieve or update the data that the application operates on.
 // The Store is an observable, and components can subscribe to it to get updates when the state changes.
 
 // The Store is a state-management solution inspired by the famous library Redux.
-// Redux popularized the idea of organizing the application state into simple objects (use primitive and non-primitive types
-// 		 in JavaScript) and updating this state by replacing it with a new state.
-// This means that the object shouldn’t be mutated directly, but rather should be replaced with a new object.
+// Redux popularized the idea of organizing the application state into simple objects and updating this state by replacing it with a new state.
+// This means that the object shouldn’t be mutated directly, but rather should be replaced with a new object which contains the new version of the data.
 
 // You don't declare the Store data type, and don't instantiate it.
 // Angular does all that for you, creating a Store instance as injectible.
-// You only need to inject it into your components so that they can read and update it.
+// You only need to inject it into your components so they can read and update it.
 
 // Here is a sample component for the Customer List.
 // It's incomplete and created only to demonstrate working with the Store:
@@ -194,8 +197,9 @@ export class CustomerListComponent implements OnInit, OnDestroy {
     // Populate the observables from the Store:
     this.customerList$ = this._store.select('customerList');
     this.contextCustomer$ = this._store.select('contextCustomer');
-    // Even though the Store is queried, it returns data from the current module's State (which is part of the Store).
-    // The parameters passed to the select() functions are the State properties names as strings.
+    // The parameters passed to the select() functions are the names of the current module’s State properties, as strings.  
+    // Even though the entire Store is queried, only data from the current module’s State is subscribed to.  
+    // This means different modules (screens) can have fields with the same names in their States without interfering with each other.
 
     // Populate the regular vars from the observables (to work with the data in the imperative way, if needed):
     this._s.add(
@@ -209,7 +213,7 @@ export class CustomerListComponent implements OnInit, OnDestroy {
   ngOnDestroy = () => this._s.unsubscribe;
 }
 
-// If another component of the module will need to get, for example, the contexts customer, it will do the same:
+// If another component of the module will need to get, for example, the context customer, it will do the same:
 this.contextCustomer$ = this._store.select('contextCustomer');
 // That eliminates the need to pass that customer from the parent component's template to the child components.
 // If any component changes contextCustomer property of the module's State, all the subscribing components are immediately aware of that.
@@ -217,28 +221,28 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 
 // @@@ What is an Angular application?
 
-// As we mentioned, Store is a singleton - there's only one Store instance per Angular application.
-// You could ask: "What if I open a few browser tabs for different customers? Shouldn't the properties of ICustomerState be arrays?".
-// Let me clarify: an Angular application has SDI (Single Document Interface), not MDI (Multiple Document Interface).
-// Only one screen can be open at a moment, but you can open many instances of the application.
-// So, each browser tab runs a separate instance of your Angular application with its own singleton Store.
+// As mentioned, the Store is a singleton — there’s only one Store instance per Angular application.  
+// You might ask: “What if I open several browser tabs for different customers? Shouldn’t the properties of ICustomerState be arrays?”  
+// Here’s the clarification: Angular applications follow the SDI (Single Document Interface) model, not MDI (Multiple Document Interface).  
+// Only one screen is active at a time, but you can open multiple instances of the application.  
+// So, each browser tab runs its own separate instance of the Angular app with its own singleton Store.
 
 // ######################################################################################################
 // * Action
 // ######################################################################################################
 
-// An Action is a plain TypeScript object used to express an event or an intention (usually, a data manipulation, or a change in the application’s state).
-// Actions are dispatched (launched) in one part of the application (usually, components or services) and captured in others.
-// NgRx automatically manages the chain of fired events when an Action is dispatched, ensuring the appropriate consumers respond to it seamlessly.
-// Actions provide an easy global communication channel. They are one of the main building blocks in NgRx.
+// An Action is a plain TypeScript object used to express an event or an intention (usually a data manipulation or a change in the application’s state).  
+// Actions are dispatched (launched) in one part of the application (usually in components or services) and captured in others.  
+// NgRx automatically manages the chain of fired events when an Action is dispatched, ensuring the appropriate consumers respond to it seamlessly.  
+// Actions provide an easy global communication channel. They are one of the main building blocks in NgRx.  
 
-// An Action object has two properties:
-//   * type - a textual description of the intention.
-//   * payload (optional) - additional data required for the action (like retrieval parameters) - to enforce type safety when the Action is dispatched.
+// An Action object has two properties:  
+//   * type – a textual description of the intention.  
+//   * payload (optional) – additional data required for the action (like retrieval parameters), used to enforce type safety when the Action is dispatched.  
 
-// An Action is created and returned by the createAction() factory function which accepts type and payload as its parameters.
-// The next example defines a few simple Actions. No payload, so only type is passed to createAction().
-// The good practice is to add the word "Action" to the names of Action objects:
+// An Action is created and returned by the createAction() factory function, which accepts type and payload as its parameters.  
+// The next example defines a few simple Actions. No payload, so only type is passed to createAction().  
+// It is good practice to add the word "Action" to the names of Action objects:
 import { createAction } from '@ngrx/store';
 export const incrementAction = createAction('[Counter] Increment');
 export const decrementAction = createAction('[Counter] Decrement');
@@ -254,9 +258,6 @@ export const resetAction = createAction('[Counter] Reset');
 // "[Module]" (within square brackets) indicates the feature module where the action is used. For application-wide Actions, use [App].
 // "Description" reflects the specific event that is fired.
 // That allows different Modules to have Actions with a same Description, like '[Customer] Save' and '[Order] Save'.
-
-// Hypothetically, different modules could have a same description, which would break the uniqueness.
-// To be 100% safe, use the Action file name (with the path but without the .ts extention) as the module identifier in the square brackets.
 
 // @@@ Action PAYLOAD - the 2nd parameter (optional) to createAction():
 
@@ -287,7 +288,7 @@ this._store.dispatch(insTodoAction({ text: 'Learn NgRx' })); // doesn't match th
 import { createAction } from '@ngrx/store';
 import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
 
-const m = '[customer.action]'; // m = Module; supposing the Action file name is "customer.action.ts".
+const m = '[Customer]'; // m = Module
 const c = 'Customer';
 const o = 'Order';
 const p = 'Product';
@@ -330,10 +331,11 @@ enum d { // the Actions' "d"escriptions
 }
 
 // Then, the Action file declares the Action objects themselves.
+
 // In most enterprise applications, dispatching an Action calls a function of a Web Service, so our example reflects that.
 // The props parameter to the createAction() function describes the Action’s payload:
-//   * The payload of a regular (non-Success) CRUD Action fits the INPUT of the Web Service function the Action calls.
-//   * The payload of a Success CRUD Action fits the OUTPUT of the same Web Service function.
+//   * The payload of a regular (non-Success) CRUD Action defines the INPUT of the Web Service function the Action calls.
+//   * The payload of a Success CRUD Action defines the OUTPUT of the same Web Service function.
 
 // Customer:
 export const setContextCustomerAction = createAction(d.SetContextCustomer, props<{ actionCustomer: ICustomer | null }>());
@@ -389,11 +391,11 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 // * Service
 // ######################################################################################################
 
-// The class which calls the Web Service directly.
-// It's "the last station" of data flow within Angular before it's sent to the Middle tier on the Web.
-// The class name says just "Service" for shortness, but keep in mind that "Web Service" is meant.
-// Strictly speaking, this class is not a part of the NgRx library, but it usually exists in apps which call a Web Service, which is the standard architecture.
-// It will be injected into the Side Effect class (described next), that's why it has the @Injectable decorator:
+// The class that directly calls the Web Service.  
+// It’s the “last station” of data flow within Angular before the data is sent to the middle tier on the Web.  
+// The class name simply says "Service" for brevity, but keep in mind that it refers to a "Web Service."  
+// Strictly speaking, this class is not part of the NgRx library, but it’s commonly found in apps that interact with a Web Service, which is the standard architecture.  
+// It will be injected into the Side Effect class (described next), which is why it has the @Injectable decorator:
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -407,28 +409,28 @@ export class CustomerService {
   private readonly _ordersUrl = `${baseUrl}/orders`;
   private readonly _productsUrl = `${baseUrl}/products`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private _http: HttpClient) {}
 
   // Customer:
 
   selCustomerList(lastName: string): Observable<ICustomer[]> {
-    return this.http.get<ICustomer[]>(this._customersUrl, lastName);
+    return this._http.get<ICustomer[]>(this._customersUrl, lastName);
   }
 
   selCustomer(customerId: number): Observable<ICustomer> {
-    return this.http.get<ICustomer>(`${this._customersUrl}/${customerId}`, customerId);
+    return this._http.get<ICustomer>(`${this._customersUrl}/${customerId}`, customerId);
   }
 
   insCustomer(customer: ICustomer): Observable<ICustomer> {
-    return this.http.post<ICustomer>(`${this._customersUrl}/ins`, customer)
+    return this._http.post<ICustomer>(`${this._customersUrl}/ins`, customer)
   }
 
   updCustomer(customer: ICustomer): Observable<ICustomer> {
-    return this.http.put<ICustomer>(`${this._customersUrl}/upd`, customer);
+    return this._http.put<ICustomer>(`${this._customersUrl}/upd`, customer);
   }
 
   delCustomer(customerId: number): Observable<void> {
-    return this.http.delete<void>(`${this._customersUrl}/del`, customerId);
+    return this._http.delete<void>(`${this._customersUrl}/del`, customerId);
   }
 
   // Order:
@@ -444,16 +446,16 @@ export class CustomerService {
 // * Effect
 // ######################################################################################################
 
-// Side effects are operations that occur outside the context of Angular, such as external APIs calls, HTTP requests or accessing local storage.
-// If your application needs to perform a side effect, you will define an Effect class.
+// Side effects are operations that happen outside the Angular context, such as calling external APIs, making HTTP requests, or accessing local storage.  
+// If your application needs to perform a side effect, you define an Effect class.  
 
-// Effects are implemented using RxJS Observables and are set up to listen for specific Actions and perform side effects without affecting the Store directly.
-// The Effect class captures a dispatched main Action and calls the corresponding function of the Web Service class.
-// Also, the Effect is "the first station" within Angular to process data returned from the Middle tier.
-// Once a side effect is successfully completed, the Effect object usually dispatches a new Action ("Success" Action) to update the Store with the results returned from outside.
+// Effects are built using RxJS Observables and are designed to listen for specific Actions and perform side effects without directly modifying the Store.  
+// The Effect class captures a dispatched main Action and calls the corresponding method in the Web Service class.  
+// It is also the “first station” within Angular to handle the data returned from the middle tier via the Web Service.  
+// Once a side effect is successfully completed, the Effect typically dispatches the respective "Success" Action to update the Store with the external results.  
 
-// Let's use the Customer screen to demonstrate how Effects can be used to handle side effects.
-// The class name says just "Effect" for shortness, but keep in mind that "Side Effect" is meant:
+// We'll use the Customer screen to demonstrate how Effects handle side effects.  
+// The class name uses just "Effect" for brevity, but it stands for "Side Effect":
 
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
@@ -500,7 +502,7 @@ export class CustomerEffect {
         return this._svc.selCustomerList(action.actionLastName).pipe(
           // If no errors, dispatch the counterpart Success Action passing to it the Web Service function's output:
           map((customerList: ICustomer[]) => selCustomerListSuccessAction({ actionCustomerList: customerList })),
-          catchError(() => EMPTY),
+          catchError(() => EMPTY), // a real app would include an error handler, but let’s leave that out for now.
         );
       }),
     ),
@@ -684,9 +686,9 @@ const getNewState = createReducer(
 // Let's briefly summarize the life cycle stages that an Action goes through:
 
 // 1. The component dispatches a regular (not Success) Action.
-// 2. The Reducer captures it (if a handler for it exists) and updates the State with the requested changed.
-// 3. The Effect captures it (if a handler for it exists) and calls the corresponding function of the Service, passing the payload as an input.
+// 2. The Reducer captures that Action (if a handler for it exists) and updates the State to display the progress bar.
+// 3. The Effect captures that Action (if a handler for it exists) and calls the corresponding function of the Service, passing the payload as an input.
 // 4. The Service sends an HTTP request to the Web Service and is waiting for its result.
 // 5. When an HTTP response is received, Angular passes its output to the waiting Effect.
 // 6. If the call was successful, the Effect dispatches the respective Success Action, passing the results returned by the Web Service.
-// 7. The Reducer captures it and updates the State with those results.
+// 7. The Reducer captures it and updates the State with those results, and updates the State to hide the progress bar.
