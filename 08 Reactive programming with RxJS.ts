@@ -157,8 +157,8 @@ threeNumbers$.subscribe((val: String) => console.log(val)); // outputs: 1, 2, 3
 // @@@ A real life use case:
 
 // In the previous example, the Observable "knew" in advance which values and how many times it will emit.
-// In real applications, this happens rarely (usually, when the Observable emits elements of an existing array).
-// But most often, the Observable itself expects that its value will be changed. When this happens, it emits that new value.
+// In real applications, this happens rarely.
+// Most often, the Observable itself expects that its value will be changed. When this happens, it emits that new value.
 // Typical scenario:
 // * The component class has a variable of type Observable.
 // * A text element in the HTML template is subscribed to it.
@@ -171,7 +171,9 @@ threeNumbers$.subscribe((val: String) => console.log(val)); // outputs: 1, 2, 3
 // ######################################################################################################
 
 // subscribe() is a TypeScript method. In HTML, you use the async Pipe instead - it's even simpler.
-// Let's say, your component class has the screenTitle$ Observable. In the template, it could be subscribed this way:
+// Let's say, your component class has this:
+screenTitle$: Observable<string>
+// In the template, it could be subscribed this way:
 <h2>{{ screenTitle$ | async }}</h2>
 // The Observable must be public in the component class to be accessible from the template.
 
@@ -216,15 +218,17 @@ export class CustomerListComponent {
 // If the "real" customerList$ is later re-populated from the DB (for example, refreshed after an item is added, edited or removed),
 //    the HTML will be automatically re-rendered as the new array is emitted.
 
-// The 'async' pipe manages automatic unsubscribing when the component is destroyed, so you don't need to handle subscriptions manually.
-
 // ######################################################################################################
 // * Manipulating an Observable's value in the imperative way (as a regular variable)
 // ######################################################################################################
 
-// An Observable can only be subscribed and emit the value to the subscriber. You cannot write: "if (amount$ > 0)..." in the reactive programming world.
+// An Observable can do only three things:
+//  * Emit its value to the subscriber.
+//  * Be subscribed (the first emission occurs when subscribe() is called).
+//  * Be changed (each change will immediately emit the new value).
+// The value of an Observable cannot be accessed (read) directly. You cannot write "if (amount$ > 0)..." in the reactive programming world.
 // If you need to work with the value of an Observable in the imperative way, that value must firstly be emitted into a regular variable.
-// The assignment of the Observable's value to the non-Observable variable occurs inside the function you pass to the subscribe() method, for example:
+// The assignment of the Observable's value to the non-Observable variable must be manually coded inside the subscribing functiond, for example:
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
@@ -261,16 +265,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   ngOnDestroy = () => this._s.unsubscribe;
 }
 
-// In the above example, which is a very popular pattern, the Store usually contains the requested property's value prior to creating the component instance.
-// The Observable is populated at the moment of the this._store.select(), so the regular var is ready to be consumed in the component class or the HTML template right away.
-// But if the value in the Store can be blank at that moment, it's your responsibility not to read from the regular var before the subscribed Observable emits a value.
-
-// In some ways Observable is similar to a regular variable.
-// At the moment of subscribing you extract the information contained in the Observable, and often simply copy it to a regular variable (like we just did).
-// This resembles a regular assignment of one variable's value to another.
-// But in imperative programming, after the assignmnet, the connection between variables is broken.
-// In reactive programming, any subsequent change in the Observable will be immediately copied to the regular variable.
-// They remain connected for their entire lifetime (or until unsubscribing).
+// The above example is a very popular pattern.
 
 // ######################################################################################################
 // * More about Subscription
@@ -283,7 +278,7 @@ export class ProductComponent implements OnInit, OnDestroy {
 //    never be fully garbage-collected because the Observable is still holding a reference to it.
 
 // Some Observables involve active processes (e.g., WebSockets or timers).
-//    These processes may continue running even if the component or context they are part of has been destroyed:
+// These processes may continue running even if the component or context they are part of has been destroyed:
 interval(1000).subscribe(value => {
   console.log(value); // will log a value every second indefinitely
 });
@@ -373,10 +368,9 @@ export class ExampleComponent implements OnInit, OnDestroy {
       httpClient.get('/api/data').subscribe(data => {
         console.log(data);
       });
-// * Using the 'async' Pipe, as it was already mentioned.
-// * Using Operators like take():
-//     RxJS operators like take(), takeUntil(), and first() automatically unsubscribe once a certain condition is met
-//        or a specified number of emissions has occurred.
+// * In HTML templates. The 'async' pipe manages automatic unsubscribing when the component is destroyed.
+// * Using RxJS Operators like take(), takeUntil(), and first(), which will be introduced in a few seconds.
+//    They automatically unsubscribe once a certain condition is met or a specified number of emissions has occurred.
 
 // ######################################################################################################
 // * RxJS operators
@@ -470,7 +464,7 @@ tenNumbers$.pipe(
   map(value => value * 2)
 );
 // This keeps the codebase uniform and easier to maintain as other developers expect operators to always be applied via pipe().
-// If you need to add more operators to the chain later, the pipe() is already there, making it easy to extend the Observable's behavior without refactoring.
-// This is the current standard, and the older "dot chaining" style, like
+// If more operators must be added to the chain in the future, the pipe() function is already there, making it easy to extend the Observable's behavior without refactoring.
+// This is the current standard. The older "dot chaining" style, like
 tenNumbers$.map(value => value * 2)
 // has been deprecated.

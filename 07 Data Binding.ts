@@ -28,7 +28,7 @@
 
 // You can embed expressions (dynamic text) into HTML templates with double curly braces, which tells Angular that
 //    it is responsible for the expression inside and ensuring it is updated correctly.
-// This is called text interpolation.
+// Interpolation is named so because it inserts (interpolates) dynamic values into static HTML, "filling the gaps" within the template.
 // Interpolation automatically converts the expression into a string. Objects and arrays are converted using their toString method.
 // In addition to evaluating the expression at first render, Angular also updates the rendered content when the expression's value changes.
 
@@ -62,7 +62,7 @@ export class ExampleComponent {
 </div>
 
 // The fourth line demonstrates a more complex expression within the interpolation brackets. It will output: John Doe (JD).
-// The expression within double curly braces can be any valid TypeScript expression that returns a value that can be rendered.
+// The expression within double curly braces can be any valid TypeScript expression that returns a value that can be converted to string.
 // This includes a wide range of possibilities. Here are some examples to illustrate the breadth of what's possible:
 
 // Simple arithmetic:
@@ -94,7 +94,7 @@ export class ExampleComponent {
 //		then use a simple property or method call in the template.
 // Or you can use data cache after the initial calculation or retrieval of the value.
 
-// Also, these expressions are evaluated in the context of the component, so they have access to the component's properties and methods,
+// These expressions are evaluated in the context of the component, so they have access to the component's properties and methods,
 //		as well as to global objects like `Math`.
 
 // These expressions should be pure and should not cause side effects, as Angular may re-evaluate them multiple times during change detection.
@@ -140,17 +140,17 @@ export class ExampleComponent {
 [html_property]="component_variable_or_method"
 // Examples:
 <!-- example.component.html -->
-<img [src]="imageUrl" />
+<img [src]="image1Url" />
 <img [src]="getImage2Url()" />
 
-// The square brackets around an HTML property (src in this example) indicate that this is a property binding,
-//		so the string inside the quotes is treated not as a hardcoded value but as an expression to obtain that value.
+// The square brackets around an HTML property indicate that this is a property binding,
+//		so the string inside the quotes is treated not as a hardcoded value but as an expression which returns that value.
 
 // During the rendering process, Angular will:
 //		* remove the square brackets from the property name;
 //		* evaluate the expression inside the quotes and use the result as the property value, substituting the expression.
-// The rendered HTML (supposing imageUrl CONTAINS "https://example.com/image.png" and getImage2Url() RETURNS "https://example.com/image2.png"):
-<img src="https://example.com/image.png" />
+// The rendered HTML (supposing imageUrl CONTAINS "https://example.com/image1.png" and getImage2Url() RETURNS "https://example.com/image2.png"):
+<img src="https://example.com/image1.png" />
 <img src="https://example.com/image2.png" />
 
 // A method used in property binding:
@@ -213,7 +213,9 @@ export class ExampleComponent {
 
 // Also, notice how getStyles() is defined:
   getStyles(): { [key: string]: any } {
-// The type { [key: string]: any } is a TypeScript index signature.
+// The type
+{ [key: string]: any }
+// is a TypeScript index signature.
 // It indicates that the function returns an object where the keys are strings and the values can be of any type.
 // We could declare the function to return any:
   getStyles(): any {
@@ -232,11 +234,11 @@ export class ExampleComponent {
 // Components handle user interactions and respond to events such as button clicks, form submissions, and more.
 // They can define event handlers in the component's class to execute specific actions or trigger changes in the application.
 
-// The syntax binds an HTML element's event (not a property!) to a method of the component class:
+// The () syntax binds an HTML element's event (not a property!) to a method of the component class:
 
 (html_event)="componentMethod()"
 
-// The method is not executed on rendering - it will be executed onlywhen the HTML event occurs.
+// The method is not executed on rendering - it will be executed only when the HTML event occurs.
 // That is different from Property Binding where the method is executed on rendering in order to get it's returned value to build the HTML.
 
 // Example:
@@ -245,10 +247,10 @@ export class ExampleComponent {
 // That is rendered to this HTML:
 <button>Click Me</button>
 // As you see, any mention of event binding has gone.
-// But how does the rendered HTML know which method of the component should be called when the button is clicked?
+// But how does Angular know which method of the component should be called when the button is clicked?
 // When you write templates with event binding, Angular sets up event listeners for these events during the compilation and rendering phases.
 // So, the component is constantly listening to the button's click event.
-// When the user clicks the button, the event is propagated to the event listener set up by Angular.
+// When the user clicks the button, the event is propagated to that listener.
 // This listener then calls the onClick() method on the component instance.
 
 // The method used in event binding usually returns void but it can return any type (however, the returned value will be ignored).
@@ -277,8 +279,8 @@ export class ExampleComponent {
 export class cstNmComponent {
   cstNm: string = '';
 
-  onKeyUp(newcstNm: string): void {
-    this.cstNm = newcstNm;
+  onKeyUp(newCstNm: string): void {
+    this.cstNm = newCstNm;
   }
 }
 
@@ -308,11 +310,11 @@ export class cstNmComponent {
 <input
   id="cstNmInput" 
   [value]="cstNm"
-  (keyup)="onKeyUp(enteredcstNm.value)"
-  #enteredcstNm
+  (keyup)="onKeyUp(enteredCstNm.value)"
+  #enteredCstNm
   placeholder="Enter user name">
 
-// The #enteredcstNm declaration creates a reference to the input element, and then that reference is used in the (keyup) event binding.
+// The #enteredCstNm declaration creates a reference to the input element, and then that reference is used in the (keyup) event binding.
 
 // ######################################################################################################
 // * [(ngModel)] - Two-way data binding (component class ---> HTML template ---> component class)
@@ -322,14 +324,18 @@ export class cstNmComponent {
 // It's a powerful tool for creating interactive forms, providing an easy way to keep your component's data in sync with your template's form controls.
 
 // Uses the [(ngModel)] directive and is denoted by [()].
-// The suare brackets mean the one-way part of the binding - from component class to HTML template (like in property binding).
+// The suare brackets mean the one-way part of the binding - from component class to HTML template.
 // The round brackets mean the opposite one-way part of the binding - from HTML template to component class (like in event binding).
+
+// In fact, the direction from component class to HTML is Interpolation.
+// Since this is a value drawing on the screen, and not a property binding, it's very strange that the creators of Angular used square brackets, and not curly ones.
+// {(ngModel)} or ({ngModel}) would reflect the essence of two-way binding much more correctly, but we have what we have, so just remember.
 
 // In a typical scenario, the value of the bound property is initially displayed in the HTML.
 // If the user changes it in the browser, the bound property is automatically updated with the new value.
 // Obviously, any changes of the bound property made by other parts of the program are reflected in the HTML right away.
 
-// To use [(ngModel)], you need to import the FormsModule in your application root module (like app.module.ts):
+// To use [(ngModel)], you need to import the FormsModule in your application root module (app.module.ts):
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms'; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -445,9 +451,6 @@ export class ParentComponent {
 }
 
 // The assignment of the value from ParentComponent.userName to ChildComponent.name is specified in the template file of the ParentComponent.
-// The input property of the child component class ("name") is used as a property of the custom HTML tag specified in the child's selector.
-// Re-read the previous sentence carefully. You will do that in your real application frequently!
-// The HTML tag's property must be in square brackets since its value is not hardcoded - it's a property of the child component class.
 // Parent Component Template file (app.component.html):
 <div>
   <h2>Parent Component</h2>
@@ -457,6 +460,11 @@ export class ParentComponent {
   <!-- in input properties and updates the child component accordingly. -->
   <app-user [name]="userName"></app-user>
 </div>
+
+// You see that the input property of the child component class ("name") is used as a property of the custom HTML tag specified in the child's selector.
+// You will do that in your real applications frequently!
+// The HTML tag's property must be in square brackets since its value is not hardcoded - it's a property of the child component class.
+
 
 // @@@ Parent/Child relationship
 
@@ -489,8 +497,9 @@ export class ParentComponent {
 
 // @@@ Required input
 
-// To make an input property required, pass the { required: true } plain object to the @Input() decorator as a parameter:
-required: true
+// To make an input property required, pass the
+{ required: true }
+// plain object to the @Input() decorator as a parameter.
 
 // Example:
 @Component({
@@ -501,9 +510,9 @@ class ChildComponent {
   @Input({ required: true }) name: string;
 }
 
-// If the value for the name property is not provided
+// Then, you forget to provide a value for the name property from the parent template:
 <app-child></app-child>
-// then you will get an error: Required input 'name' from component ChildComponent must be specified
+// That will throw an error: Required input 'name' from component ChildComponent must be specified.
 
 // Notice that "required" means that it must appear in the parent component's template.
 // It doesn't mean that the value of the property cannot be null or undefined - for example, the parent template can legally sent null.
@@ -524,7 +533,8 @@ export class CustomerProfileComponent {
   @Input('customerName') cstNm: string;
 }
 
-// The field name is cstNm, but the customerName alias becomes the property of the <customer-profile> custom HTML tag, not "cstNm":
+// The field name is cstNm, that's how it will be referenced in TypeScript.
+// But the customerName alias becomes the property of the <customer-profile> custom HTML tag, not "cstNm":
 <customer-profile [customerName]="user.fullName"></customer-profile>
 
 // This approach offers several benefits:
@@ -543,8 +553,7 @@ export class CustomerProfileComponent {
 // Basic syntax:
 
 // In the child component class:
-@Output()
-customEvent = new EventEmitter<T>();
+@Output() customEvent = new EventEmitter<T>();
 
 // Use the emit() method of the EventEmitter to send data:
 this.customEvent.emit(data);
@@ -561,8 +570,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
   template: '<button (click)="sendMessage()">Send Message</button>'
 })
 export class ChildComponent {
-  @Output()
-  messageEvent = new EventEmitter<string>();
+  @Output() messageEvent = new EventEmitter<string>();
 
   sendMessage() {
 	  this.messageEvent.emit('Hello from child');
@@ -583,15 +591,15 @@ export class ParentComponent {
 // Review this line:
   template: '<app-child (messageEvent)="reactToChildMessage($event)"></app-child>'
 // $event is a special variable in Angular template syntax which represents the data emitted by the event.
-// In this case, $event contains the string emitted by messageEvent in the child component.
-// The parent's reactToChildMessage method receives this string as its argument.
+// In our example, $event contains the string emitted by messageEvent in the child component.
+// The parent's reactToChildMessage() method receives this string as its argument.
 
 // The data type of $event is dictated by the data type passed to EventEmitter<T> as T, which is string in our example:
-  messageEvent = new EventEmitter<string>();
+  @Output() messageEvent = new EventEmitter<string>();
 
 // However, it could be any type. In the next example, it's an object:
 
-interface UserData {
+interface IUser {
   firstName: string;
   lastName: string;
 }
@@ -611,16 +619,15 @@ import { Component, Output, EventEmitter } from '@angular/core';
   `
 })
 export class UserFormComponent {
-  @Output()
-  userSubmitted = new EventEmitter<UserData>();
+  @Output() userSubmitted = new EventEmitter<IUser>();
 
-  userData: UserData = {
+  user: IUser = {
     firstName: '',
     lastName: ''
   };
 
   onSubmit() {
-    this.userSubmitted.emit(this.userData);
+    this.userSubmitted.emit(this.user);
   }
 }
 
@@ -636,11 +643,11 @@ export class UserFormComponent {
   `
 })
 export class ParentComponent {
-  submittedUser: UserData | null = null;
+  submittedUser: IUser | null = null;
 
-  handleUserSubmission(userData: UserData) {
-    this.submittedUser = userData;
-    console.log('Received user data:', userData);
+  handleUserSubmission(user: IUser) {
+    this.submittedUser = user;
+    console.log('Received user data:', user);
   }
 }
 
