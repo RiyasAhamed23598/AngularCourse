@@ -4,7 +4,7 @@
 
 // Content projection is a powerful feature that allows you to insert dynamic content into a component.
 // Allows child components to receive and display content from their parent components.
-// This is achieved using the `<ng-content>` directive, which acts as a placeholder for content that is passed from a parent to a child.
+// This is achieved using the `<ng-content>` directive, which acts as a placeholder for content that is passed from a parent.
 
 // Step-by-Step Example:
 
@@ -215,7 +215,7 @@ export class ChildComponent {}
 })
 export class ParentComponent {}
 
-// Child Component (uses <ng-content> to allow content projection and uses @ContentChild and @ContentChildren to access the projected content):
+// Child Component (uses <ng-content> to allow content projection, and uses @ContentChild and @ContentChildren to access the projected content):
 
 import { Component, ContentChild, ContentChildren, AfterContentInit, QueryList } from '@angular/core';
 
@@ -229,11 +229,8 @@ import { Component, ContentChild, ContentChildren, AfterContentInit, QueryList }
   `
 })
 export class ChildComponent implements AfterContentInit {
-  @ContentChild('headerContent')
-  header!: any;
-  
-  @ContentChildren('paragraphContent')
-  paragraphs!: QueryList<any>;
+  @ContentChild('headerContent') header!: any;
+  @ContentChildren('paragraphContent') paragraphs!: QueryList<any>;
 
   ngAfterContentInit() {
     console.log('Header Content:', this.header);

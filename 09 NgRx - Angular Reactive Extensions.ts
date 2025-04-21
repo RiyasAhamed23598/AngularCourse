@@ -10,7 +10,7 @@
 // NgRx provides a set of libraries for managing the global state, side effects, and entity collections, among other functionalities.
 // It's particularly useful in large-scale applications where managing state in an efficient, predictable, centralized, scalable and maintainable way is critical.
 
-// CONTENTS (to jump to a section, copy it with the asterisk, like "* Reducer", and Ctrl+F by it):
+// CONTENTS (to jump to a section, copy it with the asterisk, like "* Reducer" -> Ctrl+F -> Ctrl+V):
 
 // * Model
 // * State

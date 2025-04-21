@@ -1,8 +1,8 @@
 // Data binding in Angular is a powerful feature that allows you to synchronize data between the component class and the template.
-// It's the mechanism that connects the application's data to the user interface (the HTML template) and vice versa.
+// It's the mechanism that connects the application's data (stored in the component class) to the user interface (the HTML template) and vice versa.
 // Changes in the data model are immediately reflected in the UI, and user interactions with the UI are immediately reflected in the data model.
 
-// Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* @Output() - Event binding"), and Ctrl+F by it:
+// Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* @Output() - Event binding" -> Ctrl+F -> Ctrl+V):
 
 // Binding within the same component:
 

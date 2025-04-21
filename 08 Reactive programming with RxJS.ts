@@ -1,4 +1,4 @@
-// CONTENTS (to jump to a section, copy it with the asterisk, like "* Observable", and Ctrl+F by it):
+// CONTENTS (to jump to a section, copy it with the asterisk, like "* Observable" -> Ctrl+F -> Ctrl+V):
 
 // * Introduction: Reactive vs. Imperative programming
 // * What is RxJS?
