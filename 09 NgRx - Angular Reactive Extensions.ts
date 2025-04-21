@@ -20,7 +20,6 @@
 // * Effect
 // * Reducer
 // * The Action's life cycle
-// * Selector
 
 // ######################################################################################################
 // * Model
@@ -105,10 +104,10 @@ export interface ICustomerState {
   contextProductLoaded: boolean;
 }
 
-// As you see, the State doesn't have pointers to the instances of components.
-// It only contains data for them.
-// When components are instantiated, they will work with this data only.
-// Components can have propertis for the same data but these propertis are used as just a temporary storage until the changes are saved in the State.
+// As you can see, the State doesn't hold references to component instances.  
+// It only contains the data for them.  
+// When components are created, they work with this data only.  
+// Components may have properties for the same data, but these are just temporary storage until the changes are saved to the State.
 
 // State:
 // * Centralizes data management providing a single source of truth for the module's data.
@@ -163,7 +162,7 @@ export const initialCustomerState: ICustomerState = {
 
 // The Store is a state-management solution inspired by the famous library Redux.
 // Redux popularized the idea of organizing the application state into simple objects and updating this state by replacing it with a new state.
-// This means that the object shouldn’t be mutated directly, but rather should be replaced with a new object which contains the new version of the data.
+// This means that the object shouldn't be mutated directly, but rather should be replaced with a new object which contains the new version of the data.
 
 // You don't declare the Store data type, and don't instantiate it.
 // Angular does all that for you, creating a Store instance as injectible.
@@ -197,8 +196,8 @@ export class CustomerListComponent implements OnInit, OnDestroy {
     // Populate the observables from the Store:
     this.customerList$ = this._store.select('customerList');
     this.contextCustomer$ = this._store.select('contextCustomer');
-    // The parameters passed to the select() functions are the names of the current module’s State properties, as strings.  
-    // Even though the entire Store is queried, only data from the current module’s State is subscribed to.  
+    // The parameters passed to the select() functions are the names of the current module's State properties, as strings.  
+    // Even though the entire Store is queried, only data from the current module's State is subscribed to.  
     // This means different modules (screens) can have fields with the same names in their States without interfering with each other.
 
     // Populate the regular vars from the observables (to work with the data in the imperative way, if needed):
@@ -221,9 +220,9 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 
 // @@@ What is an Angular application?
 
-// As mentioned, the Store is a singleton — there’s only one Store instance per Angular application.  
-// You might ask: “What if I open several browser tabs for different customers? Shouldn’t the properties of ICustomerState be arrays?”  
-// Here’s the clarification: Angular applications follow the SDI (Single Document Interface) model, not MDI (Multiple Document Interface).  
+// As mentioned, the Store is a singleton — there's only one Store instance per Angular application.  
+// You might ask: “What if I open several browser tabs for different customers? Shouldn't the properties of ICustomerState be arrays?”  
+// Here's the clarification: Angular applications follow the SDI (Single Document Interface) model, not MDI (Multiple Document Interface).  
 // Only one screen is active at a time, but you can open multiple instances of the application.  
 // So, each browser tab runs its own separate instance of the Angular app with its own singleton Store.
 
@@ -231,7 +230,7 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 // * Action
 // ######################################################################################################
 
-// An Action is a plain TypeScript object used to express an event or an intention (usually a data manipulation or a change in the application’s state).  
+// An Action is a plain TypeScript object used to express an event or an intention (usually a data manipulation or a change in the application's state).  
 // Actions are dispatched (launched) in one part of the application (usually in components or services) and captured in others.  
 // NgRx automatically manages the chain of fired events when an Action is dispatched, ensuring the appropriate consumers respond to it seamlessly.  
 // Actions provide an easy global communication channel. They are one of the main building blocks in NgRx.  
@@ -333,7 +332,7 @@ enum d { // the Actions' "d"escriptions
 // Then, the Action file declares the Action objects themselves.
 
 // In most enterprise applications, dispatching an Action calls a function of a Web Service, so our example reflects that.
-// The props parameter to the createAction() function describes the Action’s payload:
+// The props parameter to the createAction() function describes the Action's payload:
 //   * The payload of a regular (non-Success) CRUD Action defines the INPUT of the Web Service function the Action calls.
 //   * The payload of a Success CRUD Action defines the OUTPUT of the same Web Service function.
 
@@ -392,9 +391,9 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 // ######################################################################################################
 
 // The class that directly calls the Web Service.  
-// It’s the “last station” of data flow within Angular before the data is sent to the middle tier on the Web.  
+// It's the “last station” of data flow within Angular before the data is sent to the middle tier on the Web.  
 // The class name simply says "Service" for brevity, but keep in mind that it refers to a "Web Service."  
-// Strictly speaking, this class is not part of the NgRx library, but it’s commonly found in apps that interact with a Web Service, which is the standard architecture.  
+// Strictly speaking, this class is not part of the NgRx library, but it's commonly found in apps that interact with a Web Service, which is the standard architecture.  
 // It will be injected into the Side Effect class (described next), which is why it has the @Injectable decorator:
 
 import { Injectable } from '@angular/core';
@@ -502,7 +501,7 @@ export class CustomerEffect {
         return this._svc.selCustomerList(action.actionLastName).pipe(
           // If no errors, dispatch the counterpart Success Action passing to it the Web Service function's output:
           map((customerList: ICustomer[]) => selCustomerListSuccessAction({ actionCustomerList: customerList })),
-          catchError(() => EMPTY), // a real app would include an error handler, but let’s leave that out for now.
+          catchError(() => EMPTY), // a real app would include an error handler, but let's leave that out for now.
         );
       }),
     ),
@@ -573,10 +572,10 @@ export class CustomerEffect {
 // It listens for dispatched Actions; when an Action, requiring handling, is captured, the Reducer modifies the State based on the current State and the Action's data.
 // That is done in an immutable way, creating a new State object. Angular discards the old State object, replacing it with the new one.
 
-// The mission of the Reducer is critical – it’s responsible for updating the State with the results of the Web Service calls when a ...Success Action is dispatched by the Effect.
+// The mission of the Reducer is critical – it's responsible for updating the State with the results of the Web Service calls when a ...Success Action is dispatched by the Effect.
 
 // Also, you can create and dispatch an Action which updates the State without calling side effects - like those without "Success" in the example below.
-// That is the correct way, we don’t update the State in other spots of the application. Instead, these spots dispatch Actions which signal the Reducer to change the State.
+// That is the correct way, we don't update the State in other spots of the application. Instead, these spots dispatch Actions which signal the Reducer to change the State.
 // Reducer is one centralized file with all State updates for the given module, that significantly simplifies debugging.
 
 // Here is an example Reducer file for our Customer module:
