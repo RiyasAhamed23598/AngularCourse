@@ -682,12 +682,36 @@ const getNewState = createReducer(
 // * The Action's life cycle
 // ######################################################################################################
 
+// As you've seen, Actions fall into three categories:
+
+// 1. Actions that are called from business logic and trigger external Effects (usually web services). They have corresponding Success Actions.
+// A typical example is Actions for CRUD operations.
+// Such Actions do not change the State with business data (only turn on the progress bar display flag).
+
+// 2. Success Actions. Called from the Effect class in case of successful execution of the main Action.
+// As you remember, their task is to update the State with the result, retuned by the Effect.
+// By the way, some applications also use Failure Actions, called from the Effect class in case of an error in the main Action, if the State must be updated with the failure info.
+
+// 3. Actions that are called from business logic and DO NOT trigger external Effects.
+// Their task is to change the State by writing into it the data passed as payload by the calling business code.
+// For example, SetContextCustomer receives data as a whole ICustomer object that was already stored on the client side because it was received from the web service earlier.
+// Actions of this category are also used to "manually" change a specific field of the State - for example, write calculation results.
+// Let me remind you once again that any physical changes to the State must be made only inside the Reducer.
+// Despite the fact that any component has access to the State, changes must be made by dispatching Actions, and not by assigning values ​​to the State fields directly.
+
 // Let's briefly summarize the life cycle stages that an Action goes through:
 
+// Actions related to Effects (categories 1 & 2):
+
 // 1. The component dispatches a regular (not Success) Action.
-// 2. The Reducer captures that Action (if a handler for it exists) and updates the State to display the progress bar.
-// 3. The Effect captures that Action (if a handler for it exists) and calls the corresponding function of the Service, passing the payload as an input.
-// 4. The Service sends an HTTP request to the Web Service and is waiting for its result.
-// 5. When an HTTP response is received, Angular passes its output to the waiting Effect.
-// 6. If the call was successful, the Effect dispatches the respective Success Action, passing the results returned by the Web Service.
-// 7. The Reducer captures it and updates the State with those results, and updates the State to hide the progress bar.
+// 2. The Reducer captures it and updates the State to display the progress bar.
+// 3. The Effect captures the Action and calls the corresponding function of the Service, passing the payload as an input.
+// 4. The Service sends an HTTP request to the web service and is waiting for its result.
+// 5. When an HTTP response is received, the Service function passes its output to the Effect.
+// 6. If the call was successful, the Effect dispatches the respective Success Action, passing the results returned by the web service.
+// 7. The Reducer captures the Success Action, updates the State with those results, and turns off the progress bar flag.
+
+// Actions unrelated to Effects (category 3):
+
+// 1. The component dispatches an Action.
+// 2. The Reducer captures it and writes the payload to the State.
