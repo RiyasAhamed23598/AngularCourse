@@ -54,6 +54,31 @@ export class MyFormComponent {
 // * Works well with dynamic forms and provides fine-grained control over form state.
 
 // ######################################################################################################
+// Form Control States
+// ######################################################################################################
+
+// In Angular's form handling, "touched," "dirty," and "valid" are important form states that help track user interaction and validate input.
+// These states are fundamental to creating responsive forms with appropriate validation feedback.
+
+// @@@ touched / untouched:
+
+// A form control is "untouched" originally and becomes "touched" when the user has focused on it (clicked or tabbed to it) and then moved focus away.
+
+// @@@ dirty / pristine
+
+// A form control is "pristine" originally and becomes "dirty" when its value has been changed by the user.
+
+// A "dirty" control remains "dirty" even if the original value was restored.
+// If you need to track whether the current value matches the initial value, you would need to implement that comparison logic separately.
+// If you want to reset a control's state (including making it pristine again), you would need to explicitly call the markAsPristine() method or the reset() method on the control.
+
+// @@@ valid / invalid
+
+// A form control is considered "valid" when it meets (passes) all the validation rules applied to it.
+// Becomes "invalid" if any validator fails.
+// A form group is "valid" only if all its child controls are "valid".
+
+// ######################################################################################################
 // ValidationErrors
 // ######################################################################################################
 
