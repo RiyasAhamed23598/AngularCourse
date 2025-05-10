@@ -146,7 +146,7 @@ export class ExampleComponent {
 // Sets an HTML element's property value based on a component variable or a method. The syntax:
 [html_property]="component_variable_or_method"
 
-// example.component.html:
+// HTML template (example.component.html)::
 <img [src]="image1Url" />
 <img [src]="getImage2Url()" />
 
@@ -178,7 +178,7 @@ export class ExampleComponent {
     return true;
   }
   
-  getStyles(): { [key: string]: any } {
+  getStyles(): { [key: string]: string } {
     return {
       'font-size': '20px',
       'color': 'red'
@@ -198,7 +198,7 @@ export class ExampleComponent {
   }
 }
 
-// example.component.html:
+// HTML template (example.component.html)::
 <input id="price" [value]="getPrice()" />
 <button id="calculate" [disabled]="calculationIsProhibited()">Calculate!</button>
 <div [style.font-size.px]="getFontSize()" [style.color]="getColor()">Styled Text</div>
@@ -219,18 +219,49 @@ export class ExampleComponent {
 // Angular interprets [ngStyle] and applies all the styles contained in the object to the element. [ngStyle] is More elegant than a few [style.XXX] directives.
 
 // Also, notice how getStyles() is defined:
-  getStyles(): { [key: string]: any } {
+  getStyles(): { [key: string]: string } {
 // The type it returns
-{ [key: string]: any }
+{ [key: string]: string }
 // is a TypeScript index signature.
-// It indicates that the function returns an object where the keys are strings and the values can be of any type.
-// We could declare the function to return any:
-  getStyles(): any {
-// But this would be less specific and provides less type safety.
+// It indicates that the function returns an object where the keys are strings and the values are string too.
 // "key" is not actually used in the code but serves as a placeholder name for the key in the index signature.
 // You can use any name for the placeholder in the index signature, not just "key". For example:
 { [property: string]: any }
 { [prop: string]: any }
+
+// We could declare the function to return any:
+  getStyles(): any {
+// But this would be less specific and provides less type safety.
+
+// ------------------------------------------------------------------------------------------------------
+
+// You may ask:
+//    "Why to use Property binding like <img [src]="image1Url" /> instead of Interpolation like <img src="{{ image1Url }} which must do the work" />?
+
+// You're right that both property binding ([src]) and interpolation ({{ image1Url }}) can set attributes like src, and for simple cases, they often produce the same result.
+// However, there are technical reasons why property binding is preferred in some situations.
+
+// Property binding:
+
+// 1. Binds to the DOM property, not the attribute
+//       Interpolation writes to the HTML attribute (src="{{ image1Url }}"), which might not update the DOM property correctly in some edge cases.
+//       [src] binds directly to the DOM property (img.src), which is what the browser actually uses for rendering.
+//       So, Property binding improves performance: Angular can optimize rendering by only updating DOM elements affected by changed values, rather than re-rendering everything.
+
+// 2. Avoids issues with non-string values
+//       Interpolation always converts values to strings, while Property binding can handle non-string types properly.
+//       For example, [disabled]="isDisabled" expects a boolean, while disabled="{{ isDisabled }}" sets it as "true" or "false", which is not the expected behavior.
+
+// 3. Better for complex expressions
+//       In Interpolation, if you include special characters (like quotes) or complex expressions, the syntax can become messy, hard to read and error-prone (or even break):
+         <img src="/assets/{{ isThumbnail ? 'thumb.jpg' : 'full.jpg' }}" />
+//       Property binding is more flexible and works fine:
+         <img [src]="'/assets/' + (isThumbnail ? 'thumb.jpg' : 'full.jpg')" />
+
+// 4. Is consistent with binding syntax in Angular
+//       Using [prop] is consistent across all bindable properties, which can help readability and predictability in large codebases.
+
+// In short, for property binding, just always use... Property binding!
 
 // ######################################################################################################
 // * () - Event binding (HTML ---> class)
@@ -258,7 +289,9 @@ export class ExampleComponent {
 // When the user clicks the button, the event is propagated to that listener.
 // This listener then calls the saveData() method on the component instance.
 
-// The method used in event binding usually returns void but it can return any type (however, the returned value will be ignored).
+// The purpose of Event Binding methods is only changing the component state.
+// So, they must return void (technically, they can return any type, but the returned value will be ignored, and that will confuse).
+
 // In contrast to Property Binding, Event Binding methods can accept parameters.
 // They often use the special $event object to get information about the event that triggered the method:
 
@@ -271,7 +304,7 @@ export class ExampleComponent {
   }
 }
 
-// example.component.html
+// HTML template (example.component.html):
 <button id="btn1" (click)="onClick($event)">Click Me</button>
 
 // The event's argument can be just string. The following example demonstrates calling an event when an input control's value is changed by the user:
@@ -289,7 +322,7 @@ export class cstNmComponent {
   }
 }
 
-// user-name.component.html
+// HTML template (user-name.component.html):
 <h1>{{ cstNm }}</h1>
 <input
   id="cstNmInput" 

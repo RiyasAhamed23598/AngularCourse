@@ -1,6 +1,7 @@
-// Attribute Directives (also known as Core directives):
+// Attribute Directives (also known as Core Directives):
 // * Don't change the DOM structure, only modify the behavior or appearance of existing elements
-// * Typically used with square brackets [], for examples: [ngModel], [ngClass], [ngStyle]
+// * In contrast to Structural Directives (which change the DOM layout), Core Directives are not prefixed with an asterisk (*) or pound (@).
+// 		Instead, they are typically used with square brackets [], for examples: [ngModel], [ngClass], [ngStyle]
 // * Can have multiple core directives on a single element
 
 // ######################################################################################################
@@ -14,56 +15,106 @@
 //		"[ngClass]" is replaced with "class".
 //		Each class name passed to [ngClass]) appears (or doesn't appear) depending on its boolean expression.
 
-// @@@ The string passed to [ngClass]:
+// In fact, [ngClass] is a special case of the Property binding which will be described in https://github.com/Ursego/AngularCourse/blob/main/07%20Data%20Binding.ts soon.
+// But I'll tell you in advance that the Property binding syntax is
+[html_property]="component_variable_or_method"
+// like
+<div [class]="getButtonClasses()"></div>
+// For this example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
 
-// The [ngClass] directive can accept a string which contains a several types of values:
+// So, why to use [ngClass] if we have [class]?
+// There are some differences between them:
 
-// #1. Object with key-value pairs. In each pair:
-// 		* the key is the CSS class name;
-// 		* the value is a boolean expression (normally, the component's property or method) which governs wether or not the CSS class must be applied:
-@Component({
-  selector: 'app-my-component',
-  template: `
-    <div [ngClass]="{'active': isActive, 'disabled': !isEnabled, 'highlight': isImportant()}">
-      Content
-    </div>
-  `
-})
-export class MyComponent {
-  isActive = true;
-  isEnabled = false;
+// [class]
+// 		You must provide a ready single string which will be assigned to the "class" property as is (the standard behavior of the Property binding).
+// 		By becoming the new "class" property, that string overwrites the old value, deleting any static classes on the element which existed but are not provided in the new value.
 
-  isImportant(): boolean {
-    // You can add any logic here to determine if it's important
-    return false;  // For this example, we'll just return false
-  }
-}
-// The rendered HTML:
-<div class="active disabled">
-  Content
-</div>
+// [ngClass]
+// 		Adds/removes classes dynamically depending on logical conditions, merging them with existing static classes (rather than deleting).
+// 		Much more flexible: can accept a string which contains a several types of values: a plain string, an array, or an object. That is explained in details next.
 
-// #2. List of classes separated by space (in fact, a string which would be the value of the static 'class' property as is):
+// @@@ The string passed to [ngClass] can be:
+
+// #1. List of classes separated by space (in fact, a string which contains a string which will be the value of the static 'class' property as is):
 <div [ngClass]="'class1 class2'">
+// That is similar to [class] but the whole list is ornamented by addidional quotes since the outer string contains another inner string which will be rendered as is
+// (you want to render [class]='class1 class2' rather than [class]=class1 class2).
 
-// #3. Array of classes:
+// #2. Array of classes:
 <div [ngClass]="['class1', 'class2']">
+// Notice that the Array can have a mix of static (hardcoded) classes with objects and dynamic expressions, for example:
+<div [ngClass]="['class1', { 'class2': isClass2, 'class3': isClass3 }, 'class4', isClass5() ? 'class5' : '']">
+// This div will always have class1 and class4, and it will conditionally have class2, class3 and class5 based on the respective boolean values.
+
+// #3. Object with key-value pairs:
+<div [ngClass]="{'active': isActive, 'disabled': !isEnabled, 'highlight': isImportant()}">
+// In each pair:
+// 		* the key is the CSS class name;
+// 		* the value is a boolean expression (normally, the component's property or method) which governs wether or not the CSS class must be applied
+
+// REMARK REGARDING #1, #2 AND #3:
+// Of course, if the classes are known in compile time, you would simply assign them to "class":
+<div class="class1 class2">
+// In fact, you will never assign a hardcoded string to [ngClass] as shown in #1, #2 and #3.
+// Their examples only demonstrate values which "has been built dynamically" - usually, returned by a method. That is the subject of #4:
 
 // #4. Component method returning any of the above:
 <div [ngClass]="getClasses()">
-// The method can return not only a string (#2) but also an object (#1) or an array (#3).
-// Angular will convert it to a string automatically building #1 from an object and #3 from an array.
+// This pattern ([ngClass]="a_method_returning_classes()") is what you will use in real work.
 
-// You could ask: Why to pass a list or an Array of strings (#2 and #3) if the classes can be hardcoded without using [ngClass]?
-// For static classes, you're correct - it's better to hardcode them in the template without [ngClass]:
-<div class="class1 class2">
-// However, the classes list can be built programmatically.
-// For example, you can call a function (#4) which returns a ready spaces-separated list (#2) or an array (#3).
-// Normally, you won't code #2 and #3 manually. They just demonstrate into what the return value of #4 is converted.
+// A sample getClasses() method which returns a string which describes an object:
+@Component({
+	selector: 'app-my-component',
+	template: 'app-my-template'
+  })
+  export class MyComponent {
+	isActive = true;
+	isEnabled = false;
+  
+	isImportant(): boolean {
+	  return false;  // in this example, we'll just return false for simplicity
+	}
+  
+	getClasses(): string {
+	  return JSON.stringify({
+		active: this.isActive,
+		disabled: !this.isEnabled,
+		highlight: this.isImportant()
+	  });
+	}
+  }
 
-// Notice that the Array of classes in #3 can have a mix of static (hardcoded) classes with objects (#1) and dynamic expressions, for example:
-<div [ngClass]="['class1', { 'class2': isClass2, 'class3': isClass3 }, 'class4', isClass5() ? 'class5' : '']">
-// This div will always have class1 and class4, and it will conditionally have class2, class3 and class5 based on the respective boolean values.
+// getClasses() will return the next string:
+{"active":true,"disabled":true,"highlight":false}
+
+// Then the actual rendered HTML would be:
+<div class="active disabled">Content here</div>
+// As you see, highlight is not rendered since it's false.
+
+
+// In the example above, the getClasses() method returned a string which DESCRIBED an object.
+// However, the method could return the object itself:
+
+getClassObject(): { [key: string]: boolean } {
+	return {
+	  active: this.isActive,
+	  disabled: !this.isEnabled,
+	  highlight: this.isImportant()
+	};
+  }
+
+// The type it returns
+{ [key: string]: boolean }
+// is a TypeScript index signature.
+// It indicates that the function returns an object where the keys are strings and the values are boolean.
+// If the values could be of other types too, you would use something like "boolean | string" or "boolean | string | number").
+// "key" is not actually used in the code but serves as a placeholder name for the key in the index signature.
+// You can use any name for the placeholder in the index signature, not just "key". For example:
+{ [property: string]: any }
+{ [prop: string]: any }
+
+// When [ngClass] gets an object itself, it interprets it and renders the same HTML as if would for a string describing the object:
+<div class="active disabled">Content here</div>
 
 // @@@ Combination of static and dynamic classes:
 

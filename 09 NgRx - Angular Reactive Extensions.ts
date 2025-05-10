@@ -62,8 +62,8 @@ export interface IProduct {
 
 // A module usually consists of a few components:
 // - The parent, module-level component - the highest-level container.
-//      Its HTML template defines the general outline of the window, as well as where each component is located using tags with the components' selectors.
-// - Components for different areas of the screen. They are child components of the module-level component.
+//      Its HTML template defines the general outline of the window, as well as where each child component is located using tags with the child components' selectors.
+// - Child components rendering different areas of the screen.
 
 // As an example, let's consider a Customer screen (module). It's unrealistic, but convenient for explaining the concept.
 // CustomerScreenComponent is the highest-level container. It has the following visual structure:
@@ -83,7 +83,7 @@ export interface IProduct {
 // - List components have "List" in their names: <Entity>ListComponent.
 // - Form components don't have neither "Screen" nor "Form" in their names: <Entity>Component.
 
-// Here is the State datatype which holds the entire screen's data:
+// Here is the datatype for the State (ICustomerState) which describes the entire screen's data:
 
 import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
 
@@ -107,21 +107,21 @@ export interface ICustomerState {
 // As you can see, the State doesn't hold references to component instances.  
 // It only contains the data for them.  
 // When components are created, they work with this data only.  
-// Components may have properties for the same data, but these are just temporary storage until the changes are saved to the State.
+// Components may have properties for the same data, but these are just temporary storage to facilitate local data manipulations within the Components.
 
 // State:
 // * Centralizes data management providing a single source of truth for the module's data.
 // * Ensures that all parts of the module are synchronized with the same version of the data.
-// * Simplifies communication between components by avoiding direct data sharing and, worse, multiple copies of the same data.
+// * Simplifies communication between components by avoiding direct data sharing and, worse, multiple main copies of the same data.
 // * Ensures that growing amounts of data are handled efficiently and predictably.
 
 // In NgRx, State is immutable, meaning it cannot be directly modified.
-// Eeach change creates a new instance of State and makes the old instance subject to garbage collector.
+// Eeach change creates a new instance of State and makes the old instance a subject to the garbage collector.
 // That prevents accidental modifications and ensures predictability and reliable debugging.
 
 // @@@ The Initial State:
 
-// You must also create the Initial State object of the declared type, with all the properties populated with default values:
+// In addition to declaring the State type, you must also create the Initial State object of that type, with all the properties having default values:
 export const initialCustomerState: ICustomerState = {
   // Customer:
   customerList: [],
@@ -139,8 +139,8 @@ export const initialCustomerState: ICustomerState = {
   contextProduct: null,
   contextProductLoaded: false
 };
-// This object is usually created in same Model file which declares the State's data types.
-// If those data types are changed later, it's convenient to synchronize the Initial State since it's right there at hand.
+// This object is usually created in same Model file which declares the State's data type.
+// If the State's data type is changed later, it's convenient to synchronize the Initial State since it's right there at hand.
 
 // The Initial State is crucial since it:
 // * Provides a clear and consistent starting point for the module's State.
@@ -152,11 +152,11 @@ export const initialCustomerState: ICustomerState = {
 // * Store
 // ######################################################################################################
 
-// While State is a module-level data container, Store is an application-level data container.
+// While State is a module-level container, Store is an application-level container.
 // The Store instance is a singleton object that holds the States of multiple modules combined, which makes up the state of the whole application.
 
-// The Store is the single source of truth for the current state of the whole application.
-// It provides a way to access the state, dispatch actions, and subscribe to state changes.
+// The Store is the single source of truth for the current state of the application.
+// It provides a way to access the states of different modules, dispatch actions, and subscribe to state changes.
 // You can think of it as a database that you can get access in order to retrieve or update the data that the application operates on.
 // The Store is an observable, and components can subscribe to it to get updates when the state changes.
 
@@ -187,8 +187,6 @@ export class CustomerListComponent implements OnInit, OnDestroy {
   contextCustomer$: Observable<ICustomer>;
   private _contextCustomer!: ICustomer;
 
-  private _s: Subscription = new Subscription();
-
   // A pointer to the application's Store is injected into the constructor:
   constructor(private _store: Store<any>) { }
 
@@ -196,7 +194,7 @@ export class CustomerListComponent implements OnInit, OnDestroy {
     // Populate the observables from the Store:
     this.customerList$ = this._store.select('customerList');
     this.contextCustomer$ = this._store.select('contextCustomer');
-    // The parameters passed to the select() functions are the names of the current module's State properties, as strings.  
+    // The parameters passed to the select() functions are strings with the names of the current module's State properties.  
     // Even though the entire Store is queried, only data from the current module's State is subscribed to.  
     // This means different modules (screens) can have fields with the same names in their States without interfering with each other.
 
@@ -208,20 +206,18 @@ export class CustomerListComponent implements OnInit, OnDestroy {
       this.contextCustomer$.subscribe((customer: ICustomer) => { this._contextCustomer = customer; })
     );
   }
-
-  ngOnDestroy = () => this._s.unsubscribe;
 }
 
 // If another component of the module will need to get, for example, the context customer, it will do the same:
 this.contextCustomer$ = this._store.select('contextCustomer');
 // That eliminates the need to pass that customer from the parent component's template to the child components.
-// If any component changes contextCustomer property of the module's State, all the subscribing components are immediately aware of that.
+// If any component changes contextCustomer property of the module's State, all the subscribing components are immediately updated as well.
 // So, for example, their templates are automatically re-rendered to reflect the change. Reactive programming is magic!
 
 // @@@ What is an Angular application?
 
 // As mentioned, the Store is a singleton — there's only one Store instance per Angular application.  
-// You might ask: “What if I open several browser tabs for different customers? Shouldn't the properties of ICustomerState be arrays?”  
+// You might ask: "What if I open several browser tabs for different customers? Shouldn't the properties of ICustomerState be arrays?"  
 // Here's the clarification: Angular applications follow the SDI (Single Document Interface) model, not MDI (Multiple Document Interface).  
 // Only one screen is active at a time, but you can open multiple instances of the application.  
 // So, each browser tab runs its own separate instance of the Angular app with its own singleton Store.
@@ -394,9 +390,9 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 // ######################################################################################################
 
 // The class for outsourcing logic and data that directly calls the web service.  
-// It's the “last station” of data flow within Angular before the data is sent to the middle tier on the Web.  
+// It's the "last station" of data flow within Angular before the data is sent to the middle tier on the Web.  
 // The class name simply says "Service" for brevity, but keep in mind that it refers to a "web service."  
-// Strictly speaking, this class is not part of the NgRx library, but it's commonly found in apps that interact with a web service, which is the standard architecture.
+// Strictly speaking, this class is not a part of the NgRx library, but it's commonly found in apps that interact with a web service, which is the standard architecture.
 
 // Typically, Services are injected into other areas of our app, so they must have the @Injectable decorator.
 // The next Service will be injected into the Effect class (described next):
@@ -481,7 +477,7 @@ ng g s MyService
 
 // Effects are built using RxJS Observables and are designed to listen for specific Actions and perform side effects without directly modifying the Store.  
 // The Effect class captures a dispatched main Action and calls the corresponding method in the Web Service class.  
-// It is also the “first station” within Angular to handle the data returned from the middle tier via the Web Service.  
+// It is also the "first station" within Angular to handle the data returned from the middle tier via the Web Service.  
 // Once a side effect is successfully completed, the Effect typically dispatches the respective "Success" Action to update the Store with the external results.  
 
 // We'll use the Customer screen to demonstrate how Effects handle side effects.
