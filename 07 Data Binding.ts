@@ -4,17 +4,21 @@
 
 // Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* @Output() - Event binding" -> Ctrl+F -> Ctrl+V):
 
+// The arrow in the next diagrams shows the direction from the source to the target in which the data is transmitted - a change in the source is instantly reflected in the target.
+// "Class" means the component's TypeScript class.
+// "HTML" means the component's HTML template.
+
 // Binding within the same component:
 
-// * {{ }} - Interpolation (component class ---> HTML template)
-// * [] - Property binding (component class ---> HTML template)
-// * () - Event binding (HTML template ---> component class)
-// * [(ngModel)] - Two-way data binding (component class ---> HTML template ---> component class)
+// * {{ }} - Interpolation (class ---> HTML)
+// * [] - Property binding (class ---> HTML)
+// * () - Event binding (HTML ---> class)
+// * [(ngModel)] - Two-way data binding (class ---> HTML ---> class)
 
 // Binding between parent and child components:
 
-// * @Input() - Property binding (parent HTML template ---> child component class)
-// * @Output() - Event binding (child component class ---> parent HTML template)
+// * @Input() - Property binding (parent HTML ---> child class)
+// * @Output() - Event binding (child class ---> parent HTML)
 
 // ######################################################################################################
 // ######################################################################################################
@@ -23,13 +27,16 @@
 // ######################################################################################################
 
 // ######################################################################################################
-// * {{ }} - Interpolation (component class ---> HTML template)
+// * {{ }} - Interpolation (class ---> HTML)
 // ######################################################################################################
 
-// You can embed expressions (dynamic text) into HTML templates with double curly braces, which tells Angular that
-//    it is responsible for the expression inside and ensuring it is updated correctly.
+// You can embed expressions (dynamic text) into HTML templates with double curly braces.
+// They tell Angular that the text inside is an expression to evaluate rather than a text to render as is. The next HTML
+2 + 2 = {{ 2 + 2 }}
+// is rendered as "2 + 2 = 4".
+
 // Interpolation is named so because it inserts (interpolates) dynamic values into static HTML, "filling the gaps" within the template.
-// Interpolation automatically converts the expression into a string. Objects and arrays are converted using their toString method.
+// Interpolation automatically converts the expression's result into a string. Objects and arrays are converted using their toString method.
 // In addition to evaluating the expression at first render, Angular also updates the rendered content when the expression's value changes.
 
 @Component({
@@ -133,13 +140,13 @@ export class ExampleComponent {
 //    to run change detection on these components only when their inputs change or when events originate from the component or its children.
 
 // ######################################################################################################
-// * [] - Property binding (component class ---> HTML template)
+// * [] - Property binding (class ---> HTML)
 // ######################################################################################################
 
 // Sets an HTML element's property value based on a component variable or a method. The syntax:
 [html_property]="component_variable_or_method"
-// Examples:
-<!-- example.component.html -->
+
+// example.component.html:
 <img [src]="image1Url" />
 <img [src]="getImage2Url()" />
 
@@ -147,17 +154,16 @@ export class ExampleComponent {
 //		so the string inside the quotes is treated not as a hardcoded value but as an expression which returns that value.
 
 // During the rendering process, Angular will:
-//		* remove the square brackets from the property name;
+//		* remove the square brackets from the property name ("[src]" -> "src");
 //		* evaluate the expression inside the quotes and use the result as the property value, substituting the expression.
-// The rendered HTML (supposing imageUrl CONTAINS "https://example.com/image1.png" and getImage2Url() RETURNS "https://example.com/image2.png"):
+// Suppose, image1Url CONTAINS "https://example.com/image1.png" and getImage2Url() RETURNS "https://example.com/image2.png". The rendered HTML:
 <img src="https://example.com/image1.png" />
 <img src="https://example.com/image2.png" />
 
-// A method used in property binding:
-// * cannot accept parameters;
-// * can return any type that is appropriate for the property being bound to.
+// A method used in property binding cannot accept parameters!
 
 // Property binding is not limited to strings; you can bind properties of various types such as numbers, booleans, objects, and arrays.
+// The bound fields and methods can return a string or a type convertibe to string, but the final string must be appropriate (legal) for the property being bound to:
 @Component({
   selector: 'app-example',
   templateUrl: './example.component.html',
@@ -192,7 +198,7 @@ export class ExampleComponent {
   }
 }
 
-<!-- example.component.html -->
+// example.component.html:
 <input id="price" [value]="getPrice()" />
 <button id="calculate" [disabled]="calculationIsProhibited()">Calculate!</button>
 <div [style.font-size.px]="getFontSize()" [style.color]="getColor()">Styled Text</div>
@@ -206,14 +212,15 @@ export class ExampleComponent {
 <div style="font-size: 20px; color: red;">Another Styled Text</div>
 <div class="class1 class2">Class-bound Text</div>
 
-// The [style.XXX] directive is used to bind a single CSS style property. So, it appears twice - for two the CSS style properties.
+// The [style.XXX] directive is used to bind a single CSS style property. So, it appears twice - for two the CSS style properties (font and color).
+
 // The [ngStyle] directive is used to set multiple CSS styles at once by binding to an object, returned by the method.
 // In that object, the keys are the CSS properties and the values are the styles you want to apply.
-// Angular interprets [ngStyle] and applies all the styles contained in the object to the element.
+// Angular interprets [ngStyle] and applies all the styles contained in the object to the element. [ngStyle] is More elegant than a few [style.XXX] directives.
 
 // Also, notice how getStyles() is defined:
   getStyles(): { [key: string]: any } {
-// The type
+// The type it returns
 { [key: string]: any }
 // is a TypeScript index signature.
 // It indicates that the function returns an object where the keys are strings and the values can be of any type.
@@ -225,10 +232,8 @@ export class ExampleComponent {
 { [property: string]: any }
 { [prop: string]: any }
 
-// Property Binding can bind any data type to an element property, making it more versatile for setting properties that require non-string values.
-
 // ######################################################################################################
-// * () - Event binding (HTML template ---> component class)
+// * () - Event binding (HTML ---> class)
 // ######################################################################################################
 
 // Components handle user interactions and respond to events such as button clicks, form submissions, and more.
@@ -242,16 +247,16 @@ export class ExampleComponent {
 // That is different from Property Binding where the method is executed on rendering in order to get it's returned value to build the HTML.
 
 // Example:
-<button (click)="onClick()">Click Me</button>
+<button (click)="saveData()">SAVE DATA</button>
 
-// That is rendered to this HTML:
-<button>Click Me</button>
+// That is rendered as
+<button>SAVE DATA</button>
 // As you see, any mention of event binding has gone.
 // But how does Angular know which method of the component should be called when the button is clicked?
 // When you write templates with event binding, Angular sets up event listeners for these events during the compilation and rendering phases.
 // So, the component is constantly listening to the button's click event.
 // When the user clicks the button, the event is propagated to that listener.
-// This listener then calls the onClick() method on the component instance.
+// This listener then calls the saveData() method on the component instance.
 
 // The method used in event binding usually returns void but it can return any type (however, the returned value will be ignored).
 // In contrast to Property Binding, Event Binding methods can accept parameters.
@@ -300,8 +305,8 @@ export class cstNmComponent {
 // 		which in turn updates the displayed name in the <h1> tag.
 
 // Note: It's often preferable to use the [(ngModel)] directive (described later in this file) for two-way binding if you're working with forms. 
-// However, the approach shown here demonstrates how to handle events and update properties manually,
-// 		which can be useful in certain scenarios or when you need more control over the binding process.
+// However, the approach shown here demonstrates how to handle events and update properties manually.
+// That can be useful in certain scenarios or when you need more control over the binding process.
 
 // It's also possible to use a template reference variable (a "pound variable") instead of $event.target.
 // This approach is often clearer and more Angular-idiomatic since you can give the pound variable a self-documenting name.
@@ -316,20 +321,29 @@ export class cstNmComponent {
 
 // The #enteredCstNm declaration creates a reference to the input element, and then that reference is used in the (keyup) event binding.
 
+// ### Binding an event to a field
+
+// Events are typically bound to methods, but you can also bind them to fields, for example:
+<input [value]="lastName" (blur)="lastName = $event.target.value">
+// When the user tabs out or clicks elsewhere (i.e., when the input loses focus), the blur event fires.
+// At that point, the component's lastName property is updated with the final value.
+
+// But you're unlikely to use this pattern, since there's a much more convenient Two-way data binding, which is described next.
+
 // ######################################################################################################
-// * [(ngModel)] - Two-way data binding (component class ---> HTML template ---> component class)
+// * [(ngModel)] - Two-way data binding (class ---> HTML ---> class)
 // ######################################################################################################
 
 // Allows changes in the GUI to update the component's data, and vice versa, automatically and simultaneously.
 // It's a powerful tool for creating interactive forms, providing an easy way to keep your component's data in sync with your template's form controls.
 
-// Uses the [(ngModel)] directive and is denoted by [()].
-// The suare brackets mean the one-way part of the binding - from component class to HTML template.
-// The round brackets mean the opposite one-way part of the binding - from HTML template to component class (like in event binding).
+// Uses the [(ngModel)].
+// The suare brackets denote the "class ---> HTML" part of the binding.
+// The round brackets denote the "HTML ---> class" part of the binding (like in event binding).
 
-// In fact, the direction from component class to HTML is Interpolation.
-// Since this is a value drawing on the screen, and not a property binding, it's very strange that the creators of Angular used square brackets, and not curly ones.
-// {(ngModel)} or ({ngModel}) would reflect the essence of two-way binding much more correctly, but we have what we have, so just remember.
+// In fact, the "class ---> HTML" part is Interpolation.
+// Since this is a value drawing on the screen rather than a property binding, it's strange that the creators of Angular used square and not curly brackets.
+// {{(ngModel)}} or ({{ngModel}}) would reflect the essence of the two-way binding much more correctly, but we have what we have, so just remember.
 
 // In a typical scenario, the value of the bound property is initially displayed in the HTML.
 // If the user changes it in the browser, the bound property is automatically updated with the new value.
@@ -396,7 +410,7 @@ export class ExampleComponent {
 
 // The id, name and type attributes are part of standard HTML and are not related to [(ngModel)].
 
-// @@@ Two-ay binding with getter/setter:
+// @@@ Two-ay binding with a getter / a setter:
 
 // [(ngModel)] can bind not only with an instance variable but also with a getter / a setter:
 @Component({
@@ -418,7 +432,7 @@ export class ExampleComponent {
 // ######################################################################################################
 
 // ######################################################################################################
-// * @Input() - Property binding (parent HTML template ---> child component class)
+// * @Input() - Property binding (parent HTML ---> child class)
 // ######################################################################################################
 
 // @Input() decorator denotes a component's property as an input property.
@@ -544,7 +558,7 @@ export class CustomerProfileComponent {
 // * Provides flexibility in refactoring: you can change the internal property name without affecting how other components use your component.
 
 // ######################################################################################################
-// * @Output() - Event binding (child component class ---> parent HTML template)
+// * @Output() - Event binding (child class ---> parent HTML)
 // ######################################################################################################
 
 // The @Output decorator allows child components to send data to their parent components - as the opposite of @Input().
