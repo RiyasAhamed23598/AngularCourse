@@ -146,7 +146,7 @@ export class ExampleComponent {
 // Sets an HTML element's property value based on a component variable or a method. The syntax:
 [html_property]="component_variable_or_method"
 
-// HTML template (example.component.html)::
+// HTML template (example.component.html):
 <img [src]="image1Url" />
 <img [src]="getImage2Url()" />
 

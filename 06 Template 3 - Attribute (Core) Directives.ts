@@ -15,12 +15,15 @@
 //		"[ngClass]" is replaced with "class".
 //		Each class name passed to [ngClass]) appears (or doesn't appear) depending on its boolean expression.
 
-// In fact, [ngClass] is a special case of the Property binding which will be described in https://github.com/Ursego/AngularCourse/blob/main/07%20Data%20Binding.ts soon.
+// In fact, [ngClass] is a special case of the Property binding.
+// Property binding will be described in https://github.com/Ursego/AngularCourse/blob/main/07%20Data%20Binding.ts soon.
 // But I'll tell you in advance that the Property binding syntax is
 [html_property]="component_variable_or_method"
 // like
+<img [src]="image1Url" />
+// or
 <div [class]="getButtonClasses()"></div>
-// For this example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
+// For the last example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
 
 // So, why to use [ngClass] if we have [class]?
 // There are some differences between them:
