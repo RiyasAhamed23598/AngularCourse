@@ -68,7 +68,7 @@
 // REMARK REGARDING #1, #2 AND #3:
 // In fact, you will never assign a hardcoded string to [ngClass] as shown in #1 and #2.
 // Their examples only demonstrate values which are normally built dynamically and returned by a method of the component class. That is the subject of #4.
-// The pattern of #3 can be used with the string hardcoded - the actual classes are still built dynamically by the boolean expressions.
+// The pattern of #3 can be used with the string hardcoded - the actual classes are still added dynamically by the boolean expressions.
 // But it's better to incapsulate the logic in a method which retrns the dictionary's values as true and false - try to minimize logic in HTML templates.
 
 // #4. Component method returning any of the above:
@@ -77,8 +77,7 @@
 [ngClass]="<a method returning either #1, #2 or #3>")
 // is what you will use in real work.
 
-// A sample getClasses() method which returns a string which describes an object
-// (of course, the ):
+// A sample getClasses() method which returns a string which describes an object (similar to #3 but with the dictionary's values as true and false):
 @Component({
 	selector: 'app-my-component',
 	template: 'app-my-template'
@@ -110,7 +109,7 @@
 // In the example above, the getClasses() method returned a string which DESCRIBED an object.
 // However, the method could return the object itself:
 
-getClassObject(): { [key: string]: boolean } {
+getClasses(): { [key: string]: boolean } {
 	return {
 	  active: this.isActive,
 	  disabled: !this.isEnabled,
@@ -121,8 +120,8 @@ getClassObject(): { [key: string]: boolean } {
 // The type it returns
 { [key: string]: boolean }
 // is a TypeScript index signature.
-// It indicates that the function returns an object where the keys are strings and the values are boolean.
-// If the values could be of other types too, you would use something like "boolean | string" or "boolean | string | number").
+// It defines a key-value object where the keys are strings and the values are boolean.
+// If the values could be of other types too, you would use something like "boolean | string" or "boolean | string | number") instead of "boolean".
 // "key" is not actually used in the code but serves as a placeholder name for the key in the index signature.
 // You can use any name for the placeholder in the index signature, not just "key". For example:
 { [property: string]: any }

@@ -222,12 +222,7 @@ export class ExampleComponent {
   getStyles(): { [key: string]: string } {
 // The type it returns
 { [key: string]: string }
-// is a TypeScript index signature.
-// It indicates that the function returns an object where the keys are strings and the values are string too.
-// "key" is not actually used in the code but serves as a placeholder name for the key in the index signature.
-// You can use any name for the placeholder in the index signature, not just "key". For example:
-{ [property: string]: any }
-{ [prop: string]: any }
+// defines a key-value object where both the keys and the values are strings.
 
 // We could declare the function to return any:
   getStyles(): any {
