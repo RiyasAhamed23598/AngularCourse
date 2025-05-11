@@ -8,8 +8,12 @@
 // ### [ngClass]
 // ######################################################################################################
 
-// The standard 'class' property of an HTML element (like <div class="...">) contains the CSS class(es) to be applied hardcoded.
-// [ngClass] allows to build the value of the 'class' property dynamically - it can add or remove CSS classes based on component logic.
+// The standard 'class' property of an HTML element (like <div class="...">) contains hardcoded CSS class(es) to be applied.
+// If the classes are known in compile time, you would simply assign them to "class":
+<div class="class1 class2">
+
+// [ngClass] allows to build the value of the 'class' property dynamically - it can add or remove CSS classes based on component logic:
+<img [ngClass]="<the logic for adding and removing classes>" />
 
 // In the rendered HTML:
 //		"[ngClass]" is replaced with "class".
@@ -25,27 +29,33 @@
 <div [class]="getButtonClasses()"></div>
 // For the last example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
 
-// So, why to use [ngClass] if we have [class]?
+// So, if we have [class] which accepts a CSS classes list built dinamically, why to use [ngClass]?
 // There are some differences between them:
 
 // [class]
-// 		You must provide a ready single string which will be assigned to the "class" property as is (the standard behavior of the Property binding).
-// 		By becoming the new "class" property, that string overwrites the old value, deleting any static classes on the element which existed but are not provided in the new value.
+// 		You must provide a complete string that will be assigned to the "class" property as is. This follows the standard behavior of Property binding.
+//		The string must be a space-separated list of CSS classes, and nothing else.
+// 		It completely replaces the previous value of the "class" property, removing any static classes that existed on the element but aren't included in the new string.
 
 // [ngClass]
+// 		Much more flexible.
 // 		Adds/removes classes dynamically depending on logical conditions, merging them with existing static classes (rather than deleting).
-// 		Much more flexible: can accept a string which contains a several types of values: a plain string, an array, or an object. That is explained in details next.
+// 		Can accept a string which contains several types of values: a plain string with a space-separated list of CSS classes, an array, or an object.
+// 		It can contain logic (like the ternary operator), and access fields and methods of the component (usually boolean).
+// 		That is explained in details next.
 
 // @@@ The string passed to [ngClass] can be:
 
 // #1. List of classes separated by space (in fact, a string which contains a string which will be the value of the static 'class' property as is):
 <div [ngClass]="'class1 class2'">
-// That is similar to [class] but the whole list is ornamented by addidional quotes since the outer string contains another inner string which will be rendered as is
-// (you want to render [class]='class1 class2' rather than [class]=class1 class2).
+// That is similar to [class] but the whole list is ornamented by addidional quotes - the outer string contains an inner string be rendered as is
+// (you want to render [class]='class1 class2', not [class]=class1 class2).
 
 // #2. Array of classes:
 <div [ngClass]="['class1', 'class2']">
-// Notice that the Array can have a mix of static (hardcoded) classes with objects and dynamic expressions, for example:
+// This is convenient because it simplifies the function returning such a string — the function just dynamically builds and returns an array of classes
+// without worrying about concatenating them into a single string (Angular will handle that).
+// Notice that the array can have a mix of static (hardcoded) classes with objects and dynamic expressions, for example:
 <div [ngClass]="['class1', { 'class2': isClass2, 'class3': isClass3 }, 'class4', isClass5() ? 'class5' : '']">
 // This div will always have class1 and class4, and it will conditionally have class2, class3 and class5 based on the respective boolean values.
 
@@ -56,16 +66,19 @@
 // 		* the value is a boolean expression (normally, the component's property or method) which governs wether or not the CSS class must be applied
 
 // REMARK REGARDING #1, #2 AND #3:
-// Of course, if the classes are known in compile time, you would simply assign them to "class":
-<div class="class1 class2">
-// In fact, you will never assign a hardcoded string to [ngClass] as shown in #1, #2 and #3.
-// Their examples only demonstrate values which "has been built dynamically" - usually, returned by a method. That is the subject of #4:
+// In fact, you will never assign a hardcoded string to [ngClass] as shown in #1 and #2.
+// Their examples only demonstrate values which are normally built dynamically and returned by a method of the component class. That is the subject of #4.
+// The pattern of #3 can be used with the string hardcoded - the actual classes are still built dynamically by the boolean expressions.
+// But it's better to incapsulate the logic in a method which retrns the dictionary's values as true and false - try to minimize logic in HTML templates.
 
 // #4. Component method returning any of the above:
 <div [ngClass]="getClasses()">
-// This pattern ([ngClass]="a_method_returning_classes()") is what you will use in real work.
+// This pattern
+[ngClass]="<a method returning either #1, #2 or #3>")
+// is what you will use in real work.
 
-// A sample getClasses() method which returns a string which describes an object:
+// A sample getClasses() method which returns a string which describes an object
+// (of course, the ):
 @Component({
 	selector: 'app-my-component',
 	template: 'app-my-template'
@@ -93,7 +106,6 @@
 // Then the actual rendered HTML would be:
 <div class="active disabled">Content here</div>
 // As you see, highlight is not rendered since it's false.
-
 
 // In the example above, the getClasses() method returned a string which DESCRIBED an object.
 // However, the method could return the object itself:
