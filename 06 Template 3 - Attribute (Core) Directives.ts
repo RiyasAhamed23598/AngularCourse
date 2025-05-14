@@ -37,7 +37,7 @@
 
 // [ngClass]
 // 		Much more flexible.
-// 		Adds/removes classes dynamically depending on logical conditions, merging them with existing static classes (rather than deleting).
+// 		Adds/removes classes dynamically depending on logical conditions, merging them with existing static classes (rather than deleting them).
 // 		Can accept a string which contains several types of values: a plain string with a space-separated list of CSS classes, an array, or an object.
 // 		It can contain logic (like the ternary operator), and access fields and methods of the component (usually boolean).
 // 		That is explained in details next.
@@ -119,7 +119,10 @@
 
 // @@@ Combination of static and dynamic classes:
 
-// When an HTML element has both [ngClass] and a static 'class' attribute, the classes from both sources are combined. Here's how it works:
+// An HTML element can have both a static 'class' attribute and [ngClass]:
+<div class="..." [ngClass]="...">
+
+//In this case, the classes from both sources are combined. Here's how it works:
 // 1. The static 'class' attribute classes are applied.
 // 2. The classes from [ngClass] are then added.
 // 3. If the same class appears in both, it's not duplicated.
