@@ -24,12 +24,10 @@
 // But I'll tell you in advance that the Property binding syntax is
 [html_property]="component_variable_or_method"
 // like
-<img [src]="image1Url" />
-// or
 <div [class]="getButtonClasses()"></div>
 // For the last example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
 
-// So, if we have [class] which accepts a CSS classes list built dinamically, why to use [ngClass]?
+// So, if we already have [class] which accepts a CSS classes list built dinamically, why to use [ngClass]?
 // There are some differences between them:
 
 // [class]
@@ -73,11 +71,16 @@
 
 // #4. Component method returning any of the above:
 <div [ngClass]="getClasses()">
+
 // This pattern
 [ngClass]="<a method returning either #1, #2 or #3>")
 // is what you will use in real work.
 
-// A sample getClasses() method which returns a string which describes an object (similar to #3 but with the dictionary's values as true and false):
+// A sample getClasses() method which returns a string (#1) or an array (#2) would be simple - just add (or don't add) classes to the string or array depending on conditions.
+// If no CSS classes shuld be applied due to all the conditions being false, make the method return an empty string (return "''") or an empty array (return []).
+
+// But a sample getClasses() method which returns an object (#3) is more interesting.
+// Of course, the dictionary's values in that object will be true and false, not Boolean expressions to produce them as was shown in #3:
 @Component({
 	selector: 'app-my-component',
 	template: 'app-my-template'
@@ -90,45 +93,29 @@
 	  return false;  // in this example, we'll just return false for simplicity
 	}
   
-	getClasses(): string {
-	  return JSON.stringify({
-		active: this.isActive,
-		disabled: !this.isEnabled,
-		highlight: this.isImportant()
-	  });
-	}
+	getClasses(): { [key: string]: boolean } {
+		return {
+		  active: this.isActive,
+		  disabled: !this.isEnabled,
+		  highlight: this.isImportant()
+		};
+	  }
   }
 
-// getClasses() will return the next string:
-{"active":true,"disabled":true,"highlight":false}
+// getClasses() will return the next object:
+{"active": true, "disabled": true, "highlight": false}
 
 // Then the actual rendered HTML would be:
 <div class="active disabled">Content here</div>
-// As you see, highlight is not rendered since it's false.
+// As you see, highlight is not there since it's false.
 
-// In the example above, the getClasses() method returned a string which DESCRIBED an object.
-// However, the method could return the object itself:
-
-getClasses(): { [key: string]: boolean } {
-	return {
-	  active: this.isActive,
-	  disabled: !this.isEnabled,
-	  highlight: this.isImportant()
-	};
-  }
-
-// The type it returns
+// Note the type getClasses() returns:
 { [key: string]: boolean }
-// is a TypeScript index signature.
-// It defines a key-value object where the keys are strings and the values are boolean.
-// If the values could be of other types too, you would use something like "boolean | string" or "boolean | string | number") instead of "boolean".
+// It's a TypeScript index signature which defines a key-value object where the keys are strings and the values are booleans.
 // "key" is not actually used in the code but serves as a placeholder name for the key in the index signature.
 // You can use any name for the placeholder in the index signature, not just "key". For example:
 { [property: string]: any }
 { [prop: string]: any }
-
-// When [ngClass] gets an object itself, it interprets it and renders the same HTML as if would for a string describing the object:
-<div class="active disabled">Content here</div>
 
 // @@@ Combination of static and dynamic classes:
 
@@ -155,7 +142,7 @@ getClasses(): { [key: string]: boolean } {
 // ######################################################################################################
 
 // Used to dynamically apply inline styles to HTML elements based on component logic.
-// It doesn't add or remove CSS properties dynamically, it only changes their values.
+// In contrast to [ngClass], it doesn't add or remove CSS properties, it only changes values of existing properties.
 // Syntax:
 [ngStyle]="expression"
 // The expression can be an object, a method returning an object, or a property holding an object.
