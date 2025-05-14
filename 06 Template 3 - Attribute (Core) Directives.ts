@@ -120,25 +120,34 @@
 // @@@ Combination of static and dynamic classes:
 
 // An HTML element can have both a static 'class' attribute and [ngClass]:
-<div class="..." [ngClass]="...">
+<div class="bold" [ngClass]="getDiscountedClasses(product)">
+// In this case, the classes from both sources are combined: the static 'class' attribute classes are applied first, and then the classes from [ngClass] are applied over them.
 
-//In this case, the classes from both sources are combined. Here's how it works:
-// 1. The static 'class' attribute classes are applied.
-// 2. The classes from [ngClass] are then added.
-// 3. If the same class appears in both, it's not duplicated.
-<div class="static-class1 static-class2" [ngClass]="{'dynamic-class': isDynamic, 'static-class2': true}">
-  Content
-</div>
-// Assuming `isDynamic` is true, this will render as:
-<div class="static-class1 static-class2 dynamic-class">
-  Content
-</div>
-// In this result:
-// - 'static-class1' and 'static-class2' from the static class attribute are preserved.
-// - 'dynamic-class' from [ngClass] is added.
-// - 'static-class2' is not duplicated, even though it appears in both the static attribute and [ngClass].
+// A sample getDiscountedClasses() method:
+getDiscountedClasses(product: IProduct): { [key: string]: boolean } {
+    const discounted = (product.discount > 0);
+    return { strikethrough: discounted, italic: discounted };
+}
+
+// Let's say, it returns
+{ strikethrough: true, italic: true }
+
+// Then the rendered HTML will be:
+<div class="bold strikethrough italic">
+// The point is that 'bold' is still there, [ngClass] didn't erase it - instead, it added something to it.
+
+// If the same class appears in both, it's not duplicated.
+// For example, if the returned object would include 'bold':
+{ bold: true, strikethrough: true, italic: true }
+// then the rendered HTML would still be the same, with 'bold' appearing only once.
+
+// However, what if 'bold' would be returned by getDiscountedClasses() as false?
+{ bold: false, strikethrough: true, italic: true }
+// In this case, the rendered <div> would not have 'bold' because [ngClass] explicitly removed it, even if 'bold' was statically defined in the class attribute before:
+<div class="strikethrough italic">
+
 // This behavior allows for a flexible combination of static and dynamic class application.
-// The static classes provide a baseline, while [ngClass] adds or removes classes based on component logic without interfering with the static classes.
+// The hardcoded static classes provide a baseline, while [ngClass] adds or removes classes based on component logic.
 
 // ######################################################################################################
 // [ngStyle]
