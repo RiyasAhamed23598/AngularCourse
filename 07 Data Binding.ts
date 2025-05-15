@@ -231,7 +231,7 @@ export class ExampleComponent {
 // ------------------------------------------------------------------------------------------------------
 
 // You may ask:
-//    "Why to use Property binding like <img [src]="image1Url" /> instead of Interpolation like <img src="{{ image1Url }} which must do the work" />?
+//    "Why to use Property binding like <img [src]="image1Url" /> instead of Interpolation like <img src="{{ image1Url }}" /> which must do the work?
 
 // You're right that both property binding ([src]) and interpolation ({{ image1Url }}) can set attributes like src, and for simple cases, they often produce the same result.
 // However, there are technical reasons why property binding is preferred in some situations.
@@ -463,11 +463,9 @@ export class ExampleComponent {
 // * @Input() - Property binding (parent HTML ---> child class)
 // ######################################################################################################
 
-// @Input() decorator denotes a component's property as an input property.
-// Allows you to bind data properties of a parent component to properties in a child component or directive.
-// I.e. data is passed into the component or directive from its parent component in the application's component tree.
-// When you decorate a component's property with @Input(), you enable that property to receive values from its parent component. 
-// This is typically done through attribute binding in the Angular template syntax (whith square brackets).
+// @Input() decorator denotes a child component's property as an input property.
+// When you decorate a component's property with @Input(), you enable that property to receive values from its parent component.
+// The parent HTML template passes the value using attribute binding in the Angular template syntax (whith square brackets).
 
 // Consider a simple Angular component that displays a user's name.
 // The user's name is a property that the parent component can pass to this child component.
@@ -476,11 +474,11 @@ export class ExampleComponent {
 import { Component, Input } from '@angular/core';
 @Component({
   selector: "app-user",
-  template: `<h1>Welcome, {{ userName }}!</h1>`
+  template: `<h1>Welcome, {{ nameInChild }}!</h1>`
 })
 export class ChildComponent {
-  // Thanks to the @Input() decorator, the "name" property is designed to accept data from the component where it will be used:
-  @Input() name: string;
+  // Thanks to the @Input() decorator, the "name" property is designed to accept data from the component where it will be placed:
+  @Input() nameInChild: string;
 }
 
 // Parent Component:
@@ -489,22 +487,19 @@ export class ChildComponent {
   templateUrl: './app.component.html'
 })
 export class ParentComponent {
-  userName = 'John Doe'; // holds the value intended for the child
+  nameInParent = 'John Doe'; // holds the value intended for the child
 }
 
-// The assignment of the value from ParentComponent.userName to ChildComponent.name is specified in the template file of the ParentComponent.
-// Parent Component Template file (app.component.html):
+// Data binding from parent to child is specified in the Parent Component Template (app.component.html):
 <div>
-  <h2>Parent Component</h2>
-  <!-- Data binding from parent to child happens here - where ChildComponent.name is being used. -->
-  <!-- The value of ParentComponent.userName ('John Doe') is assigned to ChildComponent.name. -->
-  <!-- This transfer of data happens automatically because of the Angular change detection mechanism that observes changes -->
-  <!-- in input properties and updates the child component accordingly. -->
-  <app-user [name]="userName"></app-user>
+  <h2>This is the Parent Component!</h2>
+  <app-user [nameInChild]="nameInParent"></app-user>
 </div>
 
-// You see that the input property of the child component class ("name") is used as a property of the custom HTML tag specified in the child's selector.
-// You will do that in your real applications frequently!
+// The value of ParentComponent.nameInParent ('John Doe') is assigned to ChildComponent.nameInChild.
+
+// You see that the input property of the child component class ("nameInChild") is used as a property of the custom HTML tag specified in the child's selector.
+// Remember that well since you will use this pattern in your real applications frequently!
 // The HTML tag's property must be in square brackets since its value is not hardcoded - it's a property of the child component class.
 
 
@@ -515,7 +510,7 @@ export class ParentComponent {
 // Each time a component selector (like "app-user") is used in a template, it corresponds to an instance of that component (like ParentComponent)
 // 		being created when Angular processes the template.
 // For example, when this line is rendered in the Parent Component's template
-  <app-user [name]="userName"></app-user>
+  <app-user [nameInChild]="nameInParent"></app-user>
 // that automatically creates an instance of the class which has "app-user" selector, i.e. ChildComponent.
 
 // Angular does not expose or manage individual named instances	like traditional object-oriented programming might suggest -
@@ -530,12 +525,12 @@ export class ParentComponent {
 //		  When Angular initializes the components, it processes the template of each component.
 // * Component Interaction:
 //		  As Angular processes the template of the ParentComponent, it recognizes the property binding syntax
-//		    and looks up the value of userName in the ParentComponent.
+//		    and looks up the value of nameInParent in the ParentComponent.
 // * Data Transfer:
-//		  Angular then assigns the value of userName to the name property of the ChildComponent. This transfer is handled by Angular's
+//		  Angular then assigns the value of nameInParent to the nameInChild property of the ChildComponent. This transfer is handled by Angular's
 //		    change detection mechanism, which ensures that the child component receives the current value of the property from the parent component.
 // * Rendering:
-//		  The ChildComponent then uses this value in its template (<h1>Welcome, {{ name }}!</h1>), rendering the name passed from the parent.
+//		  The ChildComponent then uses this value in its template (<h1>Welcome, {{ nameInChild }}!</h1>), rendering the name passed from the parent.
 
 // @@@ Required input
 
@@ -595,13 +590,13 @@ export class CustomerProfileComponent {
 // Basic syntax:
 
 // In the child component class:
-@Output() customEvent = new EventEmitter<T>();
+@Output() eventEmitterInChild = new EventEmitter<T>();
 
 // Use the emit() method of the EventEmitter to send data:
-this.customEvent.emit(data);
+this.eventEmitterInChild.emit(data);
 
 // In the parent's template, use event binding to listen for the custom event:
-<child-component (customEvent)="parentMethod($event)"></child-component>
+<app-child (eventEmitterInChild)="reactToChildMessage($event)"></app-child>
 
 // Example:
 
@@ -612,17 +607,17 @@ import { Component, Output, EventEmitter } from '@angular/core';
   template: '<button (click)="sendMessage()">Send Message</button>'
 })
 export class ChildComponent {
-  @Output() messageEvent = new EventEmitter<string>();
+  @Output() eventEmitterInChild = new EventEmitter<string>();
 
   sendMessage() {
-	  this.messageEvent.emit('Hello from child');
+	  this.eventEmitterInChild.emit('Hello from child');
   }
 }
 
 // Parent component:
 @Component({
   selector: 'app-parent',
-  template: '<app-child (messageEvent)="reactToChildMessage($event)"></app-child>'
+  template: '<app-child (eventEmitterInChild)="reactToChildMessage($event)"></app-child>'
 })
 export class ParentComponent {
   reactToChildMessage(message: string) { console.log(message); }
@@ -631,13 +626,13 @@ export class ParentComponent {
 // @@@ $event
 
 // Review this line:
-  template: '<app-child (messageEvent)="reactToChildMessage($event)"></app-child>'
+  template: '<app-child (eventEmitterInChild)="reactToChildMessage($event)"></app-child>'
 // $event is a special variable in Angular template syntax which represents the data emitted by the event.
-// In our example, $event contains the string emitted by messageEvent in the child component.
+// In our example, $event contains the string emitted by eventEmitterInChild in the child component.
 // The parent's reactToChildMessage() method receives this string as its argument.
 
 // The data type of $event is dictated by the data type passed to EventEmitter<T> as T, which is string in our example:
-  @Output() messageEvent = new EventEmitter<string>();
+  @Output() eventEmitterInChild = new EventEmitter<string>();
 
 // However, it could be any type. In the next example, it's an object:
 
@@ -704,3 +699,20 @@ export class ParentComponent {
 // 		- prevents the default form submission behavior (which would cause a page reload);
 // 		- works more reliably across different browsers;
 // 		- integrates better with Angular's form handling mechanisms.
+
+// ######################################################################################################
+// Summary
+// ######################################################################################################
+
+// Within a single component:
+
+// [] (Property binding): Binds data from component class to template elements
+// () (Event binding): Listens for DOM events from template elements, triggering component class methods
+
+// Between parent and child components:
+
+// [] with @Input(): Parent passes data down to child
+// () with @Output(): Child emits events up to parent
+
+// The syntax looks identical visually, but the underlying mechanism differs. Single-component bindings connect the component with its own template.
+// Parent-child bindings create communication channels between separate components through the Input/Output decorators.
