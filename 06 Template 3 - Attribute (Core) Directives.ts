@@ -77,7 +77,7 @@
 // is what you will use in real work.
 
 // A sample getClasses() method which returns a string (#1) or an array (#2) would be simple - just add (or don't add) classes to the string or array depending on conditions.
-// If no CSS classes shuld be applied due to all the conditions being false, make the method return an empty string (return "''") or an empty array (return []).
+// If no CSS classes shuld be applied due to all the conditions being false, make the method return an empty string (return '') or an empty array (return []).
 
 // But a sample getClasses() method which returns an object (#3) is more interesting.
 // Of course, the dictionary's values in that object will be true and false, not Boolean expressions to produce them as was shown in #3:

@@ -58,30 +58,50 @@ export interface IProduct {
 // * State
 // ######################################################################################################
 
-// State refers to a singleton object that holds all the data of a module (normally, a screen) as it is at the current moment (i.e. the current state of the module).
+// At high level, an application is a collection of modules.
+// Each module normally represents a single domain/area and includes a screen (and dependent popup screens it opens, if any).
+// State refers to a singleton object that holds all the data of a module as it is at the current moment (i.e. the current state of the module).
 
 // A module usually consists of a few components:
-// - The parent, module-level component - the highest-level container.
-//      Its HTML template defines the general outline of the window, as well as where each child component is located using tags with the child components' selectors.
-// - Child components rendering different areas of the screen.
 
-// As an example, let's consider a Customer screen (module). It's unrealistic, but convenient for explaining the concept.
-// CustomerScreenComponent is the highest-level container. It has the following visual structure:
+// - The parent, module-level component - the top-level container, i.e. the visual "skeleton" of the main screen of the domain.
+//      Its HTML template defines the general outline of the screen and where each child component is located (using the child components' selector tags).
+//      Here you can see the HTML of a real parent component I developed - it contains some screen areas, buttons and a Tab control, but not its own data fields:
+//      https://github.com/Ursego/AngularTypeScriptCSharpCodeExamples/blob/main/4%20Angular/data-chg-sub/data-chg-sub.component.html
+
+// - Child components to render different areas of the main screen.
+//      For example, in the just mentioned real parent component you can see this line:
+        <app-data-chg-sub-card [contextDataChgSub]="contextDataChgSub"></app-data-chg-sub-card>
+//      The app-data-chg-sub-card selector is defined in
+//      https://github.com/Ursego/AngularTypeScriptCSharpCodeExamples/blob/main/4%20Angular/data-chg-sub/data-chg-sub-card/data-chg-sub-card.component.ts
+//      So, the following HTML will be rendered on the selector's place:
+//      https://github.com/Ursego/AngularTypeScriptCSharpCodeExamples/blob/main/4%20Angular/data-chg-sub/data-chg-sub-card/data-chg-sub-card.component.html
+//      Note using the word Card. It is in Angular slang what Form is in other frameworks (i.e. a group of fields describing the details of a single database record).
+
+// - Components for dependent screens opened from the main screen. They can be opened by either the parent or a child component.
+//      Note that we don't call them child components - thay are the top-level components of their own screen (since there are no other components there, ha-ha!)
+
+// Each component has a dedicated data structure in the State of the module it belongs to.
+
+// As an example, let's consider a Customer module. That screen is unrealistic, but convenient for explaining the concept.
+// CustomerComponent is the highest-level container. It has the following visual structure:
 // * On the left side - a narrow vertical panel which is displayed always. It includes:
 //    ** A customer search widget (CustomerSearchComponent) with input fields to search by, and a Search button.
 //    ** A list of customers (CustomerListComponent) found by the entered search criteria.
 // * When the user selects a customer in the list, the main part of the screen displays info for the selected customer:
-//      ** The customer details form (CustomerComponent).
+//      ** The customer details card (CustomerCardComponent).
 //      ** A list of the customer's orders (OrderListComponent).
 // * When the user clicks an order, the screen displays info for the selected order:
-//      ** The order details form (OrderComponent).
-//      ** A list of the order's products (ProductListComponent).
-//            When the user double-clicks a product in the list, a details form dialog pops up (ProductComponent).
+//      ** The order details card (OrderCardComponent).
+//      ** A list of the products included in the order (ProductListComponent).
+//            When the user double-clicks a product in the list, a details card dialog pops up (ProductCardComponent).
+
 // Each entity has the CRUD functionality.
+
 // Notice the naming convention:
-// - The screen-level component has "Screen" in its name: <Entity>ScreenComponent.
 // - List components have "List" in their names: <Entity>ListComponent.
-// - Form components don't have neither "Screen" nor "Form" in their names: <Entity>Component.
+// - Card components have "Card" in their names: <Entity>CardComponent.
+// - Other types have neither "List" nor "Card": CustomerComponent, CustomerSearchComponent.
 
 // Here is the datatype for the State (ICustomerState) which describes the entire screen's data:
 
@@ -155,8 +175,10 @@ export const initialCustomerState: ICustomerState = {
 // While State is a module-level container, Store is an application-level container.
 // The Store instance is a singleton object that holds the States of multiple modules combined, which makes up the state of the whole application.
 
-// The Store is the single source of truth for the current state of the application.
-// It provides a way to access the states of different modules, dispatch actions, and subscribe to state changes.
+// The Store is the "single source of truth" for the application state/data.
+// This simply means that our application state has only one global, centralized source.
+
+// The Store provides a way to access the states of different modules, dispatch actions, and subscribe to state changes.
 // You can think of it as a database that you can get access in order to retrieve or update the data that the application operates on.
 // The Store is an observable, and components can subscribe to it to get updates when the state changes.
 
@@ -164,8 +186,7 @@ export const initialCustomerState: ICustomerState = {
 // Redux popularized the idea of organizing the application state into simple objects and updating this state by replacing it with a new state.
 // This means that the object shouldn't be mutated directly, but rather should be replaced with a new object which contains the new version of the data.
 
-// You don't declare the Store data type, and don't instantiate it.
-// Angular does all that for you, creating a Store instance as injectible.
+// You don't declare the Store data type, and don't instantiate it - Angular does all that for you, creating a Store instance as injectible.
 // You only need to inject it into your components so they can read and update it.
 
 // Here is a sample component for the Customer List.
@@ -194,7 +215,7 @@ export class CustomerListComponent implements OnInit, OnDestroy {
     // Populate the observables from the Store:
     this.customerList$ = this._store.select('customerList');
     this.contextCustomer$ = this._store.select('contextCustomer');
-    // The parameters passed to the select() functions are strings with the names of the current module's State properties.  
+    // The parameters passed to the select() functions are strings with the names of the current module's State properties, as defined in the model.  
     // Even though the entire Store is queried, only data from the current module's State is subscribed to.  
     // This means different modules (screens) can have fields with the same names in their States without interfering with each other.
 
@@ -232,7 +253,7 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 // Actions provide an easy global communication channel. They are one of the main building blocks in NgRx.
 
 // The Action file is a module-level file, like the other files which will be described soon - Service, Effect and Reducer.
-// Each file serves all the the components of the module - CustomerComponent, OrderComponent and ProductComponent.
+// Each file serves all the components of the module - CustomerCardComponent, OrderCardComponent and ProductCardComponent.
 
 // An Action object has two properties:  
 //   * type – a textual description of the intention.  
@@ -372,7 +393,7 @@ export const delProductSuccessAction = createAction(d.DelProductSuccess, props<{
 
 // === END OF THE Action FILE ===
 
-// Here are sample lines in the CustomerComponent which dispatch some Actions (of course, they would be in different parts of the component class):
+// Here are sample lines in the CustomerCardComponent which dispatch some Actions (of course, they would be in different parts of the component class):
 this._store.dispatch(selCustomerListAction({ actionLastName: this._lastName }));
 this._store.dispatch(selCustomerAction({ actionCustomerId: highlightedCustomerId })); // highlightedCustomerId is a param of delCustomer() function called from the template
 this._store.dispatch(insCustomerAction({ actionCustomer: this._contextCustomer }));
