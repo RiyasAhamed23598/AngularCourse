@@ -272,7 +272,7 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 //   * type – a textual description of the intention.  
 //   * payload (optional) – additional data required for the action (like retrieval parameters), used to enforce type safety when the Action is dispatched.  
 
-// An Action is created and returned by the createAction() factory function, which accepts type and payload as its parameters.  
+// An Action is created and returned by the createAction() factory function, which accepts type and payload.  
 // The next example defines a few simple Actions. No payload, so only type is passed to createAction().  
 // It is good practice to add the word "Action" to the names of Action objects:
 import { createAction } from '@ngrx/store';
@@ -280,7 +280,7 @@ export const incrementAction = createAction('[Counter] Increment');
 export const decrementAction = createAction('[Counter] Decrement');
 export const resetAction = createAction('[Counter] Reset');
 
-// @@@ Action TYPE - the 1st parameter to createAction():
+// @@@ Action TYPE - the 1st parameter to createAction()
 
 // Must be unique across the entire application since it serves as a unique identifier for each Action.
 // Having duplicate action types can lead to unintended consequences.
@@ -291,7 +291,7 @@ export const resetAction = createAction('[Counter] Reset');
 // "Description" reflects the specific event that is fired.
 // That allows different Modules to have Actions with a same Description, like '[Customer] Save' and '[Order] Save'.
 
-// @@@ Action PAYLOAD - the 2nd parameter (optional) to createAction():
+// @@@ Action PAYLOAD - the 2nd parameter (optional) to createAction()
 
 // Describes the payload (additional data) expected by the Action. That data must be provided when the Action is dispatched.
 // The argument prevents sending wrong data to the Action, i.e. inforces strong typing.
@@ -429,7 +429,7 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 // Strictly speaking, this class is not a part of the NgRx library, but it's commonly found in apps that interact with a web service, which is the standard architecture.
 
 // Typically, Services are injected into other areas of our app, so they must have the @Injectable decorator.
-// The next Service will be injected into the Effect class (described next):
+// The next Service is injected into the Effect class (which will be described next):
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -455,11 +455,11 @@ export class CustomerService {
     return this._http.get<ICustomer>(`${this._customersUrl}/${customerId}`, customerId);
   }
 
-  insCustomer(customer: ICustomer): Observable<ICustomer> {
+  insCustomer(customer: ICustomer): Observable<ICustomer> { // it also returns the inserted customer with the ID genereted by the DB
     return this._http.post<ICustomer>(`${this._customersUrl}/ins`, customer)
   }
 
-  updCustomer(customer: ICustomer): Observable<ICustomer> {
+  updCustomer(customer: ICustomer): Observable<ICustomer> { // it also returns the updated customer with the updatedBy & updatedAt genereted by the DB
     return this._http.put<ICustomer>(`${this._customersUrl}/upd`, customer);
   }
 
@@ -475,14 +475,14 @@ export class CustomerService {
 
   // < ... A SIMILAR FRAGMNENT FOR PRODUCT FUNCTIONS HERE, USING this._productsUrl ... >
 }
-// Notice that the generic type parameter, passed to the HTTP functions (get, post, put & delete), describes the type, returned by the web service - not the type sent to it.
-// For example, selCustomerList passes <ICustomer[]> since an array of customers is expected from the web service.
+// Notice that the generic type parameter, passed to the HTTP functions - get(), post(), put() & delete() - describes the type, returned by the web service - not the type sent to it.
+// For example, selCustomerList passes ICustomer[] - get<ICustomer[]> - since an array of customers is expected from the web service.
 
 // Also notice that the HTTP functions must fit the HTTP request types, expected by the web service, as well as the URLs must be parsable by the web service.
 // Here's the suggested URL convention:
 
 // -------------------------------------------------------------------------------------------------------------------------
-// CRUD OPERATION:      HTTP:   MAIN (PARENT) ENTITY:      CHILD ENTITY:
+// CRUD OPERATION:      HTTP:   THE MAIN (PARENT) ENTITY:  A CHILD ENTITY:
 // -------------------------------------------------------------------------------------------------------------------------
 // SELECT all entities  GET     /entities                  /entities/{parentEntityId}/child_entities
 // SELECT an entity     GET     /entities/{entityId}       /entities/{parentEntityId}/child_entities/{childEntityId}
@@ -496,7 +496,7 @@ export class CustomerService {
     return this._http.post<ICustomer>(`${this._customersUrl}/ins`, customer)
   }
 // An object of ICustomer type is also sent to the UPDATE web service, and it contains the ID.
-// So, strictly speaking, there is no need to add the ID to the URL. But we do that for the user to see consistent URLs across the app.
+// So, there is no need to add the ID to the URL for UPDATE. But we do that for the user to see consistent URLs across the app.
 
 // We can create services with commands:
 ng generate service MyService
@@ -510,9 +510,9 @@ ng g s MyService
 // If your application needs to perform a side effect, you define an Effect class.  
 
 // Effects are built using RxJS Observables and are designed to listen for specific Actions and perform side effects without directly modifying the Store.  
-// The Effect class captures a dispatched main Action and calls the corresponding method in the Web Service class.  
-// It is also the "first station" within Angular to handle the data returned from the middle tier via the Web Service.  
-// Once a side effect is successfully completed, the Effect typically dispatches the respective "Success" Action to update the Store with the external results.  
+// The Effect class captures a dispatched main (i.e. non-"Success") Action and calls the corresponding method in the Web Service class.  
+// After that call, the Effect is also the "first station" within Angular to handle the data returned from the middle tier via the Web Service.  
+// Once a side effect is successfully completed, the Effect typically dispatches the respective "Success" Action to update the Store with the results returned by the Web Service.  
 
 // We'll use the Customer screen to demonstrate how Effects handle side effects.
 // The class name uses just "Effect" for brevity, but it stands for "Side Effect":
@@ -543,8 +543,10 @@ import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class CustomerEffect {
-  // Note the Service injected into the Effect through its constructor:
-  constructor(private _actions$: Actions, private _svc: CustomerService) {}
+  constructor(
+    private _actions$: Actions,
+    private _svc: CustomerService // Remember we defined CustomerService with the @Injectable() directive? Now we inject it into the Effect through its constructor
+  ) {}
 
   // Customer:
 
@@ -555,10 +557,10 @@ export class CustomerEffect {
     this._actions$.pipe(
       // ofType() is an NgRx operator that allows only Actions with specific types to pass through.
       // It filters the Observable stream to listen specifically for the Action it handles.
-      // This means the subsequent operators in the pipe will only run when the apropriate Action is dispatched.
+      // This means the subsequent operators in the pipe will only run when selCustomerListAction is dispatched.
       ofType(selCustomerListAction),
       switchMap((action) => {
-        // The passed function calls the respective Web Service function passing to it the input data:
+        // Call the respective Web Service function passing to it the Action's payload as input:
         return this._svc.selCustomerList(action.actionLastName).pipe(
           // If no errors, dispatch the counterpart Success Action passing to it the Web Service function's output:
           map((customerList: ICustomer[]) => selCustomerListSuccessAction({ actionCustomerList: customerList })),
