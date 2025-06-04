@@ -72,18 +72,19 @@ export interface IProduct {
 // - Child components to render different areas of the main screen.
 //      For example, in the just mentioned real parent component you can see this line:
         <app-data-chg-sub-card [contextDataChgSub]="contextDataChgSub"></app-data-chg-sub-card>
-//      The app-data-chg-sub-card selector is defined in
+//      The app-data-chg-sub-card selector identifies the component defined in
 //      https://github.com/Ursego/AngularTypeScriptCSharpCodeExamples/blob/main/4%20Angular/data-chg-sub/data-chg-sub-card/data-chg-sub-card.component.ts
 //      So, the following HTML will be rendered on the selector's place:
 //      https://github.com/Ursego/AngularTypeScriptCSharpCodeExamples/blob/main/4%20Angular/data-chg-sub/data-chg-sub-card/data-chg-sub-card.component.html
 //      Note using the word Card. It is in Angular slang what Form is in other frameworks (i.e. a group of fields describing the details of a single database record).
 
 // - Components for dependent screens opened from the main screen. They can be opened by either the parent or a child component.
-//      Note that we don't call them child components - thay are the top-level components of their own screen (since there are no other components there, ha-ha!)
+//      Note that we don't call them child components - thay are the top-level components of their own screen (since there are no other components there).
 
 // Each component has a dedicated data structure in the State of the module it belongs to.
 
-// As an example, let's consider a Customer module. That screen is unrealistic, but convenient for explaining the concept.
+// As an example, let's consider a Customer module. That screen is extremely unrealistic, but its entities are convenient for explaining the concept.
+
 // CustomerComponent is the highest-level container. It has the following visual structure:
 // * On the left side - a narrow vertical panel which is displayed always. It includes:
 //    ** A customer search widget (CustomerSearchComponent) with input fields to search by, and a Search button.
@@ -99,11 +100,11 @@ export interface IProduct {
 // Each entity has the CRUD functionality.
 
 // Notice the naming convention:
-// - List components have "List" in their names: <Entity>ListComponent.
-// - Card components have "Card" in their names: <Entity>CardComponent.
-// - Other types have neither "List" nor "Card": CustomerComponent, CustomerSearchComponent.
+// - List components: <Entity>ListComponent.
+// - Card components: <Entity>CardComponent.
+// - Other types have neither "List" nor "Card" in their names: CustomerComponent, CustomerSearchComponent.
 
-// Here is the datatype for the State (ICustomerState) which describes the entire screen's data:
+// Here is the datatype (model) for the State (ICustomerState) which describes the entire screen's data:
 
 import { ICustomer, IOrder, IProduct } from 'src/models/customer.model';
 
@@ -124,15 +125,23 @@ export interface ICustomerState {
   contextProductLoaded: boolean;
 }
 
-// As you can see, the State doesn't hold references to component instances.  
-// It only contains the data for them.  
-// When components are created, they work with this data only.  
-// Components may have properties for the same data, but these are just temporary storage to facilitate local data manipulations within the Components.
+// As you see, the State doesn't hold references to component instances - it only contains their data.  
+// When components are created, they work with this data only.
+
+// Component classes may have properties for the same fields, but these are just temporary storage to facilitate local data manipulations within the Components.
+// The usual workflow:
+// 1. A value is copied from the state to a property of the component class (and automatically rendered in the HTML if it has a linked control).
+// 2. That local copy of the data is processed in the component (either by user interaction or programmatically).
+// 3. The changed value is saved in the state which makes the change permanent.
+//      The component can change the state directly by dispatching an Action, but it's not a common scenario.
+//      Usually, the component dispatches an Action which saves data in the DB by calling a web service.
+//      After that, the respective SuccessAction updates the State with the change.
+//      Now all three the copies of the value - in the DB, in the State and in the component class - are in sync.
 
 // State:
 // * Centralizes data management providing a single source of truth for the module's data.
 // * Ensures that all parts of the module are synchronized with the same version of the data.
-// * Simplifies communication between components by avoiding direct data sharing and, worse, multiple main copies of the same data.
+// * Simplifies communication between components by avoiding direct data sharing and, worse, multiple "main" copies of the same data.
 // * Ensures that growing amounts of data are handled efficiently and predictably.
 
 // In NgRx, State is immutable, meaning it cannot be directly modified.
@@ -141,7 +150,7 @@ export interface ICustomerState {
 
 // @@@ The Initial State:
 
-// In addition to declaring the State type, you must also create the Initial State object of that type, with all the properties having default values:
+// In addition to declaring the State type (ICustomerState), you must also create the Initial State object of that type, with all the fields having default values:
 export const initialCustomerState: ICustomerState = {
   // Customer:
   customerList: [],
@@ -172,14 +181,15 @@ export const initialCustomerState: ICustomerState = {
 // * Store
 // ######################################################################################################
 
-// While State is a module-level container, Store is an application-level container.
+// While State is a module-level container, Store is an application-level container (in fact, a container of containers).
 // The Store instance is a singleton object that holds the States of multiple modules combined, which makes up the state of the whole application.
 
 // The Store is the "single source of truth" for the application state/data.
 // This simply means that our application state has only one global, centralized source.
 
-// The Store provides a way to access the states of different modules, dispatch actions, and subscribe to state changes.
+// The Store provides a way to access the states of different modules, dispatch Actions, and subscribe to state changes.
 // You can think of it as a database that you can get access in order to retrieve or update the data that the application operates on.
+
 // The Store is an observable, and components can subscribe to it to get updates when the state changes.
 
 // The Store is a state-management solution inspired by the famous library Redux.
@@ -190,7 +200,7 @@ export const initialCustomerState: ICustomerState = {
 // You only need to inject it into your components so they can read and update it.
 
 // Here is a sample component for the Customer List.
-// It's incomplete and created only to demonstrate working with the Store:
+// It's incomplete and created only to demonstrate how components work with the Store:
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
@@ -218,6 +228,7 @@ export class CustomerListComponent implements OnInit, OnDestroy {
     // The parameters passed to the select() functions are strings with the names of the current module's State properties, as defined in the model.  
     // Even though the entire Store is queried, only data from the current module's State is subscribed to.  
     // This means different modules (screens) can have fields with the same names in their States without interfering with each other.
+    // So, if another module has the contextCustomer field in its model, it will be ignored by select('contextCustomer') in CustomerListComponent.
 
     // Populate the regular vars from the observables (to work with the data in the imperative way, if needed):
     this._s.add(
@@ -229,11 +240,13 @@ export class CustomerListComponent implements OnInit, OnDestroy {
   }
 }
 
-// If another component of the module will need to get, for example, the context customer, it will do the same:
+// Note that any components of the module can access any properties of the module's state - even those which store data for other components of the same module.
+// For example, if another component of the module needs to get the context customer, it will do the same call in its component class:
 this.contextCustomer$ = this._store.select('contextCustomer');
 // That eliminates the need to pass that customer from the parent component's template to the child components.
-// If any component changes contextCustomer property of the module's State, all the subscribing components are immediately updated as well.
-// So, for example, their templates are automatically re-rendered to reflect the change. Reactive programming is magic!
+
+// The this._store.select('contextCustomer') method makes this.contextCustomer$ subscribe to the changes of contextCustomer in the Store.
+// So, if any component changes contextCustomer of the module's State, all the subscribing components are immediately updated as well.
 
 // @@@ What is an Angular application?
 
