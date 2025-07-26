@@ -511,7 +511,7 @@ ng g s MyService
 
 // Effects are built using RxJS Observables and are designed to listen for specific Actions and perform side effects without directly modifying the Store.  
 // The Effect class captures a dispatched main (i.e. non-"Success") Action and calls the corresponding method in the Web Service class.  
-// After that call, the Effect is also the "first station" within Angular to handle the data returned from the middle tier via the Web Service.  
+// After that call, the Effect is the "first station" within Angular to handle the data returned from the middle tier.  
 // Once a side effect is successfully completed, the Effect typically dispatches the respective "Success" Action to update the Store with the results returned by the Web Service.  
 
 // We'll use the Customer screen to demonstrate how Effects handle side effects.
@@ -559,10 +559,12 @@ export class CustomerEffect {
       // It filters the Observable stream to listen specifically for the Action it handles.
       // This means the subsequent operators in the pipe will only run when selCustomerListAction is dispatched.
       ofType(selCustomerListAction),
+      // switchMap takes an observable, maps each emitted value to a new inner observable, and switches to the latest one, cancelling any previous subscriptions.
+      // Think of it as “forget the past, focus on the present”:
       switchMap((action) => {
         // Call the respective Web Service function passing to it the Action's payload as input:
         return this._svc.selCustomerList(action.actionLastName).pipe(
-          // If no errors, dispatch the counterpart Success Action passing to it the Web Service function's output:
+          // If no errors, dispatch the respective Success Action passing to it the Web Service function's output:
           map((customerList: ICustomer[]) => selCustomerListSuccessAction({ actionCustomerList: customerList })),
           catchError(() => EMPTY), // a real app would include an error handler, but let's leave that out for now.
         );
@@ -637,8 +639,9 @@ export class CustomerEffect {
 
 // The mission of the Reducer is critical – it's responsible for updating the State with the results of the Web Service calls when a ...Success Action is dispatched by the Effect.
 
-// Also, you can create and dispatch an Action which updates the State without calling side effects - like those without "Success" in the example below.
-// That is the correct way, we don't update the State in other spots of the application. Instead, these spots dispatch Actions which signal the Reducer to change the State.
+// Also, you can create and dispatch Actions which update the State without calling side effects - like those without "Success" in the example below.
+// That is the correct way! We don't update the State in other spots of the application, even though technically it's possible.
+// Instead, these spots dispatch Actions which signal the Reducer to change the State.
 // Reducer is one centralized file with all State updates for the given module, that significantly simplifies debugging.
 
 // Here is an example Reducer file for our Customer module:
@@ -749,17 +752,18 @@ const getNewState = createReducer(
 
 // 1. Actions that are called from business logic and trigger external Effects (usually web services). They have corresponding Success Actions.
 // A typical example is Actions for CRUD operations.
-// Such Actions do not change the State with business data (only turn on the progress bar display flag).
+// Such Actions do not change the State with business data (except of turning on the progress bar display flag).
 
 // 2. Success Actions. Called from the Effect class in case of successful execution of the main Action.
-// As you remember, their task is to update the State with the result, retuned by the Effect.
-// By the way, some applications also use Failure Actions, called from the Effect class in case of an error in the main Action, if the State must be updated with the failure info.
+// Their task is updating the State with the result, retuned by the Effect.
+// Some applications also use Failure Actions, called from the Effect class in case of an error in the main Action, if the State must be updated with the failure info.
 
 // 3. Actions that are called from business logic and DO NOT trigger external Effects.
 // Their task is to change the State by writing into it the data passed as payload by the calling business code.
 // For example, SetContextCustomer receives data as a whole ICustomer object that was already stored on the client side because it was received from the web service earlier.
-// Actions of this category are also used to "manually" change a specific field of the State - for example, write calculation results.
-// Let me remind you once again that any physical changes to the State must be made only inside the Reducer.
+// Actions of this category are also used to "manually" change a specific field of the State which should not be stored outside right away.
+
+// Let me remind you once again that any physical changes to the State must be made only within the Reducer.
 // Despite the fact that any component has access to the State, changes must be made by dispatching Actions, and not by assigning values ​​to the State fields directly.
 
 // Let's briefly summarize the life cycle stages that an Action goes through:
@@ -770,8 +774,8 @@ const getNewState = createReducer(
 // 2. The Reducer captures it and updates the State to display the progress bar.
 // 3. The Effect captures the Action and calls the corresponding function of the Service, passing the payload as an input.
 // 4. The Service sends an HTTP request to the web service and is waiting for its result.
-// 5. When an HTTP response is received, the Service function passes its output to the Effect.
-// 6. If the call was successful, the Effect dispatches the respective Success Action, passing the results returned by the web service.
+// 5. When an HTTP response is received, the Service function passes the received data to the Effect.
+// 6. If the call was successful, the Effect dispatches the respective Success Action, passing the data returned by the web service.
 // 7. The Reducer captures the Success Action, updates the State with those results, and turns off the progress bar flag.
 
 // Actions unrelated to Effects (category 3):
