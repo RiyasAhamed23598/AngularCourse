@@ -77,7 +77,7 @@ import { UserService } from './user.service';
     </ul>
   `
 })
-export class UserListComponent implements OnInit { // <<<<<<<<<<<<< notice "implements OnInit"
+export class UserListComponent implements OnInit { // <<<<<<<<<<<<<<<<<<<<<<<< notice "implements OnInit"
   users: User[] = [];
 
   // The UserService is injected into the UserListComponent through its constructor:
@@ -85,7 +85,7 @@ export class UserListComponent implements OnInit { // <<<<<<<<<<<<< notice "impl
 
   // The fetchUsers method is responsible for initiating the data-fetching process from the UserService object.
   // It subscribes to the Observable returned by the getUsers method of the service, setting the component's users property with the fetched data.
-  // This data binding subsequently updates the view to display the list of users.
+  // This data binding will subsequently update the view to display the list of users.
   fetchUsers(): void {
     this._userSvc.getUsers().subscribe(data => {
       this.users = data;
@@ -98,13 +98,13 @@ export class UserListComponent implements OnInit { // <<<<<<<<<<<<< notice "impl
   ngOnInit(): void {
     this.fetchUsers();
   }
+
+  // The unsubscribing logic is omitted for simplicity - you will learn about it later.
 }
 
 // Using ngOnInit for fetching data separates construction from initialization logic.
 // ngOnInit ensures the component's constructor remains light and focused only on setting up dependency injection,
 //    without side effects like data fetching.
-// It runs after the constructor and the first ngOnChanges, making it a safe and logical place to initialize data
-//    that might depend on input properties or other initialization logic.
 
 // ######################################################################################################
 // * ngDoCheck
@@ -421,7 +421,8 @@ export class AppComponent {}
 
 // Called ONLY ONCE after the first `ngAfterContentChecked`.
 // Usage: Respond after Angular initializes the component's views and child views, or the view that contains the directive.
-// A critical point in the component lifecycle where developers can safely interact with the component's view for the first time.
+// A critical point in the component lifecycle where developers can safely interact with the component's view for the first time
+//   (as you remember, you cannot access the DOM elements yet in the constructor or ngOnInit). 
 // Particularly important for any operations that require manipulating DOM elements, or interact with child components that are fully rendered.
 // Typical Uses:
 //	* Accessing Child Components:
@@ -448,37 +449,37 @@ import { Component, ElementRef, ViewChild, AfterViewInit, ViewChildren, QueryLis
   `
 })
 export class ExampleComponent implements AfterViewInit {
-  @ViewChild('myDiv') myDiv: ElementRef; // Access to the DOM element
-  @ViewChildren('buttons') buttons: QueryList<ElementRef>; // Access to multiple DOM elements
-  @ViewChild('childComp') childComponent: ElementRef; // Access to child component
+  @ViewChild('myDiv') myDiv: ElementRef; // access to the DOM element
+  @ViewChildren('buttons') buttons: QueryList<ElementRef>; // access to multiple DOM elements
+  @ViewChild('childComp') childComponent: ElementRef; // access to child component
 
   constructor() {}
 
   ngAfterViewInit() {
     // 1. Accessing Child Components
-	// The ViewChild and ViewChildren decorators are used to reference child components and multiple elements respectively,
-	// which are fully accessible in ngAfterViewInit.
+    // The ViewChild and ViewChildren decorators are used to reference child components and multiple elements respectively,
+    // which are fully accessible in ngAfterViewInit.
     console.log('Child component instance:', this.childComponent);
 
     // 2. DOM Manipulations
-	// Directly manipulating the DOM using nativeElement is shown here.
-	// This is practical for applying styles or properties that depend on the component being fully rendered.
-    this.myDiv.nativeElement.style.backgroundColor = 'yellow'; // Direct DOM manipulation
+    // Directly manipulating the DOM using nativeElement is shown here.
+    // This is practical for applying styles or properties that depend on the component being fully rendered.
+    this.myDiv.nativeElement.style.backgroundColor = 'yellow'; // direct DOM manipulation
     console.log('DOM element after view init:', this.myDiv.nativeElement.innerHTML);
 
     // 3. Integration with UI Libraries
-	// Although actual library integration like jQuery is not recommended in Angular due to potential conflicts with Angular's DOM management,
-	// this example adjusts styles to demonstrate how you might otherwise initialize a library or plugin that manipulates these elements.
+    // Although actual library integration like jQuery is not recommended in Angular due to potential conflicts with Angular's DOM management,
+    // this example adjusts styles to demonstrate how you might otherwise initialize a library or plugin that manipulates these elements.
     // Assuming a library that requires an element selector jQuery-like usage example (purely for demonstration)
-    // $('.buttons').pluginName(); // Would be the way to initialize a plugin
+    // $('.buttons').pluginName(); // would be the way to initialize a plugin
     this.buttons.forEach(button => {
-      button.nativeElement.style.fontSize = '20px'; // Simple DOM manipulation as a placeholder for plugin initialization
+      button.nativeElement.style.fontSize = '20px'; // simple DOM manipulation as a placeholder for plugin initialization
     });
 
     // 4. Responsive Post-Rendering Actions
     // This could be adjusting size or performing an animation based on the layout.
-	// This example checks the rendered size of an element to make further style adjustments,
-	// useful for dynamic layouts that need to react to their rendered environment.
+    // This example checks the rendered size of an element to make further style adjustments,
+    // useful for dynamic layouts that need to react to their rendered environment.
     if (this.myDiv.nativeElement.offsetWidth > 200) {
       this.myDiv.nativeElement.style.fontSize = '24px';
     }

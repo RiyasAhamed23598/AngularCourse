@@ -8,7 +8,7 @@
 //### @ViewChild
 
 // The @ViewChild decorator is used to query a single element from the component's template.
-// The name of the template reference variable (#var) is passed to the @ViewChild decorator as a parameter (with no pound sign):
+// The name of the template reference variable (#var) is passed to the @ViewChild decorator as a parameter:
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
@@ -58,7 +58,7 @@ export class AppComponent {
   }
 }
 
-// @ViewChildren returns ALL the elements with the given template reference variable, not only the first.
+// In contrast to @ViewChild, @ViewChildren returns ALL the elements with the given template reference variable, not only the first.
 // In this example, @ViewChildren is used to get references to all <div> elements with the template reference variable #item.
 // The changeItems() method then changes the text color of all these elements to red.
 

@@ -1,8 +1,8 @@
 // Data binding in Angular is a powerful feature that allows you to synchronize data between the component class and the template.
 // It's the mechanism that connects the application's data (stored in the component class) to the user interface (the HTML template) and vice versa.
-// Changes in the data model are immediately reflected in the UI, and user interactions with the UI are immediately reflected in the data model.
+// Changes in the data model are immediately reflected in the UI, and user interactions with the UI are immediately copied to the data model.
 
-// Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* @Output() - Event binding" -> Ctrl+F -> Ctrl+V):
+// Angular provides several types of data binding (to jump to a section, copy it with the asterisk, like "* @Output() - Event binding" -> Ctrl+F -> Ctrl+V).
 
 // The arrow in the next diagrams shows the direction from the source to the target in which the data is transmitted - a change in the source is instantly reflected in the target.
 // "Class" means the component's TypeScript class.
@@ -151,7 +151,7 @@ export class ExampleComponent {
 <img [src]="getImage2Url()" />
 
 // The square brackets around an HTML property indicate that this is a property binding,
-//		so the string inside the quotes is treated not as a hardcoded value but as an expression which returns that value.
+//		so the string inside the quotes is treated not as a hardcoded value but as an expression which returns the value to be used.
 
 // During the rendering process, Angular will:
 //		* remove the square brackets from the property name ("[src]" -> "src");
@@ -245,7 +245,7 @@ export class ExampleComponent {
 
 // 2. Avoids issues with non-string values
 //       Interpolation always converts values to strings, while Property binding can handle non-string types properly.
-//       For example, [disabled]="isDisabled" expects a boolean, while disabled="{{ isDisabled }}" sets it as "true" or "false", which is not the expected behavior.
+//       For example, [disabled]="isDisabled" expects a boolean, while disabled="{{ isDisabled }}" sets it literally as "true" or "false", which is not the expected behavior.
 
 // 3. Better for complex expressions
 //       In Interpolation, if you include special characters (like quotes) or complex expressions, the syntax can become messy, hard to read and error-prone (or even break):
@@ -270,14 +270,14 @@ export class ExampleComponent {
 (html_event)="componentMethod()"
 
 // The method is not executed on rendering - it will be executed only when the HTML event occurs.
-// That is different from Property Binding where the method is executed on rendering in order to get it's returned value to build the HTML.
+// That is different from Property Binding where the method is executed on rendering in order to use its return as the initial value to build the HTML.
 
 // Example:
 <button (click)="saveData()">SAVE DATA</button>
 
 // That is rendered as
 <button>SAVE DATA</button>
-// As you see, any mention of event binding has gone.
+// Ooops... Where is my saveData()? Any mention of event binding has gone!
 // But how does Angular know which method of the component should be called when the button is clicked?
 // When you write templates with event binding, Angular sets up event listeners for these events during the compilation and rendering phases.
 // So, the component is constantly listening to the button's click event.
@@ -302,34 +302,34 @@ export class ExampleComponent {
 // HTML template (example.component.html):
 <button id="btn1" (click)="onClick($event)">Click Me</button>
 
-// The event's argument can be just string. The following example demonstrates calling an event when an input control's value is changed by the user:
+// The event's argument can be just a string. The following example demonstrates calling an event when an input control's value is changed by the user:
 
 @Component({
   selector: 'app-user-name',
   templateUrl: './user-name.component.html',
   styleUrls: ['./user-name.component.css']
 })
-export class cstNmComponent {
-  cstNm: string = '';
+export class cstNameComponent {
+  cstName: string = '';
 
-  onKeyUp(newCstNm: string): void {
-    this.cstNm = newCstNm;
+  onKeyUp(newCstName: string): void {
+    this.cstName = newCstName;
   }
 }
 
 // HTML template (user-name.component.html):
-<h1>{{ cstNm }}</h1>
+<h1>{{ cstName }}</h1>
 <input
-  id="cstNmInput" 
-  [value]="cstNm"
+  id="cstNameInput" 
+  [value]="cstName"
   (keyup)="onKeyUp($event.target.value)"
   placeholder="Enter user name">
 
 // We use event binding (keyup)="onKeyUp($event.target.value)" to call the onKeyUp method whenever a key is released in the input field.
 // $event.target.value gives us the current value of the input field, which we pass to the onKeyUp method.
 
-// This setup creates a two-way binding between the input field and the cstNm property.
-// As the user types in the input field, the onKeyUp method is called, updating the cstNm property,
+// This setup creates a two-way binding between the input field and the cstName property.
+// As the user types in the input field, the onKeyUp method is called, updating the cstName property,
 // 		which in turn updates the displayed name in the <h1> tag.
 
 // Note: It's often preferable to use the [(ngModel)] directive (described later in this file) for two-way binding if you're working with forms. 
@@ -337,17 +337,18 @@ export class cstNmComponent {
 // That can be useful in certain scenarios or when you need more control over the binding process.
 
 // It's also possible to use a template reference variable (a "pound variable") instead of $event.target.
-// This approach is often clearer and more Angular-idiomatic since you can give the pound variable a self-documenting name.
+// This approach is often clearer and more Angular-idiomatic since you can give the pound variable a meaningful, business-related name.
 // Here's how you would modify the <input> element in the template:
 
 <input
-  id="cstNmInput" 
-  [value]="cstNm"
-  (keyup)="onKeyUp(enteredCstNm.value)"
-  #enteredCstNm
+  #enteredCstName
+  id="cstNameInput" 
+  [value]="cstName"
+  (keyup)="onKeyUp(enteredCstName.value)"
   placeholder="Enter user name">
 
-// The #enteredCstNm declaration creates a reference to the input element, and then that reference is used in the (keyup) event binding.
+// The #enteredCstName declaration creates a reference to the input element, and then that reference is used in the (keyup) event binding.
+// "enteredCstName.value" is much more self-documenting than "$event.target.value".
 
 // ### Binding an event to a field
 
@@ -366,7 +367,7 @@ export class cstNmComponent {
 // It's a powerful tool for creating interactive forms, providing an easy way to keep your component's data in sync with your template's form controls.
 
 // Uses the [(ngModel)].
-// The suare brackets denote the "class ---> HTML" part of the binding.
+// The square brackets denote the "class ---> HTML" part of the binding.
 // The round brackets denote the "HTML ---> class" part of the binding (like in event binding).
 
 // In fact, the "class ---> HTML" part is Interpolation.
@@ -547,7 +548,7 @@ class ChildComponent {
   @Input({ required: true }) name: string;
 }
 
-// Then, you forget to provide a value for the name property from the parent template:
+// Let's say, you forget to provide a value for the name property from the parent template:
 <app-child></app-child>
 // That will throw an error: Required input 'name' from component ChildComponent must be specified.
 
@@ -558,26 +559,26 @@ class ChildComponent {
 
 // Alias allows you to specify a different name for the input property as it should appear in the template binding.
 // This is useful when you want to use an internal property name within your component but expose a different name externally.
-// In the next example, the child component uses "cstNm" internally, but the parent populates it through the HTML attribute "customerName".
+// In the next example, the child component uses "cstName" internally, but the parent populates it through the HTML attribute "customerName".
 
 import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'customer-profile',
-  template: '<p>Customer Name: {{ cstNm }}</p>'
+  template: '<p>Customer Name: {{ cstName }}</p>'
 })
 export class CustomerProfileComponent {
-  @Input('customerName') cstNm: string;
+  @Input('customerName') cstName: string;
 }
 
-// The field name is cstNm, that's how it will be referenced in TypeScript.
-// But the customerName alias becomes the property of the <customer-profile> custom HTML tag, not "cstNm":
+// The field name is cstName, that's how it will be referenced in TypeScript.
+// But the customerName alias becomes the property of the <customer-profile> custom HTML tag, not "cstName":
 <customer-profile [customerName]="user.fullName"></customer-profile>
 
 // This approach offers several benefits:
 // * Allows you to have a more descriptive public API (HTML tag's property name) when the internal names are restricted by a naming convention
 //		(for example, repeat abbreviated DB field names).
-// * Can help avoid naming conflicts if the parent component already uses a property named cstNm.
+// * Can help avoid naming conflicts if the parent component already uses a property named cstName.
 // * Provides flexibility in refactoring: you can change the internal property name without affecting how other components use your component.
 
 // ######################################################################################################
@@ -592,7 +593,7 @@ export class CustomerProfileComponent {
 // In the child component class:
 @Output() eventEmitterInChild = new EventEmitter<T>();
 
-// Use the emit() method of the EventEmitter to send data:
+// To send data outwards, use the emit() method of the EventEmitter:
 this.eventEmitterInChild.emit(data);
 
 // In the parent's template, use event binding to listen for the custom event:

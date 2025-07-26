@@ -120,9 +120,19 @@
 
 // An Observable is an object that can emit one or more values over time.
 // It represents a stream of data that can be observed by subscribers.
-// Instead of getting a single value, you can subscribe to an Observable to receive multiple values over time.
+
+// Consider this simple assignment between two regular variables:
+let targetVar = sourceVar;
+// After the assignment, there is no connection between them.
+// If sourceVar is changed later, targetVar will not know that - it will keep holding its existing value.
+
+// When the source var is an Observable, the source var gets the value in the moment of subscribing, like in the regular assignmnet.
+// However, the link between the vars keeps to exist. So any changes in the source var will automatically be emitted to the target var to keep them in sync.
+// I.e., instead of getting a single value, the target var subscribes to the Observable to receive multiple values over time.
+
 // Observables are a way to handle asynchronous data streams like HTTP requests, user input, and more.
 // This is the foundation and core tool of RxJS, so it is important to understand and "feel" it.
+
 // Observable variables' names must end with $. That is not enforced by compiler but it's an accepted naming convention.
 
 // The next example uses of() - a utility function that creates an Observable which emits the values provided as arguments, one after the other.
@@ -216,7 +226,7 @@ export class CustomerListComponent {
 // Pay attention that the Observable emits the array at one stroke, i.e. only one emission occurs (not three emission for each element).
 // That's why the Observable's type is ICustomer[] and not ICustomer.
 // If the "real" customerList$ is later re-populated from the DB (for example, refreshed after an item is added, edited or removed),
-//    the HTML will be automatically re-rendered as the new array is emitted.
+//    the HTML will be automatically re-rendered as a new array is emitted.
 
 // ######################################################################################################
 // * Manipulating an Observable's value in the imperative way (as a regular variable)
@@ -226,7 +236,7 @@ export class CustomerListComponent {
 //  * Emit its value to the subscriber.
 //  * Be subscribed (the first emission occurs when subscribe() is called).
 //  * Be changed (each change will immediately emit the new value).
-// The value of an Observable cannot be accessed (read) directly. You cannot write "if (amount$ > 0)..." in the reactive programming world.
+// The value of an Observable cannot be accessed (read) directly like in regular variables. You cannot write "if (amount$ > 0)..." in the reactive programming world.
 // If you need to work with the value of an Observable in the imperative way, that value must firstly be emitted into a regular variable.
 // The assignment of the Observable's value to the non-Observable variable must be manually coded inside the subscribing functiond, for example:
 
@@ -242,7 +252,7 @@ import { IProduct } from 'src/models/customer.model';
 export class ProductComponent implements OnInit, OnDestroy {
   contextProduct$: Observable<IProduct>; // an Observable
   private _contextProduct: IProduct; // a regular variable
-  private _s: Subscription; // Subscription will be described soon, ignore it now
+  private _s: Subscription; // Subscription will be described soon, ignore it for now
 
   constructor(private _store: Store<any>) { }
 
@@ -325,7 +335,7 @@ export class ExampleComponent implements OnDestroy {
 
 // @@@ One Subscription object per component
 
-// It's important to understand that Subscription is a subscriptions manager rather than a single subscription as its name suggests.
+// It's important to understand that Subscription is a subscriptions manager rather than a single subscription as its name mistakenly suggests.
 // In the component, you create only once instance of it, and add multiple subscriptions using the add() method.
 // Then, when you unsubscribe, all these subscriptions will be canceled at one stroke. Example:
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -448,18 +458,17 @@ const tenNumbers$ = of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); // an observable that emi
 
 // Use pipe() to chain multiple RxJS operators together:
 tenNumbers$.pipe(
-  filter(value => value > 5), // its output stream is the values from the input stream greater than 5, i.e. 6, 7, 8, 9, 10
-  map(value => value * 2),    // its output stream is the values from the input stream multiplied by 2, i.e 12, 14, 16, 18, 20
-  take(3)                     // its output stream is the first 3 values from the input stream: 12, 14, 16
+  filter(value => value > 5), // accepts values emitted by tenNumbers$ and emits the values greater than 5: 6, 7, 8, 9, 10
+  map(value => value * 2),    // accepts values emitted by filter() and emits them multiplied by 2: 12, 14, 16, 18, 20
+  take(3)                     // accepts values emitted by map() and emits the first 3 values: 12, 14, 16
 ).subscribe(result => {
   console.log(result);        // 12, 14, 16
 });
 
-// The input stream of the first RxJS operator - filter() - is the stream emitted by tenNumbers$.
-// The input stream of each subsequent operator is the output stream of the operator prior to it.
+// As you see, the input stream of each subsequent operator, passed to pipe(), is the output stream of the operator prior to it.
 
 // In an RxJS-based codebase, using pipe() is a consistent and standardized way to apply operators, regardless of how many you use.
-// We use pipe() even if only one RxJS operator exists and, so, there is nothing to chain, for example:
+// We use pipe() even if only one RxJS operator exists and there is nothing to chain, for example:
 tenNumbers$.pipe(
   map(value => value * 2)
 );

@@ -5,7 +5,7 @@
 // ######################################################################################################
 
 // NgRx (Angular Reactive Extensions) is a framework for building reactive applications in Angular.
-// It is a state management library that implements the Redux pattern using RxJS (Reactive Extensions for JavaScript)
+// It's a state management library that implements the Redux pattern using RxJS (Reactive Extensions for JavaScript)
 //    to manage the application state in a reactive and predictable way.
 // NgRx provides a set of libraries for managing the global state, side effects, and entity collections, among other functionalities.
 // It's particularly useful in large-scale applications where managing state in an efficient, predictable, centralized, scalable and maintainable way is critical.
@@ -261,7 +261,7 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 // ######################################################################################################
 
 // An Action is a plain TypeScript object used to express an event or an intention (usually a data manipulation or a change in the application's state).  
-// Actions are dispatched (launched) in one part of the application (usually in components or services) and captured in others.  
+// Actions are dispatched (i.e. launched) in one part of the application (usually in components or services) and captured in others.  
 // NgRx automatically manages the chain of fired events when an Action is dispatched, ensuring the appropriate consumers respond to it seamlessly.  
 // Actions provide an easy global communication channel. They are one of the main building blocks in NgRx.
 
@@ -274,7 +274,7 @@ this.contextCustomer$ = this._store.select('contextCustomer');
 
 // An Action is created and returned by the createAction() factory function, which accepts type and payload.  
 // The next example defines a few simple Actions. No payload, so only type is passed to createAction().  
-// It is good practice to add the word "Action" to the names of Action objects:
+// It's a good practice to add the word "Action" to the names of Action objects:
 import { createAction } from '@ngrx/store';
 export const incrementAction = createAction('[Counter] Increment');
 export const decrementAction = createAction('[Counter] Decrement');
@@ -285,11 +285,11 @@ export const resetAction = createAction('[Counter] Reset');
 // Must be unique across the entire application since it serves as a unique identifier for each Action.
 // Having duplicate action types can lead to unintended consequences.
 
-// Conventionally, the Action type's structure is:
+// Conventionally, the Action type consista of two parts:
 "[Module] Description"
 // "[Module]" (within square brackets) indicates the feature module where the action is used. For application-wide Actions, use [App].
 // "Description" reflects the specific event that is fired.
-// That allows different Modules to have Actions with a same Description, like '[Customer] Save' and '[Order] Save'.
+// This structure allows different Modules to have Actions with a same Description, like '[Customer] Save' and '[Order] Save'.
 
 // @@@ Action PAYLOAD - the 2nd parameter (optional) to createAction()
 
@@ -425,7 +425,7 @@ this._store.dispatch(delCustomerAction({ actionCustomerId: this._contextCustomer
 
 // The class for outsourcing logic and data that directly calls the web service.  
 // It's the "last station" of data flow within Angular before the data is sent to the middle tier on the Web.  
-// The class name simply says "Service" for brevity, but keep in mind that it refers to a "web service."  
+// The class name simply says "Service", but think of it as "web service."  
 // Strictly speaking, this class is not a part of the NgRx library, but it's commonly found in apps that interact with a web service, which is the standard architecture.
 
 // Typically, Services are injected into other areas of our app, so they must have the @Injectable decorator.

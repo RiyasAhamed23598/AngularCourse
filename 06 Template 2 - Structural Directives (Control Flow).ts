@@ -39,7 +39,7 @@ export class AppComponent {
 
 // If showElement would be false, the <div> element would not be rendered at all.
 
-// Notice that *ngIf can evaluate not only a boolean variable but also a function which returns boolean, for example:
+// Notice that *ngIf can evaluate not only a boolean variable but also a boolean function, for example:
 <div *ngIf="isElementVisible()">
   This element is conditionally displayed.
 </div>
@@ -59,6 +59,7 @@ export class AppComponent {
 </ng-template>
 // The <div> will not be rendered if 'user' is undefined, null, or not declared at all.
 // That makes *ngIf useful as a guard against accessing properties of undefined objects, which would cause errors if attempted.
+// Notice that the "else templateVariable" pattern is very common in Angular templates which use the OLD syntax, so it's worth remembering.
 
 // ######################################################################################################
 // <ng-template> custom HTML tag to implement the "else" functionality
@@ -68,7 +69,7 @@ export class AppComponent {
 // In fact, you've just seen it in the previous example.
 
 // The <ng-template> tag defines a piece of HTML (like <div>) but is not rendered by default.
-// It's' a container for an HTML block that Angular can conditionally add or remove from the DOM at runtime using structural directives.
+// It's a container for an HTML block that Angular can conditionally add or remove from the DOM at runtime using structural directives.
 
 // The <ng-template> with an else condition in *ngIf is used to define content that should be displayed when the condition in *ngIf is false.
 // It provides a way to specify alternative content without needing an additional *ngIf statement with the same but negative condition.
@@ -97,12 +98,13 @@ export class AppComponent {
 <div *ngIf="condition; then thenBlock else elseBlock"></div>
 <ng-template #thenBlock>Content to render when condition is true.</ng-template>
 <ng-template #elseBlock>Content to render when condition is false.</ng-template>
+// This template keeps different code fragments, having a same level of "logical nesting", at the same level of indentation.
 
 // ######################################################################################################
 // <ng-container> to be used instead of <div>
 // ######################################################################################################
 
-// It's not a structural directive, but it's widely used with structural directives, so it's described here too.
+// It's not a structural directive either, but it's widely used with structural directives, so it's described here too.
 
 // <ng-container> groups several elements together like <div> but without adding an extra node to the DOM.
 // Allows to apply structural directives to multiple elements or a fragment of a template without rendering unnecessary <div> wrapper elements.
@@ -184,6 +186,11 @@ export class BeatlesComponent {
 // When the change detection mechanism finds that the array has been changed, Angular re-renders the HTML element (<ul> in our example).
 // trackBy improves performance by helping Angular identify which items have changed and re-render only them - instead of re-rendering the entire list.
 
+type User = {
+  id: number;
+  name: string;
+};
+
 @Component({
   selector: 'app-user-list',
   template: `
@@ -195,12 +202,12 @@ export class BeatlesComponent {
   `
 })
 export class UserListComponent {
-  users = [
+  users: User[] = [
     { id: 1, name: 'Alice' },
     { id: 2, name: 'Bob' }
   ];
 
-  getCurrUserId(index: number, user: any): number {
+  getCurrUserId(index: number, user: User): number {
     return user.id;
   }
 }
@@ -244,7 +251,7 @@ export interface TrackByFunction<T> {
   <div *ngSwitchDefault>No fruit selected.</div>
 </div>
 
-/// The rendered HTML if favoriteFruit is "cherry":
+// The rendered HTML if favoriteFruit is "cherry":
 <div>
   <div>Cherry is selected!</div>
 </div>
@@ -266,7 +273,7 @@ export interface TrackByFunction<T> {
 // The NEW syntax: /////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-// The new control flow syntax (@if, @for, @switch) was introduced in Angular 17, which was released on November 8, 2023.
+// The new control flow syntax (@if/@else, @for/@empty, @switch/@case/@default) was introduced in Angular 17, which was released on November 8, 2023.
 // This was a significant update to Angular's template syntax, aiming to make templates more intuitive, readable and efficient.
 
 // ######################################################################################################
@@ -326,10 +333,11 @@ export interface TrackByFunction<T> {
 
 // @@@ track
 // A simplified way to specify a unique identifier for each item in the loop.
-// Serving the same purpose as `trackBy` in the old syntax but with no need to create a trackBy...() function - the property is mentioned directly.
+// Serving the same purpose as `trackBy` in the old syntax but with no need to create a trackBy...() function - the unique property is mentioned directly.
 
 // In the new syntax, track is mandatory - in contrast to trackBy in the old syntax.
 // If you forget it, you will get the "NG5002: @for loop must have a "track" expression" error.
+
 // What if there is nothing unique about the looped elements?
 // In the case of an array of strings or objects, you can use the looping var itself since references are guaranteed to be unique:
 <ul>
@@ -337,20 +345,23 @@ export interface TrackByFunction<T> {
 		<li>{{ course }}</li>
 	}
 </ul>
-// You can also use $index as a unique field with an array of any type. That is the only possible option for primitive non-reference types:
+
+// You can also use $index as a unique field with an array of any type.
+// That is the only possible option for primitive non-reference types:
 @Component({
   selector: 'app-number-list',
   template: `
     <ul>
-      @for (let number of numbers; track $index) {
-        <li>Number: {{ number }}</li>
+      @for (let num of nums; track $index) {
+        <li>Number: {{ num }}</li>
       }
     </ul>
   `
 })
 export class NumberListComponent {
-  numbers = [1, 2, 3, 4, 5];
+  nums = [1, 1, 2, 2, 3, 3];
 }
+// You cannot write "track num" since the values are not guaranteed to be unique.
 
 // ######################################################################################################
 // @switch

@@ -27,7 +27,7 @@
 <div [class]="getButtonClasses()"></div>
 // For the last example, getButtonClasses() could return something like: "btn btn-lg btn-primary" or "btn btn-sm btn-secondary disabled"
 
-// So, if we already have [class] which accepts a CSS classes list built dinamically, why to use [ngClass]?
+// So, if we already have [class] which accepts a CSS classes which are built dinamically, why to use [ngClass]?
 // There are some differences between them:
 
 // [class]
@@ -47,12 +47,13 @@
 // #1. List of classes separated by space (in fact, a string which contains a string which will be the value of the static 'class' property as is):
 <div [ngClass]="'class1 class2'">
 // That is similar to [class] but the whole list is ornamented by addidional quotes - the outer string contains an inner string be rendered as is
-// (you want to render [class]='class1 class2', not [class]=class1 class2).
+//    (you want to render [class]='class1 class2', not [class]=class1 class2).
+// In contrast to [class], the classes are added to the already existing classes rather than replace them.
 
 // #2. Array of classes:
 <div [ngClass]="['class1', 'class2']">
 // This is convenient because it simplifies the function returning such a string — the function just dynamically builds and returns an array of classes
-// without worrying about concatenating them into a single string (Angular will handle that).
+//    without worrying about concatenating them into a single string (Angular will handle that).
 // Notice that the array can have a mix of static (hardcoded) classes with objects and dynamic expressions, for example:
 <div [ngClass]="['class1', { 'class2': isClass2, 'class3': isClass3 }, 'class4', isClass5() ? 'class5' : '']">
 // This div will always have class1 and class4, and it will conditionally have class2, class3 and class5 based on the respective boolean values.
@@ -194,7 +195,7 @@ export class MyComponent {
 	isImportant = true;
 	textSize = 18;
 }
-// HTML template - [ngStyle] gets the name of the component's Method returning an object with key-value pairs::
+// HTML template - [ngStyle] gets the name of the component's Method returning an object with key-value pairs (notice the ()):
 <div [ngStyle]="getStyles()">
 	Dynamically styled content
 </div>

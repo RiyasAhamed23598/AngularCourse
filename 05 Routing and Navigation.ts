@@ -6,7 +6,7 @@
 // ######################################################################################################
 
 // a) Routes: These are URLs that map to components in your application.
-// b) Router: Angular's routing module that handles navigation between views.
+// b) Router: A module that handles navigation between views.
 // c) RouterOutlet: A placeholder in your template where Angular displays the content of each route.
 // d) RouterLink: A directive for creating navigation links.
 
@@ -14,9 +14,9 @@
 // The Route class and Routes array
 // ######################################################################################################
 
-// Route is a configuration object that defines a single route - how navigation should be handled in an application.
+// Route is a configuration object that defines how navigation should be handled in an application.
 // A set of routes are collected in a Routes array to define a Router configuration.
-// The router attempts to match segments of a given URL against each route, using the configuration options defined in this object.
+// The Router attempts to match segments of a given URL against each route, using the configuration options defined in this object.
 
 // Each route in this array maps a URL path to a component or to other Routing configurations,
 // 		such as child routes, lazy-loaded routes, or even a redirection rule.
@@ -29,8 +29,8 @@
 // * pathMatch: Specifies how the router should match the URL path to the route:
 //		'full' - The entire URL must match the path exactly. Ensures that redirection happens only when there is no additional path info in the URL.
 //		'prefix' (default) - Match if the path is the initial segment of the URL.
-//			The route will activate if the path is a prefix of the URL.
-//			Useful to define paths that act as a base for child routes or when you want a route to match any URL that starts with a specific pattern.
+//			  The route will activate if the path is a prefix of the URL.
+//			  Useful to define paths that act as a base for child routes or when you want a route to match any URL that starts with a specific pattern.
 // * children: Defines child routes.
 // * resolve: Defines data resolver classes that fetch data before the route is activated.
 // * canActivate: Uses guard services to control access to a route.
@@ -60,7 +60,7 @@ const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   
   // '**' is a wildcard route that catches any URL that doesn’t match previously defined routes, typically used for displaying a 404 error page
-  // (must be list last!):
+  // It must be listed last!
   { path: '**', component: PageNotFoundComponent }
 ];
 
@@ -88,7 +88,7 @@ export class AppRoutingModule { }
 // The <nav> tag is an HTML5 semantic element used to define a section of a webpage that contains navigation links.
 // It's specifically designed to group together a set of major navigational elements on a website.
 // While it's not mandatory to use the <nav> tag for navigation links (you could use a <div> instead),
-// using <nav> is considered a best practice for creating semantic, accessible HTML structure.
+//    using <nav> is considered a best practice for creating semantic, accessible HTML structure.
 
 // ######################################################################################################
 // The routerLink directive
@@ -330,8 +330,8 @@ const routes: Routes = [
   { 
     path: 'products', 
     component: ProductsComponent,
-	// The children property of the Route interface is of the type Routes -
-	// an array of child Route objects that specifies a nested route configuration:
+	  // The children property of the Route interface is of the type Routes -
+	  // an array of child Route objects that specifies a nested route configuration:
     children: [
       { path: 'electronics', component: ElectronicsComponent },
       { path: 'books', component: BooksComponent }
@@ -367,10 +367,10 @@ export class AppModule { }
 // This structure allows for a clean separation of routing concerns from the main application module.
 
 // ######################################################################################################
-// Navigation programmatically
+// Navigating programmatically
 // ######################################################################################################
 
-// You can navigate programmatically (rather than through user interaction with links) using the navigate() method of the Router class:
+// You can navigate in your code (rather than through user interaction with links) using the navigate() method of the Router class:
 
 import { Router } from '@angular/router';
 
@@ -381,6 +381,7 @@ export class MyComponent {
     this.router.navigate(['/user', id]);
   }
 }
+// For example, if id is 123, the URL to navigate to will be /user/123.
 
 // The method's signature in the Router class:
 navigate(commands: any[], extras: NavigationExtras = { skipLocationChange: false }): Promise<boolean>
@@ -595,8 +596,6 @@ export class UserDetailComponent implements OnInit {
     });
   }
 }
-
-// ChatGPT:
 
 // A resolver is a service that implements the `Resolve<T>` interface from Angular's router package.
 // It is used to resolve data for a route before the route is activated (to fetch necessary data before navigating to a route)

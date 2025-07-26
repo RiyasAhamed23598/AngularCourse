@@ -23,7 +23,8 @@
 //			The class is responsible for handling data, responding to events, and interacting with other components or services.
 // 		2. Template (optional): Components have an associated template that defines the layout of the user interface.
 //			Templates are written in HTML with additional Angular-specific syntax and directives.
-// 		3. CSS styles (optional): CSS classes which overeride their default definition for the template of this component only.
+// 		3. CSS styles (optional): new CSS classes specific to this component, and
+//      existing CSS classes which override their default definition for the template of this component only.
 
 // Components encapsulate the rendering logic, data, and styles in a single unit, making it easier to manage and reuse UI elements across the app.
 
@@ -32,7 +33,7 @@
 // ######################################################################################################
 
 // The component class is where you define the data and logic for the component.
-// It is a TypeScript class decorated with the @Component decorator which defines metadata (additional configuration information) for the component:
+// It is a TypeScript class with the @Component decorator which defines metadata (additional configuration information) for the component:
 
 import { Component } from '@angular/core';
 
@@ -56,13 +57,13 @@ export class ExampleComponent {
 // selector
 // ######################################################################################################
 
-// The selector specifies the custom HTML tag that is used to represent the component in the templates of other components.
+// Specifies the custom HTML tag that is used to represent the component in the templates of other components.
 // Essentially, it tells Angular where to instantiate the component in the DOM.
 
 <!-- app.component.html -->
 <app-hello-world></app-hello-world>
 
-// When Angular renders the other template, it will replace the app-hello-world tag with the whole content of HTML template of HelloWorldComponent.
+// When Angular renders the other template, it will replace the app-hello-world tag with the whole content of theHTML template of HelloWorldComponent.
 
 // IMPORTANT! The selector specifies the custom HTML tag which becomes available across the whole application.
 // That means that the selector for each component should be unique.
@@ -89,6 +90,7 @@ export class ExampleComponent {
 h1 {
   color: blue;
 }
+// The CSS class can also define brand new CSS classes specific to the template of this component.
 
 // ######################################################################################################
 // Inline Template & Styles
@@ -107,7 +109,7 @@ export class ExampleComponent {
   title = 'Hello, Angular!';
 }
 
-// This practice is not commonly used. Create separate files even if they contain just one line - that is expected by developers.
+// This practice is not commonly used. You'd better create separate files even if they contain just one line - that is expected by developers.
 
 // ######################################################################################################
 // Standalone components
@@ -145,25 +147,25 @@ export class ProfilePhoto {
 // Here’s a look at what standalone components can do that non-standalone components cannot:
 
 // 1. No Need for NgModule:
-//   - Standalone Components can be used independently without being declared in an Angular module (`@NgModule`).
+// - Standalone Components can be used independently without being declared in an Angular module (`@NgModule`).
 //		This simplifies the component setup, especially for smaller applications or individual components.
-//   - Non-Standalone Components must be declared in an Angular module to be used.
+// - Non-Standalone Components must be declared in an Angular module to be used.
 
 // 2. Simplified Imports:
-//	- Standalone Components import necessary Angular features (such as directives and pipes) directly within the component using the `imports` array.
+// - Standalone Components import necessary Angular features (such as directives and pipes) directly within the component using the `imports` array.
 //		This makes the component self-contained.
-//   - Non-Standalone Components rely on the module to import and provide necessary features, which can lead to more complex dependency management.
+// - Non-Standalone Components rely on the module to import and provide necessary features, which can lead to more complex dependency management.
 
 // 3. Faster Development and Prototyping:
-//  - Standalone Components allow for rapid development and prototyping by reducing the boilerplate code and simplifying the component setup.
+// - Standalone Components allow for rapid development and prototyping by reducing the boilerplate code and simplifying the component setup.
 //		This can be particularly useful in small projects or during the initial stages of development.
 
 // 4. Decoupled and Reusable:
-//   - Standalone Components are highly decoupled from the rest of the application, making them more reusable and easier to integrate
+// - Standalone Components are highly decoupled from the rest of the application, making them more reusable and easier to integrate
 //		into different projects or parts of an application without additional setup.
 
 // 5. Improved Code Organization:
-//   - Standalone Components promote better code organization by allowing developers to keep the component logic and dependencies together.
+// - Standalone Components promote better code organization by allowing developers to keep the component logic and dependencies together.
 //		This leads to more maintainable and understandable codebases.
 
 // The shift to standalone components provides more flexibility and simplifies the development process.
@@ -205,7 +207,7 @@ import { LoggerService } from './logger.service';
   template: `<h1>Welcome to Dependency Injection in Angular</h1>`,
 })
 export class AppComponent {
-  constructor(private _logger: LoggerService) { // <<<<<<< inject the service
+  constructor(private _logger: LoggerService) { // <<<<<<<<<<<<<<<<<<<<<<<< inject the service
     this._logger.log('AppComponent initialized');
   }
 }
@@ -233,7 +235,7 @@ src/
 // my-component.component.html
 // 		The HTML template file for the component.
 // my-component.component.css (or `.scss`, `.less`, `.sass` depending on your project setup):
-// 		The stylesheet file for component-specific styles.
+// 		The stylesheet file for component-specific CSS classes.
 // my-component.component.spec.ts
 // 		A basic unit test file for the component.
 

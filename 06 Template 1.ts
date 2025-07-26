@@ -24,14 +24,13 @@
 
 // 3.2 Referencing in the Component Class
 
-// To access the variable in TypeScript, use the @ViewChild decorator:
+// To access the variable in TypeScript, use the @ViewChild decorator, and pass the name of the variable (without the #) to it as an argument:
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
 @Component({...})
 export class MyComponent {
-  @ViewChild('nameInput')
-  nameInput!: ElementRef;
+  @ViewChild('nameInput') nameInput!: ElementRef; // <<<<<<<<<<<<<<<<<<<<<<<<
 
   ngAfterViewInit() {
     console.log(this.nameInput.nativeElement.value);
@@ -93,13 +92,13 @@ export class MyComponent {
 
 // 1. Avoid overusing template variables for complex logic; move it to the component class when appropriate.
 // 2. Be cautious when using variables before they're defined in the template.
-// 3. Remember that variables are only available after Angular has initialized the view.
+// 3. Remember that variables are only available after Angular has initialized the view, so you cannot use them in the constructor and ngOnInit.
 
 //## 7. Limitations
 
 // 1. A template variable is only available within its template.
 // 2. You cannot use a variable before it's declared in the template.
-// 3. Variables are not accessible in parent components unless explicitly passed.
+// 3. Variables are not accessible in parent components unless explicitly passed through an input property or a @ViewChild decorator.
 
 //## 8. Conclusion
 
@@ -125,7 +124,7 @@ export class MyComponent {
 
 // @@@ Built-in Pipes:
 
-// Angular comes with several built-in pipes like DatePipe, UpperCasePipe, LowerCasePipe, CurrencyPipe, etc.
+// Angular comes with several built-in pipes like DatePipe, UpperCasePipe, LowerCasePipe, CurrencyPipe, PercentPipe etc.
 
 @Component({
   selector: 'app-pipe-example',
@@ -163,7 +162,7 @@ export class PipeExampleComponent {
 
 // @@@ Custom Pipes:
 
-// You can also create your own pipes to handle specific transformations that are not covered by the built-in pipes.
+// You can also create your own pipes to handle custom transformations that are not covered by the built-in pipes.
 // Pipe is a class which:
 //    1. Has the @Pipe decorator.
 //    2. Implements the PipeTransform interface which has only one method - transform(). The method takes an original value and returns the transformed value.
@@ -201,7 +200,7 @@ export class ReversePipeExampleComponent {
 	title = 'Angular Pipes Example';
 }
 
-// @@@ Custom Pipe with a Pearameter
+// @@@ Custom Pipe with a Parameter
 
 // Here is how the transform() method is defined in the PipeTransform interface:
 
