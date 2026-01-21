@@ -544,7 +544,7 @@ import { EMPTY } from 'rxjs';
 export class CustomerEffect {
   constructor(
     private _actions$: Actions,
-    private _svc: CustomerService // Remember we defined CustomerService with the @Injectable() directive? Now we inject it into the Effect through its constructor
+    private _svc: CustomerService // remember we defined CustomerService with the @Injectable() directive? Now we inject it into the Effect through its constructor
   ) {}
 
   // Customer:
@@ -686,7 +686,7 @@ export function customerReducer(oldState: ICustomerState | undefined, action: Ac
 
 // If the Action is handled in the reducer function, the new State replaces the exisitng one, otherwise the exisitng State remains untouched:
 const getNewState = createReducer(
-  // Remember we created initialCustomerState in the Model file? Now it's time to utilize it.
+  // Remember we created initialCustomerState in the State file? Now it's time to utilize it.
   // When the app starts, NgRX initializes the entire store tree by invoking every reducer once with a special internal action '@NgRX/store/init':
   // reducer(undefined, { type: '@NgRX/store/init' })
   // As you see, the old state is passed as undefined (indeed, there is no old state yet at bootstrap).
@@ -808,3 +808,4 @@ const getNewState = createReducer(
 // 1. The component dispatches an Action.
 
 // 2. The Reducer captures it and writes the payload to the State.
+
