@@ -686,7 +686,7 @@ export function customerReducer(oldState: ICustomerState | undefined, action: Ac
 
 // If the Action is handled in the reducer function, the new State replaces the exisitng one, otherwise the exisitng State remains untouched:
 const getNewState = createReducer(
-  // Remember we create initialCustomerState in the Model file? Now it's time to utilize it.
+  // Remember we created initialCustomerState in the Model file? Now it's time to utilize it.
   // When the app starts, NgRX initializes the entire store tree by invoking every reducer once with a special internal action '@NgRX/store/init':
   // reducer(undefined, { type: '@NgRX/store/init' })
   // As you see, the old state is passed as undefined (indeed, there is no old state yet at bootstrap).
@@ -806,4 +806,5 @@ const getNewState = createReducer(
 // Actions unrelated to Effects (category 3):
 
 // 1. The component dispatches an Action.
+
 // 2. The Reducer captures it and writes the payload to the State.
