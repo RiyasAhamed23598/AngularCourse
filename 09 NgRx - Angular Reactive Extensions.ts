@@ -806,6 +806,4 @@ const getNewState = createReducer(
 // Actions unrelated to Effects (category 3):
 
 // 1. The component dispatches an Action.
-
 // 2. The Reducer captures it and writes the payload to the State.
-
